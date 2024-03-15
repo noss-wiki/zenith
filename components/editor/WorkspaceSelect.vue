@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import type { VNodeRef } from 'vue';
 import { useWorkspaces } from '@/composables/workspace';
 import Arrow from '../icons/Arrow.vue';
+import NavLink from '../NavLink.vue';
+import Workspace from './Workspace.vue';
+
+withDefaults(
+  defineProps<{
+    width?: string;
+  }>(),
+  {
+    width: '100%',
+  }
+);
 
 const workspaces = useWorkspaces();
 const open = ref(false);
@@ -11,7 +21,9 @@ let dropdown: HTMLElement;
 
 const handler = (e: MouseEvent) => {
   if (button.contains(e.target as Node)) open.value = !open.value;
-  else if (!dropdown.contains(e.target as Node)) open.value = false;
+  else if (!dropdown.contains(e.target as Node)) {
+    open.value = false;
+  }
 };
 
 onMounted(() => document.addEventListener('click', handler));
@@ -21,16 +33,31 @@ onUnmounted(() => document.removeEventListener('click', handler));
 <template>
   <div class="wrapper">
     <div class="button" ref="button">
-      <div class="info">
-        <div class="icon"></div>
-        <span>{{ workspaces.active.value.name }}</span>
-      </div>
+      <Workspace />
       <div class="drop-btn">
         <Arrow />
       </div>
     </div>
     <Transition mode="in-out" name="fade">
-      <div class="dropdown" v-show="open" ref="dropdown"></div>
+      <div class="dropdown" v-show="open" ref="dropdown">
+        <div class="workspaces">
+          <div class="top-row">
+            <span class="link">Workspaces</span>
+            <IconButton symbol="add" size="small" />
+          </div>
+          <Workspace
+            v-for="workspace in workspaces.list"
+            :workspace="workspace"
+            hover="var(--hover-secondary)"
+            more-info
+          />
+        </div>
+        <div class="line"></div>
+        <div class="links">
+          <NavLink variant="secondary" icon="settings">Settings</NavLink>
+          <NavLink variant="secondary" icon="logout">Log out</NavLink>
+        </div>
+      </div>
     </Transition>
   </div>
 </template>
@@ -55,28 +82,49 @@ onUnmounted(() => document.removeEventListener('click', handler));
   }
 }
 
-.info {
-  margin: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.icon {
-  width: 2rem;
-  height: 2rem;
-  background: var(--accent);
-  border-radius: 0.25rem;
-  font-weight: 500;
-}
-
 .dropdown {
   position: absolute;
   top: 3.5rem;
   left: 0;
-  width: 100%;
-  height: 20rem;
-  background: var(--hover);
+  width: v-bind('$props.width');
+  background: var(--surface-secondary);
   border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown .workspaces {
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem;
+
+  & .top-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.25rem;
+  }
+}
+
+.dropdown .line {
+  width: 100%;
+  height: 1px;
+  background: var(--icon-inactive);
+}
+
+.dropdown .links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.5rem;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  transform: translateY(-2rem) scale(0.8);
 }
 </style>

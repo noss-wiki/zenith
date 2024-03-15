@@ -1,18 +1,25 @@
-interface Workspace {
+export interface Workspace {
   name: string;
+  members: number;
   icon?: string;
 }
 
-const defaultWorkspace: Workspace = {
-  name: 'New Workspace',
-};
+const nossWorkspace = ref<Workspace>({
+  name: 'Noss',
+  members: 2,
+});
+
+const secondWorkspace = ref<Workspace>({
+  name: 'Aantekeningen minkema',
+  members: 7,
+});
 
 const workspaces: {
   active: Ref<Workspace>;
-  list: Workspace[];
+  list: Ref<Workspace>[];
 } = {
-  active: ref(defaultWorkspace),
-  list: [defaultWorkspace],
+  active: ref(nossWorkspace),
+  list: [nossWorkspace, secondWorkspace],
 };
 
 export function useWorkspaces(): typeof workspaces {

@@ -8,7 +8,8 @@
 :root {
   --background: #17191c;
   --surface: #0f1215;
-  --hover: #1f2023;
+  --surface-secondary: #1f2023;
+  --hover-secondary: #27272a;
   --text: #c7c7c7;
   --link-inactive: #818c98;
   --icon-inactive: #45525f;
@@ -50,5 +51,9 @@ p {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.link {
+  font-weight: 500;
 }
 </style>
