@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useWorkspaces } from '@/composables/workspace';
-import Arrow from '../icons/Arrow.vue';
-import NavLink from '../NavLink.vue';
+import Arrow from './icons/Arrow.vue';
+import NavLink from './NavLink.vue';
 import Workspace from './Workspace.vue';
 
 withDefaults(
@@ -15,6 +15,9 @@ withDefaults(
 
 const workspaces = useWorkspaces();
 const open = ref(false);
+const direction = ref<'top' | 'bottom'>('bottom');
+
+watchEffect(() => (direction.value = open.value === true ? 'top' : 'bottom'));
 
 let button: HTMLElement;
 let dropdown: HTMLElement;
@@ -35,7 +38,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
     <div class="button" ref="button">
       <Workspace />
       <div class="drop-btn">
-        <Arrow />
+        <IconButton icon="arrow" :direction="direction" />
       </div>
     </div>
     <Transition mode="in-out" name="fade">
@@ -54,6 +57,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
         </div>
         <div class="line"></div>
         <div class="links">
+          <NavLink variant="secondary" icon="dashboard">Dashboard</NavLink>
           <NavLink variant="secondary" icon="settings">Settings</NavLink>
           <NavLink variant="secondary" icon="logout">Log out</NavLink>
         </div>
@@ -114,7 +118,6 @@ onUnmounted(() => document.removeEventListener('click', handler));
 .dropdown .links {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
   margin: 0.5rem;
 }
 
