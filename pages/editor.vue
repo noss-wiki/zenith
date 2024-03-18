@@ -1,0 +1,62 @@
+<script setup lang="ts">
+import WorkspaceSelect from '@/components/WorkspaceSelect.vue';
+import MaterialSymbol from '@/components/icons/MaterialSymbol.vue';
+import IconButton from '@/components/IconButton.vue';
+</script>
+
+<template>
+  <div class="wrapper">
+    <nav class="editor-nav">
+      <div class="top">
+        <WorkspaceSelect width="calc(100% + 3.5rem)" />
+        <IconButton symbol="keyboard_double_arrow_left" direction="left" />
+      </div>
+      <div class="links">
+        <div class="std-links">
+          <NavLink icon="home">Home</NavLink>
+          <NavLink icon="search">Search</NavLink>
+          <NavLink icon="settings">Settings</NavLink>
+        </div>
+      </div>
+      <Account expandable />
+    </nav>
+    <main>
+      <Editor />
+    </main>
+  </div>
+</template>
+
+<style scoped>
+.wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+nav {
+  height: 100%;
+  width: 22rem;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+
+  & > .top {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  & .links {
+    padding: 0.5rem 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+main {
+  width: 100%;
+  height: 100%;
+}
+</style>

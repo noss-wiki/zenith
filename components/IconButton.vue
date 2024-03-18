@@ -37,7 +37,11 @@ watchEffect(() => {
   <div class="wrapper">
     <div class="rotate" :style="{ rotate: rotation }">
       <Arrow v-if="$props.icon === 'arrow'" />
-      <MaterialSymbol v-else-if="$props.symbol" :symbol="$props.symbol" />
+      <MaterialSymbol
+        v-else-if="$props.symbol"
+        :symbol="$props.symbol"
+        style="rotate: -90deg"
+      />
     </div>
   </div>
 </template>
@@ -60,5 +64,13 @@ div.wrapper {
 
 .rotate {
   transition: rotate 0.3s ease;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+
+  & > svg {
+    margin: 0;
+  }
 }
 </style>

@@ -26,7 +26,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
 </script>
 
 <template>
-  <div class="wrapper">
+  <div class="account">
     <div class="button">
       <div class="info">
         <div class="icon">R</div>
@@ -45,7 +45,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
 </template>
 
 <style scoped>
-.wrapper {
+.account {
   position: relative;
   width: 100%;
 }

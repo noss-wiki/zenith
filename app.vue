@@ -4,6 +4,13 @@
   </div>
 </template>
 
+<style scoped>
+div {
+  width: 100vw;
+  height: 100vh;
+}
+</style>
+
 <style>
 :root {
   --background: #17191c;
