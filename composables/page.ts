@@ -1,4 +1,5 @@
 import type { Block, AbstractBlock } from './block';
+import { TextBlock } from './blocks/text';
 
 export interface PageData {
   title: string;
