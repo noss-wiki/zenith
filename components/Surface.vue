@@ -25,7 +25,7 @@ withDefaults(
 
 <style module>
 .surface {
-  background: var(--surface);
+  background: var(--color-surface);
   border-radius: v-bind('$props.radius');
 }
 </style>

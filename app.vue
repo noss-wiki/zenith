@@ -1,5 +1,9 @@
+<script setup>
+import '@/assets/styles/variables.css';
+</script>
+
 <template>
-  <div>
+  <div class="dark">
     <NuxtPage />
   </div>
 </template>
@@ -12,18 +16,6 @@ div {
 </style>
 
 <style>
-:root {
-  --background: #17191c;
-  --surface: #0f1215;
-  --surface-secondary: #1f2023;
-  --hover-secondary: #27272a;
-  --text: #c7c7c7;
-  --link-inactive: #818c98;
-  --icon-inactive: #45525f;
-  --accent: #5566b8; /* This should be editable by user */
-  --accent-dim: rgba(85, 102, 184, 0.25);
-}
-
 * {
   box-sizing: border-box;
 }
@@ -32,8 +24,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--background);
-  color: var(--text);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: 'Poppins', sans-serif;
   height: 100%;
   width: 100%;

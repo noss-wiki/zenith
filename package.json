@@ -17,6 +17,8 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "nuxt-svgo": "^4.0.0"
+    "nuxt-svgo": "^4.0.0",
+    "stylelint": "^16.2.1",
+    "stylelint-config-standard": "^36.0.0"
   }
 }

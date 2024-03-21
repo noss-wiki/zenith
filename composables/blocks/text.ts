@@ -1,6 +1,7 @@
 import { Block } from '../block';
 
 export class TextBlock extends Block {
-  name = 'text';
+  name = 'Text';
+  format = 'text';
   description = 'Simple plain text';
 }

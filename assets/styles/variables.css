@@ -1,0 +1,21 @@
+html {
+  --radius: 0.6rem;
+}
+
+.dark,
+html {
+  --color-bg: #17191c;
+  --color-surface: #0f1215;
+  --color-raised-surface: #1f2023;
+
+  --color-hover-surface: var(--color-bg);
+  --color-hover-raised-surface: #27272a;
+
+  --color-text: #c7c7c7;
+  --color-inactive: #818c98;
+  --color-inactive-dimmed: #45525f;
+
+  --color-primary: #5566b8;
+
+  --filter-hover: brightness(120%);
+}

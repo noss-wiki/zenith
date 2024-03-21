@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useWorkspaces } from '@/composables/workspace';
-import Arrow from './icons/Arrow.vue';
-import NavLink from './NavLink.vue';
+import MaterialSymbol from './icons/MaterialSymbol.vue';
 import Workspace from './Workspace.vue';
 
 withDefaults(
@@ -51,15 +50,24 @@ onUnmounted(() => document.removeEventListener('click', handler));
           <Workspace
             v-for="workspace in workspaces.list"
             :workspace="workspace"
-            hover="var(--hover-secondary)"
+            hover="var(--color-hover-raised-surface)"
             more-info
           />
         </div>
         <div class="line"></div>
         <div class="links">
-          <NavLink variant="secondary" icon="dashboard">Dashboard</NavLink>
-          <NavLink variant="secondary" icon="settings">Settings</NavLink>
-          <NavLink variant="secondary" icon="logout">Log out</NavLink>
+          <Button surface transparent>
+            <MaterialSymbol symbol="dashboard" />
+            Dashboard
+          </Button>
+          <Button surface transparent>
+            <MaterialSymbol symbol="settings" />
+            Settings
+          </Button>
+          <Button surface transparent>
+            <MaterialSymbol symbol="logout" />
+            Log out
+          </Button>
         </div>
       </div>
     </Transition>
@@ -82,7 +90,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
   cursor: pointer;
 
   &:hover {
-    background: var(--background);
+    background: var(--color-bg);
   }
 }
 
@@ -91,7 +99,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
   top: 3.5rem;
   left: 0;
   width: v-bind('$props.width');
-  background: var(--surface-secondary);
+  background: var(--color-raised-surface);
   border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -112,7 +120,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
 .dropdown .line {
   width: 100%;
   height: 1px;
-  background: var(--icon-inactive);
+  background: var(--color-inactive-dimmed);
 }
 
 .dropdown .links {

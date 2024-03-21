@@ -58,7 +58,7 @@ div.wrapper {
   cursor: pointer;
 
   &:hover {
-    background: var(--background);
+    background: var(--color-bg);
   }
 }
 

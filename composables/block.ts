@@ -18,9 +18,10 @@ export interface BlockType {
  * Or just define what functions the class should implement and not extend?
  */
 export class Block {
-  name: string = '';
+  name: string = 'Base';
+  format: string = 'base';
   description: string = '';
-  element: HTMLElement = document.createElement('div');
+  root: HTMLDivElement = this.createRoot();
 
   constructor() {}
 
@@ -29,9 +30,10 @@ export class Block {
    * Returns the `AbstractBlock` data to be stored
    */
   toAbstract() /* : AbstractBlock */ {}
-}
 
-export function createBlockRoot(type: string) {
-  const div = document.createElement('div');
-  div.className = `noss-selectable noss-${type}-block`;
+  createRoot() {
+    const div = document.createElement('div');
+    div.className = `noss-selectable noss-${this.format}-block`;
+    return div;
+  }
 }

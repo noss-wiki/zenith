@@ -59,7 +59,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
   transition: background 0.3s ease;
 
   &:hover {
-    background: var(--background);
+    background: var(--color-bg);
   }
 }
 
@@ -73,7 +73,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
 .icon {
   width: 2rem;
   height: 2rem;
-  background: var(--accent);
+  background: var(--color-primary);
   border-radius: 0.25rem;
   font-weight: 500;
   display: grid;
@@ -89,19 +89,13 @@ span.name {
   font-weight: 500;
 }
 
-span.members {
-  color: var(--link-inactive);
-  font-size: 0.75rem;
-  margin-top: -0.3rem;
-}
-
 .dropdown {
   position: absolute;
   bottom: 3.5rem;
   left: 0;
   width: 100%;
   height: 10rem;
-  background: var(--surface-secondary);
+  background: var(--color-raised-surface);
   border-radius: 0.5rem;
 }
 </style>

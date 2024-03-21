@@ -11,7 +11,7 @@ withDefaults(
   {
     workspace: () => useWorkspaces().active,
     moreInfo: false,
-    hover: 'var(--background)',
+    hover: 'var(--color-bg)',
   }
 );
 
@@ -49,7 +49,7 @@ const workspaces = useWorkspaces();
 .icon {
   width: 2rem;
   height: 2rem;
-  background: var(--accent);
+  background: var(--color-primary);
   border-radius: 0.25rem;
   font-weight: 500;
 }
@@ -64,7 +64,7 @@ span.name {
 }
 
 span.members {
-  color: var(--link-inactive);
+  color: var(--color-inactive);
   font-size: 0.75rem;
   margin-top: -0.3rem;
 }

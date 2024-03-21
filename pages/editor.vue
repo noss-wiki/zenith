@@ -13,9 +13,18 @@ import IconButton from '@/components/IconButton.vue';
       </div>
       <div class="links">
         <div class="std-links">
-          <NavLink icon="home">Home</NavLink>
-          <NavLink icon="search">Search</NavLink>
-          <NavLink icon="settings">Settings</NavLink>
+          <Button transparent>
+            <MaterialSymbol symbol="dashboard" />
+            Home
+          </Button>
+          <Button transparent>
+            <MaterialSymbol symbol="search" />
+            Search
+          </Button>
+          <Button transparent>
+            <MaterialSymbol symbol="settings" />
+            Settings
+          </Button>
         </div>
       </div>
       <Account expandable />
@@ -36,7 +45,7 @@ import IconButton from '@/components/IconButton.vue';
 nav {
   height: 100%;
   width: 22rem;
-  background: var(--surface);
+  background: var(--color-surface);
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
