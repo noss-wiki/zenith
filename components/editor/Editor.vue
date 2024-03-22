@@ -4,9 +4,7 @@ import { Editor } from '@/composables/editor';
 let root: HTMLDivElement;
 let editor: Editor;
 
-onMounted(() => {
-  editor = new Editor(root);
-});
+onMounted(() => (editor = new Editor(root)));
 onUnmounted(() => editor.unmount());
 </script>
 
