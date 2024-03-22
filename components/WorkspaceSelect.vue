@@ -3,6 +3,8 @@ import { useWorkspaces } from '@/composables/workspace';
 import MaterialSymbol from './icons/MaterialSymbol.vue';
 import Workspace from './Workspace.vue';
 
+import Arrow from '@/assets/icons/arrow.svg';
+
 withDefaults(
   defineProps<{
     width?: string;
@@ -36,16 +38,18 @@ onUnmounted(() => document.removeEventListener('click', handler));
   <div class="wrapper">
     <div class="button" ref="button">
       <Workspace />
-      <div class="drop-btn">
-        <IconButton icon="arrow" :direction="direction" />
-      </div>
+      <Button icon-only transparent large>
+        <Arrow />
+      </Button>
     </div>
     <Transition mode="in-out" name="fade">
       <div class="dropdown" v-show="open" ref="dropdown">
         <div class="workspaces">
           <div class="top-row">
             <span class="link">Workspaces</span>
-            <IconButton symbol="add" size="small" />
+            <Button icon-only transparent small surface>
+              <MaterialSymbol symbol="add" />
+            </Button>
           </div>
           <Workspace
             v-for="workspace in workspaces.list"
@@ -85,7 +89,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
   width: 100%;
   display: flex;
   justify-content: space-between;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-default);
   transition: background 0.3s ease;
   cursor: pointer;
 
@@ -100,7 +104,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
   left: 0;
   width: v-bind('$props.width');
   background: var(--color-raised-surface);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-default);
   display: flex;
   flex-direction: column;
 }

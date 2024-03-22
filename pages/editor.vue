@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import WorkspaceSelect from '@/components/WorkspaceSelect.vue';
 import MaterialSymbol from '@/components/icons/MaterialSymbol.vue';
-import IconButton from '@/components/IconButton.vue';
 </script>
 
 <template>
@@ -9,12 +8,14 @@ import IconButton from '@/components/IconButton.vue';
     <nav class="editor-nav">
       <div class="top">
         <WorkspaceSelect width="calc(100% + 3.5rem)" />
-        <IconButton symbol="keyboard_double_arrow_left" direction="left" />
+        <Button icon-only transparent large>
+          <MaterialSymbol symbol="keyboard_double_arrow_left" />
+        </Button>
       </div>
       <div class="links">
         <div class="std-links">
           <Button transparent>
-            <MaterialSymbol symbol="dashboard" />
+            <MaterialSymbol symbol="home" />
             Home
           </Button>
           <Button transparent>

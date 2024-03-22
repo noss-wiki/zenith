@@ -1,6 +1,7 @@
 {
-  "extends": "stylelint-config-standard",
+  "extends": ["stylelint-config-standard", "stylelint-config-html/vue"],
   "rules": {
-    "custom-property-empty-line-before": null
+    "custom-property-empty-line-before": null,
+    "function-no-unknown": null
   }
 }

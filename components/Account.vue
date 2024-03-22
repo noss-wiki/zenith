@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import Arrow from './icons/Arrow.vue';
-
 withDefaults(
   defineProps<{
     expandable?: boolean;
@@ -9,20 +7,6 @@ withDefaults(
     expandable: false,
   }
 );
-
-/* const open = ref(false);
-let button: HTMLElement;
-let dropdown: HTMLElement;
-
-const handler = (e: MouseEvent) => {
-  if (button.contains(e.target as Node)) open.value = !open.value;
-  else if (!dropdown.contains(e.target as Node)) {
-    open.value = false;
-  }
-};
-
-onMounted(() => document.addEventListener('click', handler));
-onUnmounted(() => document.removeEventListener('click', handler)); */
 </script>
 
 <template>
@@ -54,7 +38,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
   display: flex;
   width: 100%;
   justify-content: space-between;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-default);
   cursor: pointer;
   transition: background 0.3s ease;
 
@@ -74,7 +58,7 @@ onUnmounted(() => document.removeEventListener('click', handler)); */
   width: 2rem;
   height: 2rem;
   background: var(--color-primary);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-small);
   font-weight: 500;
   display: grid;
   place-items: center;
@@ -96,6 +80,6 @@ span.name {
   width: 100%;
   height: 10rem;
   background: var(--color-raised-surface);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-default);
 }
 </style>

@@ -2,22 +2,10 @@
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "types": [
+      "./types/shims-svg.d.ts"
+    ],
     "paths": {
-      "@/layouts/*": [
-        "layouts/*"
-      ],
-      "@/components/*": [
-        "components/*"
-      ],
-      "@/composables/*": [
-        "composables/*"
-      ],
-      "@/lib/*": [
-        "lib/*"
-      ],
-      "@/assets/*": [
-        "assets/*"
-      ],
       "@/*": [
         "./*"
       ],

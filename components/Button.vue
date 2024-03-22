@@ -4,13 +4,15 @@ const props = defineProps<{
   // TODO: check for contrast and change text color accordingly
   color?: Color;
   link?: string;
-  // styles
+  // size
   large?: boolean;
+  small?: boolean;
+  // styles
   surface?: boolean;
   outline?: boolean;
   transparent?: boolean;
   // layout
-  'icon-only'?: boolean;
+  iconOnly?: boolean;
 }>();
 
 const color = computed(() => {
@@ -20,23 +22,12 @@ const color = computed(() => {
   } else return colors.inactive;
 });
 
-/* const textColor =
-  props.transparent || props.outline ? color : 'var(--color-inactive)';
-
-const hoverColor = color;
-
-const background = (() => {
-  if (props.outline || props.transparent) return 'transparent';
-  else return color;
-})();
-
-const hoverBackground = (() => {
-  if (props.outline) return 'transparent';
-  else if (props.transparent) {
-    if (props.surface) return colors.hoverSecondary;
-    else return colors.hoverSurface;
-  } else return hoverColor;
-})(); */
+const background = computed(() => {
+  if (typeof props.color === 'string') {
+    if (colors[props.color]) return colors[props.color];
+    else return props.color;
+  } else return colors.hoverSurface;
+});
 </script>
 
 <template>
@@ -44,9 +35,11 @@ const hoverBackground = (() => {
     class="btn"
     :class="{
       'btn-large': large,
+      'btn-small': small,
       'btn-surface': surface,
       'btn-outline': outline,
       'btn-transparent': transparent,
+      'btn-icon-only': props.iconOnly,
     }"
   >
     <slot />
@@ -55,20 +48,21 @@ const hoverBackground = (() => {
 
 <style scoped>
 .btn {
+  --size: 2.5rem;
+  --radius: var(--radius-default);
+
   width: 100%;
-  height: 2.5rem;
+  height: var(--size);
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding-inline: 0.75rem;
-
-  border-radius: 0.5rem;
+  border-radius: var(--radius);
   font-weight: 500;
   cursor: pointer;
-
   transition: color 0.3s ease, background 0.3s ease, filter 0.3s ease;
   color: var(--color-inactive);
-  background: v-bind('color');
+  background: v-bind('background');
   filter: none;
 
   &:hover {
@@ -77,7 +71,12 @@ const hoverBackground = (() => {
 }
 
 .btn-large {
-  height: 3rem;
+  --size: 3rem;
+}
+
+.btn-small {
+  --size: 1.5rem;
+  --radius: var(--radius-small);
 }
 
 .btn-outline {
@@ -103,5 +102,13 @@ const hoverBackground = (() => {
   &.btn-surface:hover {
     background: var(--color-hover-raised-surface);
   }
+}
+
+.btn-icon-only {
+  width: var(--size);
+  padding: 0;
+  justify-content: center;
+  color: var(--color-text);
+  flex-shrink: 0;
 }
 </style>

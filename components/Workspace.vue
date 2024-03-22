@@ -34,7 +34,7 @@ const workspaces = useWorkspaces();
 <style scoped>
 .info {
   padding: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-default);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -50,7 +50,7 @@ const workspaces = useWorkspaces();
   width: 2rem;
   height: 2rem;
   background: var(--color-primary);
-  border-radius: 0.25rem;
+  border-radius: var(--radius-small);
   font-weight: 500;
 }
 
