@@ -13,6 +13,11 @@ export interface BlockType {
   // also add preview prop for a preview image later?
 }
 
+interface HandleData {
+  type: 'carryContentBackward';
+  data: string;
+}
+
 /**
  * A base class that will be extended by the different BlockTypes.
  * Or just define what functions the class should implement and not extend?
@@ -23,18 +28,9 @@ export class Block {
   description: string = '';
   root: HTMLDivElement = this.createRoot();
 
-  #listeners: {
-    element: Element;
-    event: keyof HTMLElementEventMap;
-    cb: (this: Block, e: any) => any | void;
-  }[] = [];
-
   constructor() {}
 
-  unmount() {
-    for (const l of this.#listeners)
-      l.element.removeEventListener(l.event, l.cb);
-  }
+  unmount() {}
 
   render(): HTMLElement {
     return this.root;
@@ -45,22 +41,30 @@ export class Block {
   }
 
   /**
-   * Adds an eventListener to the element, and removes them when this block is unmounted.
+   * The handler for when input gets added
    */
-  addEventListener<E extends keyof HTMLElementEventMap>(
-    element: Element,
-    event: E,
-    cb: (this: Block, e: HTMLElementEventMap[E]) => any | void
-  ) {
-    this.#listeners.push({ element, event, cb });
-    // @ts-ignore
-    element.addEventListener(event, cb.bind(this));
-  }
+  input() {}
 
   createRoot() {
     const div = document.createElement('div');
     div.className = `noss-selectable noss-${this.format}-block`;
     return div;
+  }
+
+  /**
+   * Handle if content should be inserted when carrying content backwards, return false to not allow.
+   * If you return true, you hould insert it yourself as that will not be handled
+   * @param data The string to insert
+   */
+  receiveContentBackwards(data: string): boolean {
+    return false;
+  }
+
+  /**
+   * Handle if content should be carried backwards, return false to not allow.
+   */
+  carryContentBackwards(): boolean {
+    return false;
   }
 }
 
@@ -71,11 +75,20 @@ export class SimpleBlock extends Block {
   text?: HTMLElement;
   textNode?: Text;
 
+  #default?: string;
+
+  constructor(content?: string) {
+    super();
+    this.#default = content;
+  }
+
   focus(char?: number) {
     if (!this.text) return;
     if (typeof char !== 'number' || char > this.content.length)
       char = this.content.length;
-    else if (char < 0) char = 0;
+    else if (char < 0) char = this.content.length + char;
+    if (char < 0) char = 0;
+    console.log(char);
 
     if (!this.textNode) return;
 
@@ -89,14 +102,17 @@ export class SimpleBlock extends Block {
     sel.removeAllRanges();
     setTimeout(() => {
       sel.addRange(range);
-    }, 0);
+    }, 1);
   }
 
   render() {
     this.root = this.createRoot();
     this.text = document.createElement('p');
     this.textNode = document.createTextNode('');
+    if (this.#default) this.textNode.data = this.#default;
+
     this.text.appendChild(this.textNode);
+    this.text.appendChild(document.createElement('br'));
     this.text.setAttribute('contenteditable', 'true');
     this.text.setAttribute('data-content-editable-leaf', 'true');
     this.root.appendChild(this.text);
@@ -107,10 +123,28 @@ export class SimpleBlock extends Block {
     return this.textNode?.textContent ?? '';
   }
 
-  // use beforeInput event?
-  // and make sure to always have some content, otherwise textnode gets removed
-  #onInput(e: InputEvent) {
-    const t = e.target as HTMLElement | null;
-    if (!t || t.getAttribute('data-content-editable-leaf') === null) return;
+  set content(data: string) {
+    if (this.textNode && this.text && !this.text.contains(this.textNode)) {
+      this.text.innerHTML = '';
+      this.text.appendChild(this.textNode);
+      this.text.appendChild(document.createElement('br'));
+    }
+    if (this.textNode) this.textNode.data = data;
+    else if (this.text) {
+      this.text.innerHTML = data;
+      this.textNode =
+        this.text.childNodes[0].nodeType === 3
+          ? (this.text.childNodes[0] as Text)
+          : undefined;
+    }
+  }
+
+  receiveContentBackwards(data: string) {
+    this.content += data;
+    return true;
+  }
+
+  carryContentBackwards() {
+    return true;
   }
 }

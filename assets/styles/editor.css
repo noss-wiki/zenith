@@ -1,0 +1,7 @@
+[noss-editor-root] p[data-content-editable-leaf],
+[noss-editor-root] p[data-content-editable-leaf='true'],
+[noss-editor-root] p[contenteditable] {
+  width: 100%;
+  white-space: pre-wrap;
+  min-height: 1.5rem;
+}

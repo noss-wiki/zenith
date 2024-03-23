@@ -68,5 +68,8 @@ nav {
 main {
   width: 100%;
   height: 100%;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
 }
 </style>

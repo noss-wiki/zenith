@@ -2,6 +2,7 @@
   "extends": ["stylelint-config-standard", "stylelint-config-html/vue"],
   "rules": {
     "custom-property-empty-line-before": null,
-    "function-no-unknown": null
+    "function-no-unknown": null,
+    "font-family-name-quotes": null
   }
 }

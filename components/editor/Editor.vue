@@ -9,7 +9,13 @@ onUnmounted(() => editor.unmount());
 </script>
 
 <template>
-  <div class="editor" ref="root"></div>
+  <div class="editor" ref="root" noss-editor-root></div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.editor {
+  padding-top: 14rem;
+  width: 60rem;
+  height: 100%;
+}
+</style>

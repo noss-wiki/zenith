@@ -1,5 +1,6 @@
 <script setup>
 import '@/assets/styles/variables.css';
+import '@/assets/styles/editor.css';
 </script>
 
 <template>
