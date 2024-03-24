@@ -5,3 +5,28 @@
   white-space: pre-wrap;
   min-height: 1.5rem;
 }
+
+[noss-editor-root] {
+  & .noss-selectable {
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--radius-small);
+    position: relative;
+
+    &.active {
+      background: var(--color-editor-active-block);
+    }
+
+    &,
+    & p[data-content-editable-leaf] {
+      outline: none;
+    }
+
+    & p[data-content-editable-leaf][data-empty][placeholder]::after {
+      content: attr(placeholder);
+      position: absolute;
+      top: 0;
+      left: 0.25rem;
+      color: var(--color-inactive);
+    }
+  }
+}

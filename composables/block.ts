@@ -13,9 +13,20 @@ export interface BlockType {
   // also add preview prop for a preview image later?
 }
 
-interface HandleData {
-  type: 'carryContentBackward';
-  data: string;
+export interface BlockDescription {
+  /**
+   * The name that will be displayed to the user, e.g. in the commands menu
+   */
+  name: string;
+  /**
+   * The description that will be displayed to the user, e.g. in the commands menu
+   */
+  description: string;
+  /**
+   * The name of the block, needs to be unique.
+   * This is what will be used as classname, etc.
+   */
+  type: string;
 }
 
 /**
@@ -70,8 +81,11 @@ export class Block {
 
 /**
  * Extend this class for a simple text input, e.g. heading, text, quote, etc.
+ * This will also add commands in the current block
  */
 export class SimpleBlock extends Block {
+  placeholder = "Press '/' for commands, or start typing...";
+
   text?: HTMLElement;
   textNode?: Text;
 

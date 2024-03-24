@@ -11,6 +11,8 @@ export class Editor {
   root: HTMLElement;
   blocks: Block[] = [];
 
+  editor: HTMLElement;
+
   #listeners: {
     element: Element;
     event: keyof HTMLElementEventMap;
@@ -19,14 +21,24 @@ export class Editor {
 
   constructor(root: HTMLElement) {
     this.root = root;
-    this.addEventListener(this.root, 'input', (e) =>
+    this.editor = root.querySelector('[noss-editor-content]') as HTMLElement;
+    if (!this.editor) {
+      this.editor = document.createElement('div');
+      this.editor.setAttribute('noss-editor-content', 'true');
+      this.editor.className = 'content';
+
+      this.root.innerHTML = '';
+      this.root.appendChild(this.editor);
+    }
+
+    this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
     );
-    this.addEventListener(this.root, 'keydown', (e) => this.#keydown(e));
+    this.addEventListener(this.editor, 'keydown', (e) => this.#keydown(e));
 
     const text = new TextBlock();
     text.render();
-    this.root.appendChild(text.root);
+    this.editor.appendChild(text.root);
     this.blocks.push(text);
   }
   /**
@@ -114,7 +126,7 @@ export class Editor {
         else prev.focus();
 
         block.unmount();
-        this.root.removeChild(block.root);
+        this.editor.removeChild(block.root);
         this.blocks.splice(index, 1);
       }
     }

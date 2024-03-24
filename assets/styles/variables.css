@@ -17,6 +17,7 @@ html {
   --color-inactive-dimmed: #45525f;
 
   --color-primary: #5566b8;
+  --color-editor-active-block: #5566b826;
 
   --filter-hover: brightness(120%);
 }

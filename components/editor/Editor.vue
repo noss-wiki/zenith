@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Editor } from '@/composables/editor';
+import TextBlock from './blocks/TextBlock.vue';
 
 let root: HTMLDivElement;
 let editor: Editor;
@@ -9,7 +10,12 @@ onUnmounted(() => editor.unmount());
 </script>
 
 <template>
-  <div class="editor" ref="root" noss-editor-root></div>
+  <div class="editor" ref="root" noss-editor-root>
+    <div class="header"></div>
+    <div class="content" noss-editor-content>
+      <!-- <TextBlock /> -->
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -17,5 +23,11 @@ onUnmounted(() => editor.unmount());
   padding-top: 14rem;
   width: 60rem;
   height: 100%;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 </style>
