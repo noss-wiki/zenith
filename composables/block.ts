@@ -102,7 +102,6 @@ export class SimpleBlock extends Block {
       char = this.content.length;
     else if (char < 0) char = this.content.length + char;
     if (char < 0) char = 0;
-    console.log(char);
 
     if (!this.textNode) return;
 

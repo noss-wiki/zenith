@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <p>
+  <p data-content-editable-leaf="true" contenteditable="true">
     <br />
   </p>
 </template>

@@ -1,6 +1,8 @@
 {
   "extends": "./.nuxt/tsconfig.json",
   "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
     "baseUrl": ".",
     "types": [
       "./types/shims-svg.d.ts"
@@ -16,6 +18,5 @@
         "../*"
       ],
     },
-    "jsx": "preserve"
   }
 }

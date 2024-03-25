@@ -12,9 +12,7 @@ onUnmounted(() => editor.unmount());
 <template>
   <div class="editor" ref="root" noss-editor-root>
     <div class="header"></div>
-    <div class="content" noss-editor-content>
-      <!-- <TextBlock /> -->
-    </div>
+    <div class="content" noss-editor-content></div>
   </div>
 </template>
 
