@@ -161,3 +161,41 @@ export class SimpleBlock extends Block {
     return true;
   }
 }
+
+export const instances: BlockInstanceInteractable[] = [];
+
+export class BlockInstance {
+  meta: BlockDescription;
+  id: string;
+
+  _attached?: HTMLElement;
+
+  #interactable: BlockInstanceInteractable;
+
+  constructor(meta: BlockDescription) {
+    this.meta = meta;
+    this.id = Math.random().toString(36).slice(2);
+
+    this.#interactable = new BlockInstanceInteractable(this);
+    instances.push(this.#interactable);
+  }
+}
+
+/**
+ * This will be attached to a BlockInstance, and it will act as a way for the internals to call instance functions and hooks
+ */
+export class BlockInstanceInteractable {
+  instance: BlockInstance;
+
+  constructor(instance: BlockInstance) {
+    this.instance = instance;
+  }
+
+  /**
+   * Attaches an element to this instance, this needs to be done as soon as the element is inserted in the dom.
+   * It is also needed for most functions to work
+   */
+  attach(blockRoot: HTMLElement) {
+    this.instance._attached = blockRoot;
+  }
+}

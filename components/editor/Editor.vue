@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Editor } from '@/composables/editor';
-import TextBlock from './blocks/TextBlock.vue';
 
 let root: HTMLDivElement;
 let editor: Editor;

@@ -1,8 +1,8 @@
 <script lang="ts">
 export const options: BlockDescription = {
-  name: 'Text',
-  description: 'Simple plain text',
-  type: 'text',
+  name: 'Heading 1',
+  description: 'The largest heading',
+  type: 'header',
 };
 </script>
 
@@ -22,9 +22,9 @@ const instance = new BlockInstance(options);
 </template>
 
 <style scoped>
-.noss-text-block {
+.noss-header-block {
   background: var(--color-editor-active-block);
-  font-size: 1em;
-  font-weight: 400;
+  font-size: 1.875em;
+  font-weight: 600;
 }
 </style>

@@ -1,7 +1,15 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+defineProps<{
+  index: number;
+}>();
+</script>
 
 <template>
-  <p data-content-editable-leaf="true" contenteditable="true">
+  <p
+    data-content-editable-leaf="true"
+    :data-input-index="$props.index"
+    contenteditable="true"
+  >
     <br />
   </p>
 </template>
