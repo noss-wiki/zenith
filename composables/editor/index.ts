@@ -121,6 +121,11 @@ export class Editor {
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
       text.focus(); */
+
+      const text = createBlock('text');
+      this.blocks.splice(index, 1, text);
+      block.root.insertAdjacentElement('afterend', text.root);
+      text.instance.focus();
     } else if (e.key === 'Backspace') {
       const sel = window.getSelection();
 
@@ -137,9 +142,9 @@ export class Editor {
         if (content.length > 0) prev.focus(-content.length);
         else prev.focus(); */
 
-        block.unmount();
+        /*  block.unmount();
         this.editor.removeChild(block.root);
-        this.blocks.splice(index, 1);
+        this.blocks.splice(index, 1); */
       }
     }
     // arrow key functionality

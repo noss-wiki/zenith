@@ -162,6 +162,14 @@ export class SimpleBlock extends Block {
   }
 }
 
+export interface InputRegisterHandler {
+  content: string;
+  /**
+   * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
+   */
+  focus(char?: number): void;
+}
+
 export const instances: BlockInstanceInteractable[] = [];
 
 export class BlockInstance {
@@ -178,6 +186,10 @@ export class BlockInstance {
 
     this.#interactable = new BlockInstanceInteractable(this);
     instances.push(this.#interactable);
+  }
+
+  input(handler: InputRegisterHandler): number {
+    return 0;
   }
 }
 
