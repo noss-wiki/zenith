@@ -3,6 +3,7 @@
 [noss-editor-root] p[contenteditable] {
   width: 100%;
   white-space: pre-wrap;
+  word-break: break-word;
   min-height: 1.5rem;
 }
 

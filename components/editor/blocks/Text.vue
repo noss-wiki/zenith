@@ -1,5 +1,5 @@
 <script lang="ts">
-export const options: BlockDescription = {
+export const meta: BlockDescription = {
   name: 'Text',
   description: 'Simple plain text',
   type: 'text',
@@ -12,11 +12,11 @@ import { BlockInstance } from '@/composables/block';
 import Input from '../elements/Input.vue';
 import Block from '../elements/Block.vue';
 
-const instance = new BlockInstance(options);
+const instance = new BlockInstance(meta);
 </script>
 
 <template>
-  <Block :options="options" :id="instance.id">
+  <Block :options="meta" :id="instance.id">
     <Input :index="0" />
   </Block>
 </template>

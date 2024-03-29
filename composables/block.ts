@@ -198,4 +198,6 @@ export class BlockInstanceInteractable {
   attach(blockRoot: HTMLElement) {
     this.instance._attached = blockRoot;
   }
+
+  focus(char?: number) {}
 }

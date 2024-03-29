@@ -1,4 +1,5 @@
-import type { Block } from '../block';
+import type { Block } from './blocks';
+import { createBlock } from './blocks';
 import { TextBlock } from '../blocks/text';
 
 type InputTypes =
@@ -36,8 +37,12 @@ export class Editor {
     );
     this.addEventListener(this.editor, 'keydown', (e) => this.#keydown(e));
 
-    const text = new TextBlock();
+    /* const text = new TextBlock();
     text.render();
+    this.editor.appendChild(text.root);
+    this.blocks.push(text); */
+
+    const text = createBlock('text');
     this.editor.appendChild(text.root);
     this.blocks.push(text);
   }
@@ -47,6 +52,8 @@ export class Editor {
   unmount() {
     for (const l of this.#listeners)
       l.element.removeEventListener(l.event, l.cb);
+
+    for (const b of this.blocks) b.unmount();
   }
 
   /**
@@ -87,11 +94,16 @@ export class Editor {
       }
 
       // Insert new node
-      const text = new TextBlock(carry);
+      /* const text = new TextBlock(carry);
       text.render();
       this.blocks.splice(index + 1, 0, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      text.focus(0);
+      text.focus(0); */
+
+      const text = createBlock('block');
+      this.blocks.splice(index + 1, 0, text);
+      block.root.insertAdjacentElement('afterend', text.root);
+      text.instance.focus(0);
     }
   }
 
@@ -104,11 +116,11 @@ export class Editor {
 
     if (e.key === 'Enter' && e.ctrlKey) {
       // Insert new node
-      const text = new TextBlock();
+      /* const text = new TextBlock();
       text.render();
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      text.focus();
+      text.focus(); */
     } else if (e.key === 'Backspace') {
       const sel = window.getSelection();
 
@@ -116,14 +128,14 @@ export class Editor {
         sel &&
         sel.anchorNode &&
         sel.focusOffset < 1 &&
-        index > 0 &&
-        block.carryContentBackwards()
+        index > 0 /* &&
+        block.carryContentBackwards() */
       ) {
         const prev = this.blocks[index - 1];
         const content = (sel.anchorNode as Text).data ?? '';
-        prev.receiveContentBackwards(content.trim());
+        /* prev.receiveContentBackwards(content.trim());
         if (content.length > 0) prev.focus(-content.length);
-        else prev.focus();
+        else prev.focus(); */
 
         block.unmount();
         this.editor.removeChild(block.root);
