@@ -29,6 +29,7 @@ const blocks: {
 ] as const;
 
 export interface Block<Type extends string = string> {
+  meta: Required<BlockDescription>;
   instance: BlockInstanceInteractable;
   root: HTMLElement;
   type: Type;
@@ -48,7 +49,10 @@ export function createBlock<T extends string>(type: T): Block<T> {
   let root = ele.children[0] as HTMLElement;
   instance.attach(root);
 
+  block.meta.carry ??= 'both';
+
   return {
+    meta: block.meta as Required<BlockDescription>,
     type,
     root,
     instance,

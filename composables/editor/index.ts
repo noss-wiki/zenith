@@ -1,6 +1,5 @@
 import type { Block } from './blocks';
 import { createBlock } from './blocks';
-import { TextBlock } from '../blocks/text';
 
 type InputTypes =
   | 'insertParagraph'
@@ -94,15 +93,10 @@ export class Editor {
       }
 
       // Insert new node
-      /* const text = new TextBlock(carry);
-      text.render();
+      const text = createBlock('text');
       this.blocks.splice(index + 1, 0, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      text.focus(0); */
-
-      const text = createBlock('block');
-      this.blocks.splice(index + 1, 0, text);
-      block.root.insertAdjacentElement('afterend', text.root);
+      if (carry) text.instance.carry(carry);
       text.instance.focus(0);
     }
   }
@@ -116,12 +110,6 @@ export class Editor {
 
     if (e.key === 'Enter' && e.ctrlKey) {
       // Insert new node
-      /* const text = new TextBlock();
-      text.render();
-      this.blocks.splice(index, 1, text);
-      block.root.insertAdjacentElement('afterend', text.root);
-      text.focus(); */
-
       const text = createBlock('text');
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
@@ -133,18 +121,18 @@ export class Editor {
         sel &&
         sel.anchorNode &&
         sel.focusOffset < 1 &&
-        index > 0 /* &&
-        block.carryContentBackwards() */
+        index > 0 &&
+        (block.meta.carry === 'backwards' || block.meta.carry === 'both')
       ) {
         const prev = this.blocks[index - 1];
         const content = (sel.anchorNode as Text).data ?? '';
-        /* prev.receiveContentBackwards(content.trim());
-        if (content.length > 0) prev.focus(-content.length);
-        else prev.focus(); */
 
-        /*  block.unmount();
-        this.editor.removeChild(block.root);
-        this.blocks.splice(index, 1); */
+        prev.instance.carry(content.trim());
+        if (content.length > 0) prev.instance.focus(-content.length);
+        else prev.instance.focus();
+
+        block.unmount();
+        this.blocks.splice(index, 1);
       }
     }
     // arrow key functionality

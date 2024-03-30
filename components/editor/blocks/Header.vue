@@ -17,7 +17,7 @@ const instance = new BlockInstance(meta);
 
 <template>
   <Block :options="meta" :id="instance.id">
-    <Input :input="instance.input" />
+    <Input :instance="instance" />
   </Block>
 </template>
 

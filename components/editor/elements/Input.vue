@@ -1,22 +1,18 @@
 <script setup lang="ts">
-import type { BlockInstance } from '@/composables/block';
+import type { BlockInstance, InputRegisterHandler } from '@/composables/block';
 
 const props = defineProps<{
-  input: BlockInstance['input'];
+  instance: BlockInstance;
 }>();
 
-if (typeof props.input !== 'function')
+if (typeof props.instance._input !== 'function')
   throw new Error('Input paramater is not of type function');
 
 let text: HTMLParagraphElement;
 let textNode = document.createTextNode('');
 
-const index = props.input({
-  get content(): string {
-    return textNode?.textContent ?? '';
-  },
-
-  set content(data: string) {
+const index = props.instance._input({
+  setContent(data: string) {
     if (textNode && text && !text.contains(textNode)) {
       text.innerHTML = '';
       text.append(textNode, document.createElement('br'));
@@ -26,14 +22,47 @@ const index = props.input({
       text.innerHTML = data;
     }
   },
+  getContent() {
+    if (text.contains(textNode)) return textNode.data;
+    else
+      return text.childNodes[0].nodeType === 3
+        ? (text.childNodes[0] as Text).data
+        : '';
+  },
+  set content(data: string) {
+    this.setContent(data);
+  },
+  get content(): string {
+    return textNode.data;
+  },
 
   focus(char?: number) {
     if (!text) return;
-    if (typeof char !== 'number' || char > this.content.length)
-      char = this.content.length;
-    else if (char < 0) char = Math.min(0, this.content.length + char);
+    if (typeof char !== 'number' || char > this.getContent().length)
+      char = this.getContent().length;
+    else if (char < 0) char = this.getContent().length + char;
+    if (char < 0) char = 0;
 
-    if (!textNode) return;
+    if (textNode && text && !text.contains(textNode)) {
+      textNode.data = this.getContent();
+      text.innerHTML = '';
+      text.append(textNode, document.createElement('br'));
+    } else if (!textNode) return;
+
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    range.setStart(textNode, char);
+    range.collapse(true);
+    sel.removeAllRanges();
+    setTimeout(() => {
+      sel.addRange(range);
+    }, 1);
+  },
+
+  carry(data) {
+    this.setContent(this.getContent() + data);
   },
 });
 </script>

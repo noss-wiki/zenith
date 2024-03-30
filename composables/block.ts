@@ -27,139 +27,12 @@ export interface BlockDescription {
    * This is what will be used as classname, etc.
    */
   type: string;
-}
-
-/**
- * A base class that will be extended by the different BlockTypes.
- * Or just define what functions the class should implement and not extend?
- */
-export class Block {
-  name: string = 'Base';
-  format: string = 'base';
-  description: string = '';
-  root: HTMLDivElement = this.createRoot();
-
-  constructor() {}
-
-  unmount() {}
-
-  render(): HTMLElement {
-    return this.root;
-  }
-
-  focus(char?: number) {
-    this.root.focus();
-  }
-
   /**
-   * The handler for when input gets added
+   * - Forwards means that content from this block can be carried to previous.
+   * - Backwards means that content from next block can be carried to this block.
+   * @default "both"
    */
-  input() {}
-
-  createRoot() {
-    const div = document.createElement('div');
-    div.className = `noss-selectable noss-${this.format}-block`;
-    return div;
-  }
-
-  /**
-   * Handle if content should be inserted when carrying content backwards, return false to not allow.
-   * If you return true, you hould insert it yourself as that will not be handled
-   * @param data The string to insert
-   */
-  receiveContentBackwards(data: string): boolean {
-    return false;
-  }
-
-  /**
-   * Handle if content should be carried backwards, return false to not allow.
-   */
-  carryContentBackwards(): boolean {
-    return false;
-  }
-}
-
-/**
- * Extend this class for a simple text input, e.g. heading, text, quote, etc.
- * This will also add commands in the current block
- */
-export class SimpleBlock extends Block {
-  placeholder = "Press '/' for commands, or start typing...";
-
-  text?: HTMLElement;
-  textNode?: Text;
-
-  #default?: string;
-
-  constructor(content?: string) {
-    super();
-    this.#default = content;
-  }
-
-  focus(char?: number) {
-    if (!this.text) return;
-    if (typeof char !== 'number' || char > this.content.length)
-      char = this.content.length;
-    else if (char < 0) char = this.content.length + char;
-    if (char < 0) char = 0;
-
-    if (!this.textNode) return;
-
-    const range = document.createRange();
-    const sel = window.getSelection();
-    if (!sel) return;
-
-    range.setStart(this.textNode, char);
-    range.collapse(true);
-
-    sel.removeAllRanges();
-    setTimeout(() => {
-      sel.addRange(range);
-    }, 1);
-  }
-
-  render() {
-    this.root = this.createRoot();
-    this.text = document.createElement('p');
-    this.textNode = document.createTextNode('');
-    if (this.#default) this.textNode.data = this.#default;
-
-    this.text.appendChild(this.textNode);
-    this.text.appendChild(document.createElement('br'));
-    this.text.setAttribute('contenteditable', 'true');
-    this.text.setAttribute('data-content-editable-leaf', 'true');
-    this.root.appendChild(this.text);
-    return this.root;
-  }
-
-  get content(): string {
-    return this.textNode?.textContent ?? '';
-  }
-
-  set content(data: string) {
-    if (this.textNode && this.text && !this.text.contains(this.textNode)) {
-      this.text.innerHTML = '';
-      this.text.appendChild(this.textNode);
-      this.text.appendChild(document.createElement('br'));
-    }
-    if (this.textNode) this.textNode.data = data;
-    else if (this.text) {
-      this.text.innerHTML = data;
-      this.textNode =
-        this.text.childNodes[0].nodeType === 3
-          ? (this.text.childNodes[0] as Text)
-          : undefined;
-    }
-  }
-
-  receiveContentBackwards(data: string) {
-    this.content += data;
-    return true;
-  }
-
-  carryContentBackwards() {
-    return true;
-  }
+  carry?: 'forwards' | 'backwards' | 'both';
 }
 
 export interface InputRegisterHandler {
@@ -168,28 +41,46 @@ export interface InputRegisterHandler {
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */
   focus(char?: number): void;
+
+  carry(content: string): void;
+}
+
+export interface InputRegister extends InputRegisterHandler {
+  index: number;
 }
 
 export const instances: BlockInstanceInteractable[] = [];
 
 export class BlockInstance {
-  meta: BlockDescription;
+  meta: Required<BlockDescription>;
   id: string;
+
+  inputs: InputRegister[] = [];
 
   _attached?: HTMLElement;
 
   #interactable: BlockInstanceInteractable;
 
   constructor(meta: BlockDescription) {
-    this.meta = meta;
+    meta.carry ??= 'both';
+    this.meta = meta as Required<BlockDescription>;
     this.id = Math.random().toString(36).slice(2);
 
     this.#interactable = new BlockInstanceInteractable(this);
     instances.push(this.#interactable);
   }
 
-  input(handler: InputRegisterHandler): number {
-    return 0;
+  _input<Additional>(handler: InputRegisterHandler & Additional): number {
+    if (!this.inputs)
+      throw new Error(
+        'The instance.input has incorrect this argument, function needs to be passed as an anonymous function or manually bounded, e.g. (e) => instance.input(e) or instance.input.bind(instance)'
+      );
+    const val: InputRegister = {
+      index: this.inputs.length,
+      ...handler,
+    };
+    this.inputs.push(val);
+    return val.index;
   }
 }
 
@@ -211,5 +102,17 @@ export class BlockInstanceInteractable {
     this.instance._attached = blockRoot;
   }
 
-  focus(char?: number) {}
+  focus(char?: number) {
+    const i = this.instance.inputs.length - 1;
+    if (i < 0) return;
+
+    this.instance.inputs[i].focus(char);
+  }
+
+  carry(content: string) {
+    const i = this.instance.inputs.length - 1;
+    if (i < 0) return;
+
+    this.instance.inputs[i].carry(content);
+  }
 }

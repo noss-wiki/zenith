@@ -1,5 +1,4 @@
-import type { Block, AbstractBlock } from './block';
-import { TextBlock } from './blocks/text';
+import type { AbstractBlock } from './block';
 
 export interface PageData {
   title: string;
