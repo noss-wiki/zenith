@@ -51,6 +51,7 @@ const background = computed(() => {
   --size: 2.5rem;
   --radius: var(--radius-default);
 
+  position: relative;
   width: 100%;
   height: var(--size);
   display: flex;

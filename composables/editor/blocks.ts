@@ -1,4 +1,8 @@
-import type { BlockDescription, BlockInstanceInteractable } from '../block';
+import type {
+  BlockDescription,
+  BlockInstance,
+  BlockInstanceInteractable,
+} from '../block';
 import type { Component } from 'vue';
 import { instances } from '../block';
 import { createVNode, render } from 'vue';
@@ -30,7 +34,8 @@ const blocks: {
 
 export interface Block<Type extends string = string> {
   meta: Required<BlockDescription>;
-  instance: BlockInstanceInteractable;
+  instance: BlockInstance;
+  interact: BlockInstanceInteractable;
   root: HTMLElement;
   type: Type;
 
@@ -50,12 +55,14 @@ export function createBlock<T extends string>(type: T): Block<T> {
   instance.attach(root);
 
   block.meta.carry ??= 'both';
+  block.meta.arrows ??= true;
 
   return {
     meta: block.meta as Required<BlockDescription>,
     type,
     root,
-    instance,
+    instance: instance.instance,
+    interact: instance,
 
     unmount() {
       render(null, ele);

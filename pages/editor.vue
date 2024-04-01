@@ -10,6 +10,7 @@ import MaterialSymbol from '@/components/icons/MaterialSymbol.vue';
         <WorkspaceSelect width="calc(100% + 3.5rem)" />
         <Button icon-only transparent large>
           <MaterialSymbol symbol="keyboard_double_arrow_left" />
+          <!-- <Tooltip> Collapse </Tooltip> -->
         </Button>
       </div>
       <div class="links">
@@ -46,6 +47,7 @@ import MaterialSymbol from '@/components/icons/MaterialSymbol.vue';
 nav {
   height: 100%;
   width: 22rem;
+  flex-shrink: 0;
   background: var(--color-surface);
   display: flex;
   flex-direction: column;

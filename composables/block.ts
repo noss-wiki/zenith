@@ -33,10 +33,22 @@ export interface BlockDescription {
    * @default "both"
    */
   carry?: 'forwards' | 'backwards' | 'both';
+
+  /**
+   * Whether or not this block allows you to move into it with the arrow keys,
+   * e.g. you are at the end of the previous block and press arrow right,
+   * if this value is true it will move into the first input of the block,
+   * if it is manual you will have to define its functionality with the hook and false simply disables this functionality.
+   * @default true
+   */
+  arrows?: true | false | 'manual';
 }
 
 export interface InputRegisterHandler {
-  content: string;
+  content?: string;
+
+  getContent(): string;
+  setContent(content: string): void;
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */

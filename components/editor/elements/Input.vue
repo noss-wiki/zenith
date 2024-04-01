@@ -23,17 +23,12 @@ const index = props.instance._input({
     }
   },
   getContent() {
-    if (text.contains(textNode)) return textNode.data;
-    else
+    if (textNode && text && text.contains(textNode)) return textNode.data;
+    else if (text)
       return text.childNodes[0].nodeType === 3
         ? (text.childNodes[0] as Text).data
         : '';
-  },
-  set content(data: string) {
-    this.setContent(data);
-  },
-  get content(): string {
-    return textNode.data;
+    else return '';
   },
 
   focus(char?: number) {

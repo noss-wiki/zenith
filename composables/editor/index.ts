@@ -12,6 +12,7 @@ export class Editor {
   blocks: Block[] = [];
 
   editor: HTMLElement;
+  handle: HTMLElement; // Create helper class / object for this to easily move it
 
   #listeners: {
     element: Element;
@@ -22,24 +23,20 @@ export class Editor {
   constructor(root: HTMLElement) {
     this.root = root;
     this.editor = root.querySelector('[noss-editor-content]') as HTMLElement;
-    if (!this.editor) {
-      this.editor = document.createElement('div');
-      this.editor.setAttribute('noss-editor-content', 'true');
-      this.editor.className = 'content';
-
-      this.root.innerHTML = '';
-      this.root.appendChild(this.editor);
-    }
+    this.handle = root.querySelector('[noss-editor-handle]') as HTMLElement;
+    if (!this.editor)
+      throw new Error(
+        '[editor] No content section has found in the provided editor root.'
+      );
+    if (!this.handle)
+      throw new Error(
+        '[editor] No handle element has found in the provided editor root.'
+      );
 
     this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
     );
     this.addEventListener(this.editor, 'keydown', (e) => this.#keydown(e));
-
-    /* const text = new TextBlock();
-    text.render();
-    this.editor.appendChild(text.root);
-    this.blocks.push(text); */
 
     const text = createBlock('text');
     this.editor.appendChild(text.root);
@@ -96,8 +93,8 @@ export class Editor {
       const text = createBlock('text');
       this.blocks.splice(index + 1, 0, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      if (carry) text.instance.carry(carry);
-      text.instance.focus(0);
+      if (carry) text.interact.carry(carry);
+      text.interact.focus(0);
     }
   }
 
@@ -108,15 +105,15 @@ export class Editor {
     const index = block ? this.blocks.indexOf(block) : -1;
     if (!block || index === -1) return;
 
+    const sel = window.getSelection();
+
     if (e.key === 'Enter' && e.ctrlKey) {
       // Insert new node
       const text = createBlock('text');
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      text.instance.focus();
+      text.interact.focus();
     } else if (e.key === 'Backspace') {
-      const sel = window.getSelection();
-
       if (
         sel &&
         sel.anchorNode &&
@@ -127,14 +124,39 @@ export class Editor {
         const prev = this.blocks[index - 1];
         const content = (sel.anchorNode as Text).data ?? '';
 
-        prev.instance.carry(content.trim());
-        if (content.length > 0) prev.instance.focus(-content.length);
-        else prev.instance.focus();
+        prev.interact.carry(content.trim());
+        if (content.length > 0) prev.interact.focus(-content.length);
+        else prev.interact.focus();
 
         block.unmount();
         this.blocks.splice(index, 1);
       }
     }
-    // arrow key functionality
+    // Arrow keys
+    else if (
+      sel &&
+      sel.anchorNode &&
+      (e.key === 'ArrowLeft' || e.key === 'ArrowRight')
+    ) {
+      if (e.key === 'ArrowLeft' && sel.focusOffset < 1 && index > 0) {
+        const prev = this.blocks[index - 1];
+        if (prev.meta.arrows === true) prev.interact.focus();
+        else if (prev.meta.arrows === 'manual') {
+          // call hook
+        }
+      } else if (e.key === 'ArrowRight' && index < this.blocks.length - 1) {
+        const next = this.blocks[index + 1];
+        // TODO: selection's anchornode is the paragraph element if ctrl was used, but then offset doesn't work
+        // TODO: work diffierently if shift is used (selections)
+        if (
+          next.meta.arrows === true &&
+          sel.focusOffset === block.instance.inputs[0].getContent().length
+        ) {
+          next.instance.inputs[0].focus(0);
+        } else if (next.meta.arrows === 'manual') {
+          // call hook
+        }
+      }
+    }
   }
 }
