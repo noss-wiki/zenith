@@ -14,13 +14,13 @@ onUnmounted(() => editor.unmount());
     <div class="header"></div>
     <div class="content" noss-editor-content></div>
     <div class="handle" noss-editor-handle>
-      <Button surface icon-only small transparent>
+      <Button surface icon-only small transparent tooltip>
         <MaterialSymbol symbol="add" />
         <Tooltip>
           <div><strong>Click</strong> to add below</div>
         </Tooltip>
       </Button>
-      <Button surface icon-only small transparent>
+      <Button surface icon-only small transparent tooltip>
         <MaterialSymbol symbol="drag_indicator" />
         <Tooltip>
           <div class="line"><strong>Drag</strong> to move</div>

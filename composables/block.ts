@@ -1,3 +1,5 @@
+import type { EditorRef } from './editor/ref';
+
 /**
  * The type that gets stored, this includes all the data for the Block class to load everything properly
  */
@@ -68,6 +70,7 @@ export class BlockInstance {
   id: string;
 
   inputs: InputRegister[] = [];
+  editor?: EditorRef;
 
   _attached?: HTMLElement;
 

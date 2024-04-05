@@ -13,6 +13,7 @@ const props = defineProps<{
   transparent?: boolean;
   // layout
   iconOnly?: boolean;
+  tooltip?: boolean;
 }>();
 
 const color = computed(() => {
@@ -40,6 +41,7 @@ const background = computed(() => {
       'btn-outline': outline,
       'btn-transparent': transparent,
       'btn-icon-only': props.iconOnly,
+      'btn-tooltip': tooltip,
     }"
   >
     <slot />
@@ -51,7 +53,6 @@ const background = computed(() => {
   --size: 2.5rem;
   --radius: var(--radius-default);
 
-  position: relative;
   width: 100%;
   height: var(--size);
   display: flex;
@@ -111,5 +112,11 @@ const background = computed(() => {
   justify-content: center;
   color: var(--color-text);
   flex-shrink: 0;
+}
+</style>
+
+<style>
+.btn-tooltip {
+  position: relative;
 }
 </style>
