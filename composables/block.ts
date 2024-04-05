@@ -69,6 +69,9 @@ export class BlockInstance {
   meta: Required<BlockDescription>;
   id: string;
 
+  // watch this to move handle
+  hover = ref(false);
+
   inputs: InputRegister[] = [];
   editor?: EditorRef;
 
