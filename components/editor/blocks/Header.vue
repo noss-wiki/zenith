@@ -16,14 +16,13 @@ const instance = new BlockInstance(meta);
 </script>
 
 <template>
-  <Block :options="meta" :id="instance.id" :instance="instance">
+  <Block :options="meta" :id="instance.id">
     <Input :instance="instance" />
   </Block>
 </template>
 
 <style scoped>
 .noss-header-block {
-  background: var(--color-editor-active-block);
   font-size: 1.875em;
   font-weight: 600;
 }

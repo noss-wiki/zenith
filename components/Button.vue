@@ -66,6 +66,7 @@ const background = computed(() => {
   color: var(--color-inactive);
   background: v-bind('background');
   filter: none;
+  user-select: none;
 
   &:hover {
     color: var(--color-text);

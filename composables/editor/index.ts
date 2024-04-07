@@ -1,4 +1,5 @@
 import type { Block } from './blocks';
+import { Handle } from './handle';
 import { createBlock } from './blocks';
 
 type InputTypes =
@@ -7,12 +8,14 @@ type InputTypes =
   | 'insertText'
   | 'deleteContentBackward';
 
+export const editors: Editor[] = [];
+
 export class Editor {
   root: HTMLElement;
   blocks: Block[] = [];
 
   editor: HTMLElement;
-  handle: HTMLElement; // Create helper class / object for this to easily move it
+  handle: Handle; // Create helper class / object for this to easily move it
 
   #listeners: {
     element: Element;
@@ -20,18 +23,22 @@ export class Editor {
     cb: (this: Editor, e: any) => any | void;
   }[] = [];
 
+  #_index: number;
+
   constructor(root: HTMLElement) {
     this.root = root;
     this.editor = root.querySelector('[noss-editor-content]') as HTMLElement;
-    this.handle = root.querySelector('[noss-editor-handle]') as HTMLElement;
+    const handle = root.querySelector('[noss-editor-handle]') as HTMLElement;
     if (!this.editor)
       throw new Error(
         '[editor] No content section has found in the provided editor root.'
       );
-    if (!this.handle)
+    if (!handle)
       throw new Error(
         '[editor] No handle element has found in the provided editor root.'
       );
+
+    this.handle = new Handle(this, handle);
 
     this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
@@ -41,15 +48,19 @@ export class Editor {
     const text = createBlock('text');
     this.editor.appendChild(text.root);
     this.blocks.push(text);
+
+    this.#_index = editors.push(this) - 1;
   }
   /**
-   * Removes all event listeners, to be used on the `onUnMount` hook to work with hmr
+   * Removes all event listeners, to be used on the `onUnmount` hook to work with hmr
    */
   unmount() {
     for (const l of this.#listeners)
       l.element.removeEventListener(l.event, l.cb);
 
     for (const b of this.blocks) b.unmount();
+
+    editors.splice(this.#_index, 1);
   }
 
   /**
