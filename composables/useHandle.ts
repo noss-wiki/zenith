@@ -22,8 +22,7 @@ export function useHandle(id: string): [Enter, Leave] {
           `Block id: ${id}, could not be found in an existing editor instance.\n  at useHandle[0] (enter)`
         );
 
-      // TODO: Do not hide if hovering over handle itself
-      //editor.handle.hide(id);
+      editor.handle.hide(id);
     },
   ];
 }

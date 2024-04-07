@@ -1,15 +1,31 @@
 import type { Editor } from '.';
+import { DOMEventfull } from '../DOMEventfull';
 import type { Block } from './blocks';
 
-export class Handle {
+export class Handle extends DOMEventfull {
   editor: Editor;
   root: HTMLElement;
 
+  hovering: boolean = false;
+  blockHovering: boolean = false;
   active: Block<string> | undefined;
 
   constructor(editor: Editor, root: HTMLElement) {
+    super();
     this.editor = editor;
     this.root = root;
+
+    this.addEventListener(root, 'mouseenter', () => {
+      this.hovering = true;
+      if (this.active === undefined) this.root.classList.remove('hidden');
+    });
+    this.addEventListener(root, 'mouseleave', () => {
+      this.hovering = false;
+      if (this.blockHovering === false) {
+        this.root.classList.add('hidden');
+        this.active = undefined;
+      }
+    });
   }
 
   move(item: number | string | Block<string>) {
@@ -35,8 +51,12 @@ export class Handle {
   }
 
   hide(id: string) {
-    if (this.active !== undefined && this.active === this._getBlock(id))
-      this.root.classList.add('hidden');
+    if (this.active !== undefined && this.active === this._getBlock(id)) {
+      this.blockHovering = false;
+      setTimeout(() => {
+        if (!this.hovering) this.root.classList.add('hidden');
+      }, 0);
+    }
   }
 
   _getBlock(item: number | string | Block<string>): Block<string> | undefined {

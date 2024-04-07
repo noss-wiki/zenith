@@ -10,8 +10,9 @@ type InputTypes =
 
 export const editors: Editor[] = [];
 
-export class Editor {
+export class Editor extends DOMEventfull {
   root: HTMLElement;
+  mounted: boolean = false;
   blocks: Block[] = [];
 
   editor: HTMLElement;
@@ -25,20 +26,30 @@ export class Editor {
 
   #_index: number;
 
-  constructor(root: HTMLElement) {
-    this.root = root;
-    this.editor = root.querySelector('[noss-editor-content]') as HTMLElement;
-    const handle = root.querySelector('[noss-editor-handle]') as HTMLElement;
-    if (!this.editor)
-      throw new Error(
-        '[editor] No content section has found in the provided editor root.'
-      );
-    if (!handle)
-      throw new Error(
-        '[editor] No handle element has found in the provided editor root.'
-      );
+  constructor() {
+    super();
 
-    this.handle = new Handle(this, handle);
+    this.root = null as unknown as HTMLElement;
+    this.editor = null as unknown as HTMLElement;
+    this.handle = null as unknown as Handle;
+
+    this.#_index = editors.push(this) - 1;
+  }
+
+  // Lifecycle
+
+  mount(root: HTMLElement) {
+    this.root = root;
+
+    let editor = root.querySelector('[noss-editor-content]'),
+      handle = root.querySelector('[noss-editor-handle]');
+    if (!editor)
+      return console.error('[editor] No content was found in the editor root.');
+    if (!handle)
+      return console.error('[editor] No handle was found in the editor root.');
+
+    this.editor = editor as HTMLElement;
+    this.handle = new Handle(this, handle as HTMLElement);
 
     this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
@@ -49,32 +60,48 @@ export class Editor {
     this.editor.appendChild(text.root);
     this.blocks.push(text);
 
-    this.#_index = editors.push(this) - 1;
+    this.mounted = true;
   }
-  /**
-   * Removes all event listeners, to be used on the `onUnmount` hook to work with hmr
-   */
+
   unmount() {
     for (const l of this.#listeners)
       l.element.removeEventListener(l.event, l.cb);
 
     for (const b of this.blocks) b.unmount();
+    this.handle.unmount();
 
     editors.splice(this.#_index, 1);
   }
 
-  /**
-   * Adds an eventListener to the element, and removes them when this block is unmounted.
-   */
-  addEventListener<E extends keyof HTMLElementEventMap>(
-    element: Element,
-    event: E,
-    cb: (this: Editor, e: HTMLElementEventMap[E]) => any | void
-  ) {
-    this.#listeners.push({ element, event, cb });
-    // @ts-ignore
-    element.addEventListener(event, cb.bind(this));
+  // Blocks
+
+  add<T extends string>(index: number, type: T): Block<T> {
+    const block = createBlock(type);
+    if (index === 0)
+      this.blocks[0].root.insertAdjacentElement('beforebegin', block.root);
+    else {
+      const curr = this.blocks[index - 1];
+      curr.root.insertAdjacentElement('afterend', block.root);
+    }
+    this.blocks.splice(index, 0, block);
+    return block;
   }
+
+  remove(index: number | Block<string>) {
+    let block: Block<string>;
+    if (typeof index === 'number') block = this.blocks[index];
+    else block = index;
+
+    const i = this.blocks.indexOf(block);
+    if (i === -1)
+      return console.error("[editor] Block doesn't exist in the editor.");
+
+    this.editor.removeChild(block.root);
+    this.blocks.splice(i, 1);
+    block.unmount();
+  }
+
+  // Event listeners
 
   #input(e: InputEvent) {
     const t = e.target as HTMLElement | null;

@@ -2,6 +2,11 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['nuxt-svgo'],
+  postcss: {
+    plugins: {
+      'postcss-preset-env': {},
+    },
+  },
   app: {
     head: {
       title: 'Noss',

@@ -22,6 +22,21 @@ const [mouseenter, mouseleave] = useHandle(id);
 </template>
 
 <style scoped>
+.noss-selectable {
+  isolation: isolate;
+  position: relative;
+
+  &::before {
+    content: '';
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: calc(0px - var(--block-hover-padding));
+    width: calc(100% + calc(var(--block-hover-padding) * 2));
+    height: 100%;
+  }
+}
+
 .noss-selectable.selected {
   background: var(--color-editor-active-block);
 }
