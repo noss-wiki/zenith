@@ -11,7 +11,11 @@ export interface HandleActions {
 
 export function useHandleActions(editor: Editor): HandleActions {
   return {
-    select() {},
+    select() {
+      const block = editor.handle.active;
+      if (!block) return;
+      block.root.classList.add('selected');
+    },
     addBelow<T>(type?: T) {
       const block = editor.handle.active;
       if (!block) return;

@@ -25,6 +25,7 @@ const [mouseenter, mouseleave] = useHandle(id);
 .noss-selectable {
   isolation: isolate;
   position: relative;
+  transition: 0.3s ease background;
 
   &::before {
     content: '';
