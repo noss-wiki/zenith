@@ -19,10 +19,10 @@ const { click } = useClickLevel();
       transparent
       tooltip
       @click="
-        click((e: MouseEvent) => {
+        click<MouseEvent>((e) => {
           if (e.shiftKey) actions.addAbove();
           else actions.addBelow();
-        })
+        }).handler
       "
     >
       <MaterialSymbol symbol="add" />
@@ -37,7 +37,7 @@ const { click } = useClickLevel();
       small
       transparent
       tooltip
-      @click="click(actions.select)"
+      @click="click(actions.select).handler"
     >
       <MaterialSymbol symbol="drag_indicator" />
       <Tooltip>

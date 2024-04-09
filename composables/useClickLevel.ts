@@ -29,7 +29,6 @@ export function click<E>(
 
   return {
     handler: (e) => {
-      console.log(clickLevel);
       if (level < clickLevel) return;
       return cb(e);
     },
