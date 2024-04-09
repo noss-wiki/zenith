@@ -10,5 +10,3 @@ withDefaults(
 <template>
   <span class="material-symbols-rounded"> {{ $props.symbol }} </span>
 </template>
-
-<style></style>

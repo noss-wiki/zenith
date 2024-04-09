@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import WorkspaceSelect from '@/components/WorkspaceSelect.vue';
 import MaterialSymbol from '@/components/icons/MaterialSymbol.vue';
+
+const { click } = useClickLevel();
 </script>
 
 <template>

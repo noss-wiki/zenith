@@ -7,6 +7,7 @@ const { editor } = defineProps<{
 }>();
 
 const actions = useHandleActions(editor);
+const { click } = useClickLevel();
 </script>
 
 <template>
@@ -17,10 +18,12 @@ const actions = useHandleActions(editor);
       small
       transparent
       tooltip
-      @click="(e: MouseEvent) => {
-        if (e.shiftKey) actions.addAbove();
-        else actions.addBelow();
-      }"
+      @click="
+        click((e: MouseEvent) => {
+          if (e.shiftKey) actions.addAbove();
+          else actions.addBelow();
+        })
+      "
     >
       <MaterialSymbol symbol="add" />
       <Tooltip>
@@ -28,7 +31,14 @@ const actions = useHandleActions(editor);
         <!-- doesn't fit in tooltip: <div><strong>Shift-Click</strong> to add above</div> -->
       </Tooltip>
     </Button>
-    <Button surface icon-only small transparent tooltip @click="actions.select">
+    <Button
+      surface
+      icon-only
+      small
+      transparent
+      tooltip
+      @click="click(actions.select)"
+    >
       <MaterialSymbol symbol="drag_indicator" />
       <Tooltip>
         <div class="line"><strong>Drag</strong> to move</div>

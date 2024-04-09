@@ -23,10 +23,15 @@ watchEffect(() => (direction.value = open.value === true ? 'top' : 'bottom'));
 let button: HTMLElement;
 let dropdown: HTMLElement;
 
+const { set, reset } = useClickLevel();
+
 const handler = (e: MouseEvent) => {
-  if (button.contains(e.target as Node)) open.value = !open.value;
-  else if (!dropdown.contains(e.target as Node)) {
+  if (button.contains(e.target as Node)) {
+    open.value = !open.value;
+    set(open.value === true ? 1 : 0);
+  } else if (!dropdown.contains(e.target as Node)) {
     open.value = false;
+    reset();
   }
 };
 
