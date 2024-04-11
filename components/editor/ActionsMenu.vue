@@ -7,6 +7,7 @@ import MaterialSymbol from '../icons/MaterialSymbol.vue';
 }>(); */
 
 const { click } = useClickLevel();
+const { blocks } = useBlocks();
 </script>
 
 <template>
@@ -27,7 +28,11 @@ const { click } = useClickLevel();
     <Button surface transparent dropdown>
       <MaterialSymbol symbol="swap_horiz" />
       Turn into
-      <Dropdown></Dropdown>
+      <Dropdown>
+        <Button v-for="block in blocks" surface transparent>
+          {{ block.name }}
+        </Button>
+      </Dropdown>
     </Button>
     <Divider menu />
     <Button surface transparent dropdown>

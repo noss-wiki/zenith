@@ -21,7 +21,9 @@
   background: var(--color-raised-surface);
   border-radius: var(--radius-default);
   width: 20rem;
-  height: 16rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
 }
 </style>
 
