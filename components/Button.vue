@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import MaterialSymbol from './icons/MaterialSymbol.vue';
+
 const props = defineProps<{
   // modifiers
   // TODO: check for contrast and change text color accordingly
@@ -14,6 +16,7 @@ const props = defineProps<{
   // layout
   iconOnly?: boolean;
   tooltip?: boolean;
+  dropdown?: boolean;
 }>();
 
 const color = computed(() => {
@@ -42,9 +45,15 @@ const background = computed(() => {
       'btn-transparent': transparent,
       'btn-icon-only': props.iconOnly,
       'btn-tooltip': tooltip,
+      'btn-dropdown': dropdown,
     }"
   >
     <slot />
+    <MaterialSymbol
+      v-if="dropdown"
+      symbol="chevron_right"
+      style="margin-left: auto; margin-right: -0.25rem"
+    />
   </div>
 </template>
 
@@ -117,7 +126,8 @@ const background = computed(() => {
 </style>
 
 <style>
-.btn-tooltip {
+.btn-tooltip,
+.btn-dropdown {
   position: relative;
 }
 </style>

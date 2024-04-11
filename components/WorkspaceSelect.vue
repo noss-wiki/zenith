@@ -28,7 +28,7 @@ const { set, reset } = useClickLevel();
 const handler = (e: MouseEvent) => {
   if (button.contains(e.target as Node)) {
     open.value = !open.value;
-    set(open.value === true ? 1 : 0);
+    set(open.value === true ? 2 : 0);
   } else if (!dropdown.contains(e.target as Node)) {
     open.value = false;
     reset();

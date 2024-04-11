@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Editor } from '@/composables/editor';
 import Handle from './Handle.vue';
+import ActionsMenu from './ActionsMenu.vue';
 
 let root: HTMLDivElement;
 let editor = new Editor();
@@ -13,7 +14,10 @@ onUnmounted(() => editor.unmount());
   <div class="editor" ref="root" noss-editor-root>
     <div class="header"></div>
     <div class="content" noss-editor-content></div>
-    <Handle :editor="editor" />
+    <div class="handle">
+      <Handle :editor="editor" />
+      <ActionsMenu />
+    </div>
   </div>
 </template>
 
