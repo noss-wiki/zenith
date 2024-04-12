@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useWorkspaces } from '@/composables/workspace';
-import MaterialSymbol from './icons/MaterialSymbol.vue';
 import Workspace from './Workspace.vue';
 
 import Arrow from '@/assets/icons/arrow.svg';

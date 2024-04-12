@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import MaterialSymbol from './icons/MaterialSymbol.vue';
-
 const props = defineProps<{
   // modifiers
   // TODO: check for contrast and change text color accordingly

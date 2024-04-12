@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Editor } from '@/composables/editor';
-import MaterialSymbol from '../icons/MaterialSymbol.vue';
 
 /* const { editor } = defineProps<{
   editor: Editor;
