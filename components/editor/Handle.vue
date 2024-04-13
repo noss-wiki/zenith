@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import type { Editor } from '@/composables/editor';
 
-const { editor } = defineProps<{
-  editor: Editor;
-}>();
-
-const actions = useHandleActions(editor);
+const actions = useHandleActions();
 const { click } = useClickLevel();
 </script>
 

@@ -15,39 +15,18 @@ withDefaults(
 
 const workspaces = useWorkspaces();
 const open = ref(false);
-const direction = ref<'top' | 'bottom'>('bottom');
-
-watchEffect(() => (direction.value = open.value === true ? 'top' : 'bottom'));
-
-let button: HTMLElement;
-let dropdown: HTMLElement;
-
-const { set, reset } = useClickLevel();
-
-const handler = (e: MouseEvent) => {
-  if (button.contains(e.target as Node)) {
-    open.value = !open.value;
-    set(open.value === true ? 2 : 0);
-  } else if (!dropdown.contains(e.target as Node)) {
-    open.value = false;
-    reset();
-  }
-};
-
-onMounted(() => document.addEventListener('click', handler));
-onUnmounted(() => document.removeEventListener('click', handler));
 </script>
 
 <template>
   <div class="wrapper">
-    <div class="button" ref="button">
+    <div class="button" ref="button" @click="open = true">
       <Workspace />
       <Button icon-only transparent large>
         <Arrow />
       </Button>
     </div>
     <Transition mode="in-out" name="fade">
-      <div class="dropdown" v-show="open" ref="dropdown">
+      <FunctionalPopup class="dropdown" v-model="open">
         <div class="workspaces">
           <div class="top-row">
             <span class="link">Workspaces</span>
@@ -77,7 +56,7 @@ onUnmounted(() => document.removeEventListener('click', handler));
             Log out
           </Button>
         </div>
-      </div>
+      </FunctionalPopup>
     </Transition>
   </div>
 </template>

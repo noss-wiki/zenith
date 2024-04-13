@@ -73,6 +73,5 @@ main {
   height: 100%;
   display: grid;
   place-items: center;
-  overflow-y: auto;
 }
 </style>

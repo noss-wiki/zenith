@@ -8,7 +8,7 @@ type InputTypes =
   | 'insertText'
   | 'deleteContentBackward';
 
-export const editors: Editor[] = [];
+export let editor: Editor | undefined;
 
 export class Editor extends DOMEventfull {
   root: HTMLElement;
@@ -16,15 +16,15 @@ export class Editor extends DOMEventfull {
   blocks: Block[] = [];
 
   editor: HTMLElement;
-  handle: Handle; // Create helper class / object for this to easily move it
+  handle: Handle;
+
+  selected: Block | undefined;
 
   #listeners: {
     element: Element;
     event: keyof HTMLElementEventMap;
     cb: (this: Editor, e: any) => any | void;
   }[] = [];
-
-  #_index: number;
 
   constructor() {
     super();
@@ -33,7 +33,7 @@ export class Editor extends DOMEventfull {
     this.editor = null as unknown as HTMLElement;
     this.handle = null as unknown as Handle;
 
-    this.#_index = editors.push(this) - 1;
+    editor = this;
   }
 
   // Lifecycle
@@ -42,14 +42,23 @@ export class Editor extends DOMEventfull {
     this.root = root;
 
     let editor = root.querySelector('[noss-editor-content]'),
-      handle = root.querySelector('[noss-editor-handle]');
+      handle = root.querySelector('[noss-editor-handle]'),
+      handleMenu = root.querySelector('[noss-editor-handle-menu]');
     if (!editor)
       return console.error('[editor] No content was found in the editor root.');
     if (!handle)
       return console.error('[editor] No handle was found in the editor root.');
+    if (!handleMenu)
+      return console.error(
+        '[editor] No handle menu was found in the editor root.'
+      );
 
     this.editor = editor as HTMLElement;
-    this.handle = new Handle(this, handle as HTMLElement);
+    this.handle = new Handle(
+      this,
+      handle as HTMLElement,
+      handleMenu as HTMLElement
+    );
 
     this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
@@ -70,7 +79,7 @@ export class Editor extends DOMEventfull {
     for (const b of this.blocks) b.unmount();
     this.handle.unmount();
 
-    editors.splice(this.#_index, 1);
+    editor = undefined;
   }
 
   // Blocks
@@ -99,6 +108,12 @@ export class Editor extends DOMEventfull {
     this.editor.removeChild(block.root);
     this.blocks.splice(i, 1);
     block.unmount();
+  }
+
+  select(block: Block) {
+    if (!this.blocks.includes(block)) return;
+    this.selected = block;
+    block.root.classList.add('selected');
   }
 
   // Event listeners

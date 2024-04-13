@@ -1,5 +1,3 @@
-import type { EditorRef } from './editor/ref';
-
 /**
  * The type that gets stored, this includes all the data for the Block class to load everything properly
  */
@@ -15,6 +13,13 @@ export interface BlockType {
   // also add preview prop for a preview image later?
 }
 
+export type Category = 'simple_text' | 'list' | 'decorative_text';
+export const categories: Category[] = [
+  'simple_text',
+  'list',
+  'decorative_text',
+];
+
 export interface BlockDescription {
   /**
    * The name that will be displayed to the user, e.g. in the commands menu
@@ -29,6 +34,16 @@ export interface BlockDescription {
    * This is what will be used as classname, etc.
    */
   type: string;
+  /**
+   * The block will be sorted under this category in e.g. the commands menu
+   */
+  category: Category;
+
+  /**
+   * Raw html code for icon, import using `*.svg?raw`
+   */
+  icon: string;
+
   /**
    * - Forwards means that content from this block can be carried to previous.
    * - Backwards means that content from next block can be carried to this block.
@@ -73,7 +88,6 @@ export class BlockInstance {
   hover = ref(false);
 
   inputs: InputRegister[] = [];
-  editor?: EditorRef;
 
   _attached?: HTMLElement;
 

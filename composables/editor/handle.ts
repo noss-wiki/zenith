@@ -5,21 +5,23 @@ import type { Block } from './blocks';
 export class Handle extends DOMEventfull {
   editor: Editor;
   root: HTMLElement;
+  menu: HTMLElement;
 
   hovering: boolean = false;
   blockHovering: boolean = false;
   active: Block<string> | undefined;
 
-  constructor(editor: Editor, root: HTMLElement) {
+  constructor(editor: Editor, handle: HTMLElement, menu: HTMLElement) {
     super();
     this.editor = editor;
-    this.root = root;
+    this.root = handle;
+    this.menu = menu;
 
-    this.addEventListener(root, 'mouseenter', () => {
+    this.addEventListener(this.root, 'mouseenter', () => {
       this.hovering = true;
       if (this.active === undefined) this.root.classList.remove('hidden');
     });
-    this.addEventListener(root, 'mouseleave', () => {
+    this.addEventListener(this.root, 'mouseleave', () => {
       this.hovering = false;
       if (this.blockHovering === false) {
         this.root.classList.add('hidden');
@@ -57,6 +59,17 @@ export class Handle extends DOMEventfull {
         if (!this.hovering) this.root.classList.add('hidden');
       }, 0);
     }
+  }
+
+  select() {
+    if (!this.active || !this.active.instance._attached) return;
+    const editorRect = this.editor.editor.getBoundingClientRect();
+    const blockRect = this.active.instance._attached.getBoundingClientRect();
+
+    const top = blockRect.top - editorRect.top;
+
+    this.menu.style.setProperty('--block-top', `${top}px`);
+    this.menu.classList.remove('hidden');
   }
 
   _getBlock(item: number | string | Block<string>): Block<string> | undefined {

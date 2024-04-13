@@ -1,8 +1,12 @@
 <script lang="ts">
+import icon from '@/assets/icons/blocks/header.svg?raw';
+
 export const meta: BlockDescription = {
   name: 'Heading 1',
   description: 'The largest heading',
   type: 'header',
+  category: 'simple_text',
+  icon,
 };
 </script>
 

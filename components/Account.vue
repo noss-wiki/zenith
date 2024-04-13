@@ -30,7 +30,6 @@ withDefaults(
 
 <style scoped>
 .account {
-  position: relative;
   width: 100%;
 }
 

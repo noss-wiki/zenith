@@ -1,11 +1,19 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import svgLoader from 'vite-svg-loader';
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ['nuxt-svgo'],
   postcss: {
     plugins: {
       'postcss-preset-env': {},
     },
+  },
+  vite: {
+    plugins: [
+      svgLoader({
+        defaultImport: 'component',
+      }),
+    ],
   },
   app: {
     head: {

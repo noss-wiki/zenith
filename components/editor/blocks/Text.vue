@@ -1,8 +1,12 @@
 <script lang="ts">
+import icon from '@/assets/icons/blocks/paragraph.svg?raw';
+
 export const meta: BlockDescription = {
   name: 'Text',
   description: 'Simple plain text',
   type: 'text',
+  category: 'simple_text',
+  icon,
 };
 </script>
 

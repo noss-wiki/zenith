@@ -37,6 +37,9 @@ devDependencies:
   stylelint-config-standard:
     specifier: ^36.0.0
     version: 36.0.0(stylelint@16.2.1)
+  vite-svg-loader:
+    specifier: ^5.1.0
+    version: 5.1.0(vue@3.4.21)
 
 packages:
 
@@ -6913,6 +6916,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+
+  /vite-svg-loader@5.1.0(vue@3.4.21):
+    resolution: {integrity: sha512-M/wqwtOEjgb956/+m5ZrYT/Iq6Hax0OakWbokj8+9PXOnB7b/4AxESHieEtnNEy7ZpjsjYW1/5nK8fATQMmRxw==}
+    peerDependencies:
+      vue: '>=3.2.13'
+    dependencies:
+      svgo: 3.2.0
+      vue: 3.4.21(typescript@5.4.2)
+    dev: true
 
   /vite@5.1.6:
     resolution: {integrity: sha512-yYIAZs9nVfRJ/AiOLCA91zzhjsHUgMjB+EigzFb6W2XTLO8JixBCKCjvhKZaye+NKYHCrkv3Oh50dH9EdLU2RA==}

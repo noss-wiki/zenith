@@ -15,7 +15,7 @@ onUnmounted(() => editor.unmount());
     <div class="header"></div>
     <div class="content" noss-editor-content></div>
     <div class="handle">
-      <Handle :editor="editor" />
+      <Handle />
       <ActionsMenu />
     </div>
   </div>

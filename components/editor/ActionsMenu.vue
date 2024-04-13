@@ -1,22 +1,18 @@
 <script setup lang="ts">
-import type { Editor } from '@/composables/editor';
+const { blocks, sorted, categories } = useBlocks();
+const actions = useHandleActions();
 
-/* const { editor } = defineProps<{
-  editor: Editor;
-}>(); */
-
-const { click } = useClickLevel();
-const { blocks } = useBlocks();
+const show = ref(false);
 </script>
 
 <template>
-  <div class="actions-menu">
+  <FunctionalPopup v-model="show" class="actions-menu" noss-editor-handle-menu>
     <Button surface transparent>
       <MaterialSymbol symbol="chat" />
       Comment
     </Button>
     <Divider menu />
-    <Button surface transparent>
+    <Button surface transparent @click="actions.remove()">
       <MaterialSymbol symbol="delete" />
       Delete
     </Button>
@@ -28,9 +24,17 @@ const { blocks } = useBlocks();
       <MaterialSymbol symbol="swap_horiz" />
       Turn into
       <Dropdown>
-        <Button v-for="block in blocks" surface transparent>
-          {{ block.name }}
-        </Button>
+        <template v-for="(category, index) in categories">
+          <Divider v-if="sorted[category].length > 0 && index > 0" menu />
+          <Button
+            v-for="{ name, icon } in sorted[category]"
+            surface
+            transparent
+          >
+            <div class="icon" v-html="icon" style="height: 1.5rem"></div>
+            {{ name }}
+          </Button>
+        </template>
       </Dropdown>
     </Button>
     <Divider menu />
@@ -43,17 +47,32 @@ const { blocks } = useBlocks();
       <p>Last edited by Robin de Vos</p>
       <p>8 april 20224, 17:29</p>
     </div>
-  </div>
+  </FunctionalPopup>
 </template>
 
 <style scoped>
 .actions-menu {
+  --block-top: 0px;
+  --block-left: 0px;
+
+  position: absolute;
+  top: calc(14rem + var(--block-top));
+  left: -2rem;
+  z-index: 100;
+  transform: translate(-100%, -50%);
   background: var(--color-raised-surface);
   width: 20rem;
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
   border-radius: var(--radius-default);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 
   & .last-edited {
     color: var(--color-inactive);
