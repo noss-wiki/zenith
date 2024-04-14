@@ -8,7 +8,7 @@ const { click } = useClickLevel();
   <div class="wrapper">
     <nav class="editor-nav">
       <div class="top">
-        <WorkspaceSelect width="calc(100% + 3.5rem)" />
+        <WorkspaceSelect width="calc(var(--width) + 3.5rem)" />
         <Button icon-only transparent large>
           <MaterialSymbol symbol="keyboard_double_arrow_left" />
           <!-- <Tooltip> Collapse </Tooltip> -->

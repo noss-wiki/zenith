@@ -10,6 +10,7 @@ export class Handle extends DOMEventfull {
   hovering: boolean = false;
   blockHovering: boolean = false;
   active: Block<string> | undefined;
+  menuOpen = ref(false);
 
   constructor(editor: Editor, handle: HTMLElement, menu: HTMLElement) {
     super();

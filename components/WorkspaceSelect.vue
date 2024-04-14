@@ -19,14 +19,14 @@ const open = ref(false);
 
 <template>
   <div class="wrapper">
-    <div class="button" ref="button" @click="open = true">
+    <div class="button" ref="button" @click.stop="open = true">
       <Workspace />
       <Button icon-only transparent large>
         <Arrow />
       </Button>
     </div>
     <Transition mode="in-out" name="fade">
-      <FunctionalPopup class="dropdown" v-model="open">
+      <FunctionalPopup v-model="open" class="dropdown">
         <div class="workspaces">
           <div class="top-row">
             <span class="link">Workspaces</span>
@@ -63,7 +63,9 @@ const open = ref(false);
 
 <style scoped>
 .wrapper {
-  width: max(12rem, min(100%, 20rem));
+  --width: max(12rem, min(100%, 20rem));
+
+  width: var(--width);
   position: relative;
 }
 

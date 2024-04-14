@@ -37,6 +37,6 @@
 .dropdown-menu:hover,
 .btn-dropdown:hover > .dropdown-menu {
   opacity: 1;
-  pointer-events: all;
+  pointer-events: initial;
 }
 </style>

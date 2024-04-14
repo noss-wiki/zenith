@@ -8,6 +8,8 @@ let editor = new Editor();
 
 onMounted(() => editor.mount(root));
 onUnmounted(() => editor.unmount());
+
+const show = ref(true);
 </script>
 
 <template>
@@ -16,7 +18,7 @@ onUnmounted(() => editor.unmount());
     <div class="content" noss-editor-content></div>
     <div class="handle">
       <Handle />
-      <ActionsMenu />
+      <ActionsMenu v-model="show" />
     </div>
   </div>
 </template>

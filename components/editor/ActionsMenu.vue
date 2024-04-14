@@ -1,53 +1,59 @@
 <script setup lang="ts">
+const show = defineModel<boolean>({ required: true });
+
 const { blocks, sorted, categories } = useBlocks();
 const actions = useHandleActions();
-
-const show = ref(false);
 </script>
 
 <template>
-  <FunctionalPopup v-model="show" class="actions-menu" noss-editor-handle-menu>
-    <Button surface transparent>
-      <MaterialSymbol symbol="chat" />
-      Comment
-    </Button>
-    <Divider menu />
-    <Button surface transparent @click="actions.remove()">
-      <MaterialSymbol symbol="delete" />
-      Delete
-    </Button>
-    <Button surface transparent>
-      <MaterialSymbol symbol="content_copy" />
-      Duplicate
-    </Button>
-    <Button surface transparent dropdown>
-      <MaterialSymbol symbol="swap_horiz" />
-      Turn into
-      <Dropdown>
-        <template v-for="(category, index) in categories">
-          <Divider v-if="sorted[category].length > 0 && index > 0" menu />
-          <Button
-            v-for="{ name, icon } in sorted[category]"
-            surface
-            transparent
-          >
-            <div class="icon" v-html="icon" style="height: 1.5rem"></div>
-            {{ name }}
-          </Button>
-        </template>
-      </Dropdown>
-    </Button>
-    <Divider menu />
-    <Button surface transparent dropdown>
-      <MaterialSymbol symbol="border_color" />
-      Color
-    </Button>
-    <Divider menu />
-    <div class="last-edited">
-      <p>Last edited by Robin de Vos</p>
-      <p>8 april 20224, 17:29</p>
-    </div>
-  </FunctionalPopup>
+  <Transition name="fade">
+    <FunctionalPopup
+      v-model="show"
+      class="actions-menu"
+      noss-editor-handle-menu
+    >
+      <Button surface transparent>
+        <MaterialSymbol symbol="chat" />
+        Comment
+      </Button>
+      <Divider menu />
+      <Button surface transparent @click="actions.remove()">
+        <MaterialSymbol symbol="delete" />
+        Delete
+      </Button>
+      <Button surface transparent>
+        <MaterialSymbol symbol="content_copy" />
+        Duplicate
+      </Button>
+      <Button surface transparent dropdown>
+        <MaterialSymbol symbol="swap_horiz" />
+        Turn into
+        <Dropdown>
+          <template v-for="(category, index) in categories">
+            <Divider v-if="sorted[category].length > 0 && index > 0" menu />
+            <Button
+              v-for="{ name, icon } in sorted[category]"
+              surface
+              transparent
+            >
+              <div class="icon" v-html="icon" style="height: 1.5rem"></div>
+              {{ name }}
+            </Button>
+          </template>
+        </Dropdown>
+      </Button>
+      <Divider menu />
+      <Button surface transparent dropdown>
+        <MaterialSymbol symbol="border_color" />
+        Color
+      </Button>
+      <Divider menu />
+      <div class="last-edited">
+        <p>Last edited by Robin de Vos</p>
+        <p>8 april 20224, 17:29</p>
+      </div>
+    </FunctionalPopup>
+  </Transition>
 </template>
 
 <style scoped>

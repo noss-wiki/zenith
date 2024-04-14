@@ -1,28 +1,33 @@
 <script setup lang="ts">
-import type { VNodeRef, TransitionProps } from 'vue';
+const show = defineModel<boolean>({ required: true });
+let root: HTMLElement;
 
-defineProps<{
-  transition?: TransitionProps;
-}>();
+watchEffect(() => {
+  if (!document) return;
 
-const show = defineModel<boolean>();
+  if (show.value === true)
+    document.body.style.setProperty('pointer-events', 'none');
+  else document.body.style.removeProperty('pointer-events');
+});
+
+const click = (e: MouseEvent) => {
+  const t = e.target as HTMLElement;
+  if (show.value === true && t.tagName === 'HTML') show.value = false;
+};
+
+onMounted(() => document.addEventListener('click', click));
+onUnmounted(() => document.removeEventListener('click', click));
 </script>
 
 <template>
-  <div class="popup" v-show="show">
+  <div class="popup" v-show="show" ref="root">
     <slot />
-    <div
-      class="popup-area"
-      :style="{ 'pointer-events': show ? 'all' : 'none' }"
-      @click="() => (show = false)"
-    ></div>
   </div>
 </template>
 
 <style scoped>
 .popup {
-  z-index: 999;
-  isolation: isolate;
+  pointer-events: all;
 }
 
 .popup-area {
