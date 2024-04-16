@@ -6,7 +6,7 @@ const actions = useHandleActions();
 </script>
 
 <template>
-  <Transition name="fade">
+  <Transition name="fade" mode="in-out">
     <FunctionalPopup
       v-model="show"
       class="actions-menu"
@@ -85,5 +85,15 @@ const actions = useHandleActions();
     font-size: 0.75rem;
     padding: 0.25rem 0.75rem;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

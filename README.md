@@ -1,2 +1,2 @@
 # TODO
-- feat: allow implementing block types as vue components for easier html?
+- feat: chromium compatibility; chrome inserts div as child in p element

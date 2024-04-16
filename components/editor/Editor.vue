@@ -9,7 +9,9 @@ let editor = new Editor();
 onMounted(() => editor.mount(root));
 onUnmounted(() => editor.unmount());
 
-const show = ref(true);
+// TODO: Create menu and handle classes and pass these to the editor, to simplify actions
+const menuShow = ref(true);
+useHandleActions.attach(menuShow);
 </script>
 
 <template>
@@ -18,7 +20,7 @@ const show = ref(true);
     <div class="content" noss-editor-content></div>
     <div class="handle">
       <Handle />
-      <ActionsMenu v-model="show" />
+      <ActionsMenu v-model="menuShow" />
     </div>
   </div>
 </template>

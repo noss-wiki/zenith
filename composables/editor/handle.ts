@@ -70,7 +70,6 @@ export class Handle extends DOMEventfull {
     const top = blockRect.top - editorRect.top;
 
     this.menu.style.setProperty('--block-top', `${top}px`);
-    this.menu.classList.remove('hidden');
   }
 
   _getBlock(item: number | string | Block<string>): Block<string> | undefined {

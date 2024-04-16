@@ -12,6 +12,8 @@ export interface HandleActions {
   addAbove<T>(type?: T): Block<Default<T>> | undefined;
 }
 
+let attached: Ref<boolean> | undefined;
+
 export function useHandleActions(): HandleActions {
   return {
     select() {
@@ -19,11 +21,13 @@ export function useHandleActions(): HandleActions {
 
       const block = editor.handle.active;
       if (block) editor.handle.select();
+      if (typeof attached !== 'undefined') attached.value = true;
     },
     remove() {
       if (!editor) return;
 
       const block = editor.handle.active;
+      console.log(block);
       if (block) editor.remove(block);
       editor.handle.active = undefined;
     },
@@ -53,3 +57,7 @@ export function useHandleActions(): HandleActions {
     },
   };
 }
+
+useHandleActions.attach = (ref: Ref<boolean>) => {
+  attached = ref;
+};
