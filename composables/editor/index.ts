@@ -1,4 +1,6 @@
 import type { Block } from './blocks';
+import type { ComponentType, ComponentClass } from './component';
+import { Component, ActionsComponent } from './component';
 import { Handle } from './handle';
 import { createBlock } from './blocks';
 
@@ -19,6 +21,8 @@ export class Editor extends DOMEventfull {
   handle: Handle;
 
   selected: Block | undefined;
+
+  components: Component[] = [];
 
   #listeners: {
     element: Element;
@@ -80,6 +84,17 @@ export class Editor extends DOMEventfull {
     this.handle.unmount();
 
     editor = undefined;
+  }
+
+  /**
+   * Used to attach an editor component (e.g. handle, actions, etc.) to this editor
+   */
+  attach<T extends ComponentType>(type: T): ComponentClass<T> {
+    let c: Component;
+    if (type === 'actions') c = new ActionsComponent(type, this);
+    else c = new Component(type, this);
+    this.components.push(c);
+    return c as ComponentClass<T>;
   }
 
   // Blocks

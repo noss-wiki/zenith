@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import type { Editor } from '@/composables/editor';
+import type { VNodeRef } from 'vue';
+
+const { instance } = defineProps<{
+  instance: Editor;
+}>();
+
+let handle = ref<HTMLElement>();
+const component = instance.attach('handle');
+
+onMounted(() => component.mount(handle));
 
 const actions = useHandleActions();
 const { click } = useClickLevel();
 </script>
 
 <template>
-  <div class="handle hidden" noss-editor-handle>
+  <div class="handle hidden" noss-editor-handle ref="handle">
     <Button
       surface
       icon-only

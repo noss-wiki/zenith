@@ -1,5 +1,17 @@
 <script setup lang="ts">
-const show = defineModel<boolean>({ required: true });
+import type { Editor } from '@/composables/editor';
+
+const { instance } = defineProps<{
+  instance: Editor;
+}>();
+
+let actionsRef = ref<HTMLElement>();
+const component = instance.attach('actions');
+
+onMounted(() => component.mount(actionsRef));
+
+const show = defineModel<boolean>({ default: false });
+watchEffect(() => (show.value = component.show.value));
 
 const { blocks, sorted, categories } = useBlocks();
 const actions = useHandleActions();
@@ -11,6 +23,7 @@ const actions = useHandleActions();
       v-model="show"
       class="actions-menu"
       noss-editor-handle-menu
+      ref="actionsRef"
     >
       <Button surface transparent>
         <MaterialSymbol symbol="chat" />

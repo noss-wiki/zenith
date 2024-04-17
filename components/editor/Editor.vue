@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { Editor } from '@/composables/editor';
-import Handle from './Handle.vue';
-import ActionsMenu from './ActionsMenu.vue';
 
 let root: HTMLDivElement;
 let editor = new Editor();
 
 onMounted(() => editor.mount(root));
 onUnmounted(() => editor.unmount());
-
-// TODO: Create menu and handle classes and pass these to the editor, to simplify actions
-const menuShow = ref(true);
-useHandleActions.attach(menuShow);
 </script>
 
 <template>
@@ -19,8 +13,8 @@ useHandleActions.attach(menuShow);
     <div class="header"></div>
     <div class="content" noss-editor-content></div>
     <div class="handle">
-      <Handle />
-      <ActionsMenu v-model="menuShow" />
+      <EditorHandle :instance="editor" />
+      <EditorActions :instance="editor" />
     </div>
   </div>
 </template>
