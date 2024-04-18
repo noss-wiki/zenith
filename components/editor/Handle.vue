@@ -8,11 +8,9 @@ const { instance } = defineProps<{
 
 let handle = ref<HTMLElement>();
 const component = instance.attach('handle');
-
 onMounted(() => component.mount(handle));
 
 const actions = useHandleActions();
-const { click } = useClickLevel();
 </script>
 
 <template>
@@ -24,10 +22,10 @@ const { click } = useClickLevel();
       transparent
       tooltip
       @click="
-        click<MouseEvent>((e) => {
+        (e) => {
           if (e.shiftKey) actions.addAbove();
           else actions.addBelow();
-        }).handler
+        }
       "
     >
       <MaterialSymbol symbol="add" />
@@ -36,14 +34,7 @@ const { click } = useClickLevel();
         <!-- doesn't fit in tooltip: <div><strong>Shift-Click</strong> to add above</div> -->
       </Tooltip>
     </Button>
-    <Button
-      surface
-      icon-only
-      small
-      transparent
-      tooltip
-      @click="click(actions.select).handler"
-    >
+    <Button surface icon-only small transparent tooltip @click="actions.select">
       <MaterialSymbol symbol="drag_indicator" />
       <Tooltip>
         <div class="line"><strong>Drag</strong> to move</div>
