@@ -1,17 +1,4 @@
-/**
- * The type that gets stored, this includes all the data for the Block class to load everything properly
- */
-export interface AbstractBlock {
-  type: string; // this should be the name of a `BlockType`, prob add list type for this?
-  data: any; // this is what the extended block class can read to determine what it shoud render, can be string, object, etc.
-}
-
-export interface BlockType {
-  name: string;
-  description: string;
-  // icon: ...; the icon that gets showed in the commands list
-  // also add preview prop for a preview image later?
-}
+export * from './components';
 
 export type Category = 'simple_text' | 'list' | 'decorative_text';
 export const categories: Category[] = [
@@ -61,7 +48,7 @@ export interface BlockDescription {
   arrows?: true | false | 'manual';
 }
 
-export interface InputRegisterHandler {
+interface InputRegisterHandler {
   content?: string;
 
   getContent(): string;
@@ -74,7 +61,7 @@ export interface InputRegisterHandler {
   carry(content: string): void;
 }
 
-export interface InputRegister extends InputRegisterHandler {
+interface InputRegister extends InputRegisterHandler {
   index: number;
 }
 

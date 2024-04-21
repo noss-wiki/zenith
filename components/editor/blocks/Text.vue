@@ -11,8 +11,8 @@ export const meta: BlockDescription = {
 </script>
 
 <script setup lang="ts">
-import type { BlockDescription } from '@/composables/block';
-import { BlockInstance } from '@/composables/block';
+import type { BlockDescription } from '@/composables/blocks';
+import { BlockInstance } from '@/composables/blocks';
 import Input from '../elements/Input.vue';
 import Block from '../elements/Block.vue';
 
@@ -31,3 +31,4 @@ const instance = new BlockInstance(meta);
   font-weight: 400;
 }
 </style>
+@/composables/blocks@/composables/blocks

@@ -9,8 +9,7 @@ const { instance } = defineProps<{
 let handle = ref<HTMLElement>();
 const component = instance.attach('handle');
 onMounted(() => component.mount(handle));
-
-const actions = useHandleActions();
+onUnmounted(() => instance.detach(component));
 </script>
 
 <template>
@@ -23,8 +22,7 @@ const actions = useHandleActions();
       tooltip
       @click="
         (e) => {
-          if (e.shiftKey) actions.addAbove();
-          else actions.addBelow();
+          e.shiftKey ? component.addAbove() : component.addBelow();
         }
       "
     >
@@ -34,7 +32,14 @@ const actions = useHandleActions();
         <!-- doesn't fit in tooltip: <div><strong>Shift-Click</strong> to add above</div> -->
       </Tooltip>
     </Button>
-    <Button surface icon-only small transparent tooltip @click="actions.select">
+    <Button
+      surface
+      icon-only
+      small
+      transparent
+      tooltip
+      @click="component.select()"
+    >
       <MaterialSymbol symbol="drag_indicator" />
       <Tooltip>
         <div class="line"><strong>Drag</strong> to move</div>

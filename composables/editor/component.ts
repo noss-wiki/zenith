@@ -1,6 +1,7 @@
 import type { Editor } from '.';
-import type { Block } from './blocks';
-import { DOMEventfull } from '../DOMEventfull';
+import type { Block } from '../blocks';
+import { Eventfull } from '../classes/eventfull';
+import { Logger } from '../classes/logger';
 
 export type ComponentType = 'handle' | 'actions';
 export type ComponentClass<T extends ComponentType> = T extends 'actions'
@@ -20,7 +21,7 @@ export function createComponent<T extends ComponentType>(
   return new Component(type, editor) as ComponentClass<T>;
 }
 
-export class Component extends DOMEventfull {
+export class Component extends Eventfull {
   type: ComponentType;
   /**
    * `ref.value` will always be defined if `mounted` is true, otherwise it might be undefined, even if type says it isn't
@@ -35,10 +36,15 @@ export class Component extends DOMEventfull {
     this.editor = editor;
   }
 
-  mount(ref: Ref<HTMLElement | undefined>) {
-    if (ref.value === undefined) return;
+  mount(ref: Ref<HTMLElement | undefined>): boolean | void {
+    if (ref.value === undefined) return false;
     this.ref = ref as Ref<HTMLElement>;
-    this.mounted = true;
+    return (this.mounted = true);
+  }
+
+  unmount() {
+    super.unmount();
+    this.mounted = false;
   }
 }
 
@@ -50,24 +56,31 @@ export class ActionsComponent extends Component {
 type Default<T> = T extends string ? T : 'text';
 
 export class HandleComponent extends Component {
+  logger = new Logger('handle');
   type = 'handle' as const;
 
   mount(ref: Ref<HTMLElement | undefined>) {
-    super.mount(ref);
+    if (super.mount(ref) === false) return;
+    const handle = ref as Ref<HTMLElement>;
+
+    this.on('element:mouseenter', (e) => {}, handle.value);
   }
 
   select() {
     if (!this.mounted) return;
 
     const block = this.editor.handle.active;
-    if (block) this.editor.handle.select();
-    //if (typeof attached !== 'undefined') attached.value = true;
+    if (!block) return;
+    this.editor.handle.select();
+
+    const c = this.editor.component('actions');
+    if (c) c.show.value = true;
   }
   remove() {
     if (!this.mounted) return;
 
     const block = this.editor.handle.active;
-    console.log(block);
+    this.logger.info(block);
     if (block) this.editor.remove(block);
     this.editor.handle.active = undefined;
   }

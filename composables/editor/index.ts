@@ -1,8 +1,10 @@
-import type { Block } from './blocks';
+import type { Block } from '../blocks';
 import type { ComponentType, ComponentClass, Component } from './component';
+import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
 import { Handle } from './handle';
-import { createBlock } from './blocks';
+import { createBlock } from '../blocks';
+import { LoggerClass } from '../classes/logger';
 
 type InputTypes =
   | 'insertParagraph'
@@ -32,6 +34,7 @@ export class Editor extends DOMEventfull {
 
   constructor() {
     super();
+    this.logger.init('editor');
 
     this.root = null as unknown as HTMLElement;
     this.editor = null as unknown as HTMLElement;
@@ -49,12 +52,19 @@ export class Editor extends DOMEventfull {
       handle = root.querySelector('[noss-editor-handle]'),
       handleMenu = root.querySelector('[noss-editor-handle-menu]');
     if (!editor)
-      return console.error('[editor] No content was found in the editor root.');
+      return this.logger.error(
+        'No content was found in the editor root.',
+        'Editor.mount'
+      );
     if (!handle)
-      return console.error('[editor] No handle was found in the editor root.');
+      return this.logger.error(
+        'No handle was found in the editor root.',
+        'Editor.mount'
+      );
     if (!handleMenu)
-      return console.error(
-        '[editor] No handle menu was found in the editor root.'
+      return this.logger.error(
+        'No handle menu was found in the editor root.',
+        'Editor.mount'
       );
 
     this.editor = editor as HTMLElement;
@@ -90,9 +100,33 @@ export class Editor extends DOMEventfull {
    * Used to attach an editor component (e.g. handle, actions, etc.) to this editor
    */
   attach<T extends ComponentType>(type: T): ComponentClass<T> {
+    const e = this.components.find((e) => e.type === type);
+    if (e !== undefined) {
+      this.logger.error(
+        `Component of type ${type}, already exists in this instance`,
+        'Editor.attach'
+      );
+      return e as ComponentClass<T>;
+    }
     let c = createComponent(type, this);
     this.components.push(c as Component);
     return c;
+  }
+
+  detach(component: Component) {
+    const i = this.components.indexOf(component);
+    if (i < 0)
+      return this.logger.error(
+        "Failed to detach component as it isn't attached to this instance",
+        'Editor.detach'
+      );
+
+    this.components.splice(i, 1);
+  }
+
+  component<T extends ComponentType>(type: T): ComponentClass<T> | undefined {
+    const c = this.components.find((e) => e.type === type);
+    return c as ComponentClass<T> | undefined;
   }
 
   // Blocks
@@ -116,7 +150,10 @@ export class Editor extends DOMEventfull {
 
     const i = this.blocks.indexOf(block);
     if (i === -1)
-      return console.error("[editor] Block doesn't exist in the editor.");
+      return this.logger.error(
+        "Block doesn't exist in the editor.",
+        'Editor.remove'
+      );
 
     this.editor.removeChild(block.root);
     this.blocks.splice(i, 1);

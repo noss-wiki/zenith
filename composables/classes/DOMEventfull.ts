@@ -1,7 +1,11 @@
+import { Logger } from './logger';
+
 /**
  * Adds some helper methods to the class e.g. adding eventlisteners that get removed when unmount is called
  */
 export class DOMEventfull {
+  logger = new Logger();
+
   #listeners: {
     element: Element;
     event: keyof HTMLElementEventMap;

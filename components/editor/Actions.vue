@@ -14,7 +14,6 @@ const show = defineModel<boolean>({ default: false });
 watchEffect(() => (show.value = component.show.value));
 
 const { blocks, sorted, categories } = useBlocks();
-const actions = useHandleActions();
 </script>
 
 <template>
@@ -30,7 +29,11 @@ const actions = useHandleActions();
         Comment
       </Button>
       <Divider menu />
-      <Button surface transparent @click="actions.remove()">
+      <Button
+        surface
+        transparent
+        @click="component.editor.component('handle')?.remove()"
+      >
         <MaterialSymbol symbol="delete" />
         Delete
       </Button>

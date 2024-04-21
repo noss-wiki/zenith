@@ -1,6 +1,6 @@
 import type { Editor } from '.';
-import { DOMEventfull } from '../DOMEventfull';
-import type { Block } from './blocks';
+import { DOMEventfull } from '../classes/DOMEventfull';
+import type { Block } from '../blocks';
 
 export class Handle extends DOMEventfull {
   editor: Editor;

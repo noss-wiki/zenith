@@ -76,3 +76,4 @@ const index = props.instance._input({
 <style scoped>
 /* stylelint-disable-next-line no-empty-source */
 </style>
+@/composables/blocks

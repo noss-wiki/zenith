@@ -2,35 +2,34 @@ import type {
   BlockDescription,
   BlockInstance,
   BlockInstanceInteractable,
-} from '../block';
+} from '.';
 import type { Component } from 'vue';
-import { instances } from '../block';
+import { instances } from '.';
 import { createVNode, render } from 'vue';
 
-import {
-  meta as textMeta,
-  default as TextVue,
-} from '@/components/editor/blocks/Text.vue';
-import {
-  meta as headingMeta,
-  default as HeadingVue,
-} from '@/components/editor/blocks/Header.vue';
+import * as text from '@/components/editor/blocks/Text.vue';
+import * as header from '@/components/editor/blocks/Header.vue';
 
-const defaultBlock = {
-  meta: textMeta,
-  vue: TextVue,
+type BlockImport = {
+  meta: BlockDescription;
+  default: Component;
 };
 
-const blocks: {
+type BlockInfo = {
   meta: BlockDescription;
-  vue: Component;
-}[] = [
-  defaultBlock,
-  {
-    meta: headingMeta,
-    vue: HeadingVue,
-  },
-] as const;
+  component: Component;
+};
+
+export const meta = [text.meta, header.meta];
+export const defaultBlock = info(text);
+export const blocks: BlockInfo[] = [defaultBlock, info(header)];
+
+function info(info: BlockImport): BlockInfo {
+  return {
+    meta: info.meta,
+    component: info.default,
+  };
+}
 
 export interface Block<Type extends string = string> {
   meta: Required<BlockDescription>;
@@ -46,7 +45,7 @@ export function createBlock<T extends string>(type: T): Block<T> {
   let block = blocks.find((e) => e.meta.type === type);
   if (!block) block = defaultBlock;
 
-  let vnode = createVNode(block.vue);
+  let vnode = createVNode(block.component);
   const ele = document.createElement('div');
 
   render(vnode, ele);

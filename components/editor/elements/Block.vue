@@ -42,3 +42,4 @@ const [mouseenter, mouseleave] = useHandle(id);
   background: var(--color-editor-active-block);
 }
 </style>
+@/composables/blocks@/composables/blocks
