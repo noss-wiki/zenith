@@ -2,7 +2,6 @@ import type { Block } from '../blocks';
 import type { ComponentType, ComponentClass, Component } from './component';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
-import { Handle } from './handle';
 import { createBlock } from '../blocks';
 import { LoggerClass } from '../classes/logger';
 
@@ -20,7 +19,6 @@ export class Editor extends DOMEventfull {
   blocks: Block[] = [];
 
   editor: HTMLElement;
-  handle: Handle;
 
   selected: Block | undefined;
 
@@ -38,7 +36,6 @@ export class Editor extends DOMEventfull {
 
     this.root = null as unknown as HTMLElement;
     this.editor = null as unknown as HTMLElement;
-    this.handle = null as unknown as Handle;
 
     editor = this;
   }
@@ -49,16 +46,10 @@ export class Editor extends DOMEventfull {
     this.root = root;
 
     let editor = root.querySelector('[noss-editor-content]'),
-      handle = root.querySelector('[noss-editor-handle]'),
       handleMenu = root.querySelector('[noss-editor-handle-menu]');
     if (!editor)
       return this.logger.error(
         'No content was found in the editor root.',
-        'Editor.mount'
-      );
-    if (!handle)
-      return this.logger.error(
-        'No handle was found in the editor root.',
         'Editor.mount'
       );
     if (!handleMenu)
@@ -68,11 +59,6 @@ export class Editor extends DOMEventfull {
       );
 
     this.editor = editor as HTMLElement;
-    this.handle = new Handle(
-      this,
-      handle as HTMLElement,
-      handleMenu as HTMLElement
-    );
 
     this.addEventListener(this.editor, 'input', (e) =>
       this.#input(e as InputEvent)
@@ -91,7 +77,8 @@ export class Editor extends DOMEventfull {
       l.element.removeEventListener(l.event, l.cb);
 
     for (const b of this.blocks) b.unmount();
-    this.handle.unmount();
+
+    for (const c of this.components) c.unmount();
 
     editor = undefined;
   }
@@ -121,11 +108,20 @@ export class Editor extends DOMEventfull {
         'Editor.detach'
       );
 
+    this.components[i].unmount();
     this.components.splice(i, 1);
   }
 
+  componentCached: {
+    [x: string]: Component;
+  } = {};
+
   component<T extends ComponentType>(type: T): ComponentClass<T> | undefined {
+    if (this.componentCached[type])
+      return this.componentCached[type] as ComponentClass<T>;
+
     const c = this.components.find((e) => e.type === type);
+    if (c) this.componentCached[type] = c;
     return c as ComponentClass<T> | undefined;
   }
 

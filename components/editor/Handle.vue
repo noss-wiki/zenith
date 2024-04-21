@@ -21,8 +21,9 @@ onUnmounted(() => instance.detach(component));
       transparent
       tooltip
       @click="
-        (e) => {
-          e.shiftKey ? component.addAbove() : component.addBelow();
+        (e: MouseEvent) => {
+          if (e.shiftKey) component.addAbove();
+          else component.addBelow();
         }
       "
     >
@@ -38,7 +39,7 @@ onUnmounted(() => instance.detach(component));
       small
       transparent
       tooltip
-      @click="component.select()"
+      @click="() => component.select()"
     >
       <MaterialSymbol symbol="drag_indicator" />
       <Tooltip>

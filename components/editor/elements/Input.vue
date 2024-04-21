@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BlockInstance, InputRegisterHandler } from '@/composables/block';
+import type { BlockInstance } from '@/composables/blocks';
 
 const props = defineProps<{
   instance: BlockInstance;

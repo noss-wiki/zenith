@@ -9,6 +9,7 @@ let actionsRef = ref<HTMLElement>();
 const component = instance.attach('actions');
 
 onMounted(() => component.mount(actionsRef));
+onUnmounted(() => instance.detach(component));
 
 const show = defineModel<boolean>({ default: false });
 watchEffect(() => (show.value = component.show.value));

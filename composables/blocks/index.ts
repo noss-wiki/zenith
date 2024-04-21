@@ -48,7 +48,7 @@ export interface BlockDescription {
   arrows?: true | false | 'manual';
 }
 
-interface InputRegisterHandler {
+export interface InputRegisterHandler {
   content?: string;
 
   getContent(): string;
