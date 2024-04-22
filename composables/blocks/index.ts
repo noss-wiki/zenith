@@ -67,6 +67,8 @@ interface InputRegister extends InputRegisterHandler {
 
 export const instances: BlockInstanceInteractable[] = [];
 
+// TODO: Use meta.category to determine list of availble transformations to other types
+// TODO: Implement method to turn into other type
 export class BlockInstance {
   meta: Required<BlockDescription>;
   id: string;

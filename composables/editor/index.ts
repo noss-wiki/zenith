@@ -102,11 +102,10 @@ export class Editor extends DOMEventfull {
 
   detach(component: Component) {
     const i = this.components.indexOf(component);
-    if (i < 0)
-      return this.logger.error(
+    if (i < 0) return; /*  this.logger.warn(
         "Failed to detach component as it isn't attached to this instance",
         'Editor.detach'
-      );
+      ); */
 
     this.components[i].unmount();
     this.components.splice(i, 1);
@@ -127,14 +126,18 @@ export class Editor extends DOMEventfull {
 
   // Blocks
 
-  add<T extends string>(index: number, type: T): Block<T> {
+  add<T extends string>(index: number, type: T, content?: string): Block<T> {
     const block = createBlock(type);
-    if (index === 0)
-      this.blocks[0].root.insertAdjacentElement('beforebegin', block.root);
-    else {
+    if (index === 0) {
+      if (this.blocks.length > 0)
+        this.blocks[0].root.insertAdjacentElement('beforebegin', block.root);
+      else this.editor.appendChild(block.root);
+    } else {
       const curr = this.blocks[index - 1];
       curr.root.insertAdjacentElement('afterend', block.root);
     }
+
+    if (content) block.interact.carry(content);
     this.blocks.splice(index, 0, block);
     return block;
   }
@@ -154,6 +157,10 @@ export class Editor extends DOMEventfull {
     this.editor.removeChild(block.root);
     this.blocks.splice(i, 1);
     block.unmount();
+
+    // insert block if none exist
+    if (this.blocks.length === 0) this.add(0, 'text');
+    this.blocks[0].interact.focus();
   }
 
   select(block: Block) {

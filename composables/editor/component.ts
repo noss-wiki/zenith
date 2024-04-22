@@ -32,6 +32,10 @@ export class Component extends Eventfull {
   mounted = false;
   editor: Editor;
 
+  get handle() {
+    return this.editor.component('handle');
+  }
+
   constructor(type: ComponentType, editor: Editor) {
     super();
     this.type = type;
@@ -53,6 +57,10 @@ export class Component extends Eventfull {
 export class ActionsComponent extends Component {
   type = 'actions' as const;
   show = ref<boolean>(false);
+
+  hide() {
+    this.show.value = false;
+  }
 }
 
 type Default<T> = T extends string ? T : 'text';
@@ -119,7 +127,6 @@ export class HandleComponent extends Component {
 
   // actions
 
-  // TODO: doesn't work if selected previously and clicked of somehow
   select() {
     if (!this.mounted) return;
 
@@ -132,16 +139,10 @@ export class HandleComponent extends Component {
     this.logger.info(this.last);
     if (this.last) this.editor.remove(this.last);
     this.last = undefined;
-
-    const c = this.editor.component('actions');
-    if (c) c.show.value = false;
   }
   addBelow<T>(type?: T) {
-    if (!this.mounted) return;
-
-    const block = this.last;
-    if (!block) return;
-    const i = this.editor.blocks.indexOf(block) + 1;
+    if (!this.mounted || !this.last) return;
+    const i = this.editor.blocks.indexOf(this.last) + 1;
     if (i === 0) return;
 
     const inserted = this.editor.add(
@@ -152,11 +153,8 @@ export class HandleComponent extends Component {
     return inserted as Block<Default<T>>;
   }
   addAbove<T>(type?: T) {
-    if (!this.mounted) return;
-
-    const block = this.last;
-    if (!block) return;
-    const i = this.editor.blocks.indexOf(block);
+    if (!this.mounted || !this.last) return;
+    const i = this.editor.blocks.indexOf(this.last);
     if (i === -1) return;
 
     const inserted = this.editor.add(
@@ -165,6 +163,12 @@ export class HandleComponent extends Component {
     );
     setTimeout(() => inserted.interact.focus(), 0);
     return inserted as Block<Default<T>>;
+  }
+  duplicate() {
+    if (!this.mounted || !this.last) return;
+    const inserted = this.addBelow(this.last.type);
+    // TODO: Implement a way to get content
+    inserted?.interact.carry('dupe');
   }
 
   // helper

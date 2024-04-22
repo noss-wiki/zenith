@@ -20,7 +20,7 @@ const { blocks, sorted, categories } = useBlocks();
 <template>
   <Transition name="fade" mode="in-out">
     <FunctionalPopup
-      v-model="show"
+      v-model="component.show.value"
       class="actions-menu"
       noss-editor-handle-menu
       ref="actionsRef"
@@ -33,12 +33,26 @@ const { blocks, sorted, categories } = useBlocks();
       <Button
         surface
         transparent
-        @click="component.editor.component('handle')?.remove()"
+        @click="
+          () => {
+            component.handle?.remove();
+            component.hide();
+          }
+        "
       >
         <MaterialSymbol symbol="delete" />
         Delete
       </Button>
-      <Button surface transparent>
+      <Button
+        surface
+        transparent
+        @click="
+          () => {
+            component.handle?.duplicate();
+            component.hide();
+          }
+        "
+      >
         <MaterialSymbol symbol="content_copy" />
         Duplicate
       </Button>
