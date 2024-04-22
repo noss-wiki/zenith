@@ -59,6 +59,7 @@ const background = computed(() => {
 .btn {
   --size: 2.5rem;
   --radius: var(--radius-default);
+  --color: var(--color-inactive);
 
   width: 100%;
   height: var(--size);
@@ -70,13 +71,14 @@ const background = computed(() => {
   font-weight: 500;
   cursor: pointer;
   transition: color 0.3s ease, background 0.3s ease, filter 0.3s ease;
-  color: var(--color-inactive);
+  color: var(--color);
+  fill: var(--color);
   background: v-bind('background');
   filter: none;
   user-select: none;
 
   &:hover {
-    color: var(--color-text);
+    --color: var(--color-text);
   }
 }
 
@@ -92,21 +94,23 @@ const background = computed(() => {
 .btn-outline {
   background: transparent;
   border: 2px solid v-bind('color');
-  color: v-bind('color');
+  --color: v-bind('color');
 
   &:hover {
-    color: v-bind('color');
+    --color: v-bind('color');
+
     filter: var(--filter-hover);
   }
 }
 
 .btn-transparent {
-  color: v-bind('color');
+  --color: v-bind('color');
+
   background: transparent;
 
   &:hover {
     background: var(--color-bg);
-    color: var(--color-text);
+    --color: var(--color-text);
   }
 
   &.btn-surface:hover {
@@ -118,8 +122,8 @@ const background = computed(() => {
   width: var(--size);
   padding: 0;
   justify-content: center;
-  color: var(--color-text);
   flex-shrink: 0;
+  --color: var(--color-text);
 }
 </style>
 

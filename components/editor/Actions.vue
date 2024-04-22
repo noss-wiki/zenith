@@ -128,3 +128,12 @@ const { blocks, sorted, categories } = useBlocks();
   opacity: 0;
 }
 </style>
+
+<style>
+.icon,
+.icon * {
+  color: var(--color, var(--icon-inactive));
+  fill: var(--color, var(--icon-inactive));
+  transition: fill 0.3s ease;
+}
+</style>

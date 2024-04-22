@@ -3,7 +3,6 @@ import type { ComponentType, ComponentClass, Component } from './component';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
 import { createBlock } from '../blocks';
-import { LoggerClass } from '../classes/logger';
 
 type InputTypes =
   | 'insertParagraph'
