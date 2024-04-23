@@ -32,10 +32,6 @@ export class Component extends Eventfull {
   mounted = false;
   editor: Editor;
 
-  get handle() {
-    return this.editor.component('handle');
-  }
-
   constructor(type: ComponentType, editor: Editor) {
     super();
     this.type = type;
@@ -54,9 +50,15 @@ export class Component extends Eventfull {
   }
 }
 
+// TODO: Move these to seperate files?
+
 export class ActionsComponent extends Component {
   type = 'actions' as const;
   show = ref<boolean>(false);
+
+  get handle() {
+    return this.editor.component('handle');
+  }
 
   hide() {
     this.show.value = false;
@@ -167,7 +169,7 @@ export class HandleComponent extends Component {
   duplicate() {
     if (!this.mounted || !this.last) return;
     const inserted = this.addBelow(this.last.type);
-    // TODO: Implement a way to get content
+    // TODO: Implement a way to get content, probs in new instances classes
     inserted?.interact.carry('dupe');
   }
 
