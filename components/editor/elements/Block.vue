@@ -2,18 +2,18 @@
 import type { BlockInstance } from '@/composables/blocks';
 import type { BlockDescription } from '@/composables/blocks';
 
-const { id } = defineProps<{
-  options: BlockDescription;
-  id: string;
+const props = defineProps<{
+  instance: BlockInstance;
+  meta: BlockDescription;
 }>();
 
-const [mouseenter, mouseleave] = useHandle(id);
+const [mouseenter, mouseleave] = useHandle(props.instance.id);
 </script>
 
 <template>
   <div
-    :class="`noss-selectable noss-${options.type}-block`"
-    :data-block-id="$props.id"
+    :class="`noss-selectable noss-${meta.type}-block`"
+    :data-block-id="$props.instance.id"
     @mouseenter="mouseenter"
     @mouseleave="mouseleave"
   >

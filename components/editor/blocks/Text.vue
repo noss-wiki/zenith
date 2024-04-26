@@ -8,8 +8,9 @@ export class Instance extends BlockInstance {
     description: 'Simple plain text',
     type: 'text',
     category: 'simple_text',
+    inputs: 1,
     icon,
-  });
+  } as const);
 }
 </script>
 
@@ -21,7 +22,7 @@ const instance = new Instance();
 </script>
 
 <template>
-  <Block :options="Instance.meta" :id="instance.id">
+  <Block :meta="Instance.meta" :instance="instance">
     <Input :instance="instance" />
   </Block>
 </template>

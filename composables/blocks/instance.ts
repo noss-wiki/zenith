@@ -1,9 +1,17 @@
-import type { BlockDescription, InputRegister, InputRegisterHandler } from '.';
+import type {
+  BlockDescription,
+  BlockDescriptionDefaults,
+  InputRegister,
+  InputRegisterHandler,
+} from '.';
+import { Eventfull } from '../classes/eventfull';
 
 export const instances: BlockInstanceInteractable[] = [];
 
-export class BlockInstance {
+export class BlockInstance extends Eventfull {
   static readonly meta: Readonly<Required<BlockDescription>>;
+  readonly meta: Readonly<Required<BlockDescription>>;
+
   id: string;
 
   // watch this to move handle
@@ -16,10 +24,18 @@ export class BlockInstance {
   #interactable: BlockInstanceInteractable;
 
   constructor() {
-    this.id = Math.random().toString(36).slice(2);
+    super();
+    this.meta = (<typeof BlockInstance>this.constructor).meta;
 
+    this.id = Math.random().toString(36).slice(2);
     this.#interactable = new BlockInstanceInteractable(this);
     instances.push(this.#interactable);
+  }
+
+  mount() {}
+
+  unmount() {
+    super.unmount();
   }
 
   _input<Additional>(handler: InputRegisterHandler & Additional): number {
@@ -34,12 +50,6 @@ export class BlockInstance {
     this.inputs.push(val);
     return val.index;
   }
-}
-
-export function description(desc: BlockDescription) {
-  desc.carry ??= 'both';
-  desc.arrows ??= true;
-  return desc as Required<BlockDescription>;
 }
 
 /**
@@ -73,4 +83,16 @@ export class BlockInstanceInteractable {
 
     this.instance.inputs[i].carry(content);
   }
+}
+
+type Defaults<T> = Omit<BlockDescriptionDefaults, keyof T> & T;
+
+/**
+ * Adds defaults to every optional value of the description.
+ * None specified values still get all the options, instead of defaults as I haven't figured out how to do this in typescript.
+ */
+export function description<T extends BlockDescription>(desc: T): Defaults<T> {
+  desc.carry ??= 'both';
+  desc.arrows ??= true;
+  return desc as Defaults<T>;
 }

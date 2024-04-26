@@ -27,19 +27,20 @@ export interface BlockDescription {
    * The block will be sorted under this category in e.g. the commands menu
    */
   readonly category: Category;
-
+  /**
+   * Defines how many inputs this component has
+   */
+  readonly inputs: number;
   /**
    * Raw html code for icon, import using `*.svg?raw`
    */
   readonly icon: string;
-
   /**
    * - Forwards means that content from this block can be carried to previous.
    * - Backwards means that content from next block can be carried to this block.
    * @default "both"
    */
   carry?: 'forwards' | 'backwards' | 'both';
-
   /**
    * Whether or not this block allows you to move into it with the arrow keys,
    * e.g. you are at the end of the previous block and press arrow right,
@@ -48,6 +49,11 @@ export interface BlockDescription {
    * @default true
    */
   arrows?: true | false | 'manual';
+}
+
+export interface BlockDescriptionDefaults extends BlockDescription {
+  readonly carry: 'both';
+  readonly arrows: true;
 }
 
 export interface InputRegisterHandler {

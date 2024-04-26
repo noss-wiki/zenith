@@ -23,12 +23,6 @@ export class Editor extends DOMEventfull {
 
   components: Component[] = [];
 
-  #listeners: {
-    element: Element;
-    event: keyof HTMLElementEventMap;
-    cb: (this: Editor, e: any) => any | void;
-  }[] = [];
-
   constructor() {
     super();
     this.logger.init('editor');
@@ -72,11 +66,9 @@ export class Editor extends DOMEventfull {
   }
 
   unmount() {
-    for (const l of this.#listeners)
-      l.element.removeEventListener(l.event, l.cb);
+    super.unmount();
 
     for (const b of this.blocks) b.unmount();
-
     for (const c of this.components) c.unmount();
 
     editor = undefined;
