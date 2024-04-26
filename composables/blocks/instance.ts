@@ -3,7 +3,7 @@ import type { BlockDescription, InputRegister, InputRegisterHandler } from '.';
 export const instances: BlockInstanceInteractable[] = [];
 
 export class BlockInstance {
-  meta: Required<BlockDescription>;
+  static readonly meta: Readonly<Required<BlockDescription>>;
   id: string;
 
   // watch this to move handle
@@ -15,9 +15,7 @@ export class BlockInstance {
 
   #interactable: BlockInstanceInteractable;
 
-  constructor(meta: BlockDescription) {
-    meta.carry ??= 'both';
-    this.meta = meta as Required<BlockDescription>;
+  constructor() {
     this.id = Math.random().toString(36).slice(2);
 
     this.#interactable = new BlockInstanceInteractable(this);
@@ -36,6 +34,12 @@ export class BlockInstance {
     this.inputs.push(val);
     return val.index;
   }
+}
+
+export function description(desc: BlockDescription) {
+  desc.carry ??= 'both';
+  desc.arrows ??= true;
+  return desc as Required<BlockDescription>;
 }
 
 /**

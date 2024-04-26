@@ -1,30 +1,27 @@
 <script lang="ts">
+import { BlockInstance, description } from '@/composables/blocks/instance';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
-import { BlockInstance } from '@/composables/blocks/instance';
 
-export class TextInstance extends BlockInstance {
-  static readonly meta: BlockDescription = {
+export class Instance extends BlockInstance {
+  static readonly meta = description({
     name: 'Text',
     description: 'Simple plain text',
     type: 'text',
     category: 'simple_text',
     icon,
-  };
+  });
 }
-
-export const meta = TextInstance.meta;
 </script>
 
 <script setup lang="ts">
-import type { BlockDescription } from '@/composables/blocks';
 import Input from '../elements/Input.vue';
 import Block from '../elements/Block.vue';
 
-const instance = new BlockInstance(meta);
+const instance = new Instance();
 </script>
 
 <template>
-  <Block :options="meta" :id="instance.id">
+  <Block :options="Instance.meta" :id="instance.id">
     <Input :instance="instance" />
   </Block>
 </template>

@@ -11,7 +11,7 @@ import * as text from '@/components/editor/blocks/Text.vue';
 import * as header from '@/components/editor/blocks/Header.vue';
 
 type BlockImport = {
-  meta: BlockDescription;
+  Instance: typeof BlockInstance;
   default: Component;
 };
 
@@ -20,13 +20,13 @@ type BlockInfo = {
   component: Component;
 };
 
-export const meta = [text.meta, header.meta];
+export const meta = [text.Instance.meta, header.Instance.meta];
 export const defaultBlock = info(text);
 export const blocks: BlockInfo[] = [defaultBlock, info(header)];
 
 function info(info: BlockImport): BlockInfo {
   return {
-    meta: info.meta,
+    meta: info.Instance.meta,
     component: info.default,
   };
 }
