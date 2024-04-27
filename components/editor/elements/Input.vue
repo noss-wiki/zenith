@@ -5,13 +5,14 @@ const props = defineProps<{
   instance: BlockInstance;
 }>();
 
-if (typeof props.instance._input !== 'function')
-  throw new Error('Input paramater is not of type function');
+if (typeof props.instance.register !== 'function')
+  throw new Error('Incorrect instance argument provided');
 
 let text: HTMLParagraphElement;
 let textNode = document.createTextNode('');
 
-const index = props.instance._input({
+// TODO: Add support for multiple textnodes in the p element; neede for inline blocks, like: inline equation, etc.
+const res = props.instance.register('input', {
   setContent(data: string) {
     if (textNode && text && !text.contains(textNode)) {
       text.innerHTML = '';
@@ -60,13 +61,15 @@ const index = props.instance._input({
     this.setContent(this.getContent() + data);
   },
 });
+
+onUnmounted(() => res?.deregister());
 </script>
 
 <template>
   <p
     data-content-editable-leaf="true"
     contenteditable="true"
-    :data-input-index="index"
+    :data-input-index="res?.index"
     ref="text"
   >
     <br />
@@ -76,4 +79,3 @@ const index = props.instance._input({
 <style scoped>
 /* stylelint-disable-next-line no-empty-source */
 </style>
-@/composables/blocks

@@ -1,12 +1,25 @@
+import { FocusReason } from './hooks';
 import type {
   BlockDescription,
   BlockDescriptionDefaults,
   InputRegister,
   InputRegisterHandler,
 } from '.';
+import { Logger } from '../classes/logger';
 import { Eventfull } from '../classes/eventfull';
 
 export const instances: BlockInstanceInteractable[] = [];
+
+type RegisterType = 'input';
+interface Register {
+  input: {
+    handler: InputRegisterHandler;
+    return: {
+      index: number;
+      deregister: () => void;
+    };
+  };
+}
 
 export class BlockInstance extends Eventfull {
   static readonly meta: Readonly<Required<BlockDescription>>;
@@ -16,12 +29,12 @@ export class BlockInstance extends Eventfull {
 
   // watch this to move handle
   hover = ref(false);
+  _attached?: HTMLElement;
+  #interactable: BlockInstanceInteractable;
 
   inputs: InputRegister[] = [];
-
-  _attached?: HTMLElement;
-
-  #interactable: BlockInstanceInteractable;
+  protected logger = new Logger('BlockInstance');
+  protected components = [];
 
   constructor() {
     super();
@@ -32,23 +45,65 @@ export class BlockInstance extends Eventfull {
     instances.push(this.#interactable);
   }
 
-  mount() {}
+  /* mount() {}
 
   unmount() {
     super.unmount();
+  } */
+
+  register(
+    type: RegisterType,
+    handler: Register[typeof type]['handler']
+  ): Register[typeof type]['return'] | void {
+    if (!this.meta)
+      return this.logger.error(
+        'The attach hook has incorrect `this` argument',
+        'BlockInstance.attach'
+      );
+
+    if (type === 'input') {
+      if (this.inputs.length === this.meta.inputs)
+        return this.logger.error(
+          `Failed to attach input component, this instance already has the provided number of inputs: ${this.meta.inputs}`,
+          'BlockInstance.attach'
+        );
+
+      const val = {
+        index: this.inputs.length,
+        ...handler,
+      };
+      this.inputs.push(val);
+      return {
+        index: val.index,
+        deregister: () => {
+          this.inputs.splice(val.index, 1);
+        },
+      };
+    }
   }
 
-  _input<Additional>(handler: InputRegisterHandler & Additional): number {
-    if (!this.inputs)
-      throw new Error(
-        'The instance.input has incorrect this argument, function needs to be passed as an anonymous function or manually bounded, e.g. (e) => instance.input(e) or instance.input.bind(instance)'
-      );
-    const val: InputRegister = {
-      index: this.inputs.length,
-      ...handler,
-    };
-    this.inputs.push(val);
-    return val.index;
+  // Hooks
+  // ?TODO: Add result returns to hooks, that indicated whether or not the action was successfull
+
+  /**
+   * The hook that gets called when this block needs to be focussed.
+   * Default implementation always focuses the first input, if it exists.
+   *
+   * @param reason The reason why this block needs to be focussed, item of the enum: {@link FocusReason}
+   */
+  focus(reason: FocusReason) {
+    if (this.meta.inputs === 0 || this.inputs.length === 0) return;
+
+    if (
+      reason === FocusReason.DeleteLast ||
+      reason === FocusReason.ArrowPrevious
+    ) {
+      // focus at last character
+      this.inputs[0]?.focus();
+    } else {
+      // focus at first character
+      this.inputs[0]?.focus(0);
+    }
   }
 }
 

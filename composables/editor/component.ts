@@ -138,7 +138,6 @@ export class HandleComponent extends Component {
   remove() {
     if (!this.mounted) return;
 
-    this.logger.info(this.last);
     if (this.last) this.editor.remove(this.last);
     this.last = undefined;
   }

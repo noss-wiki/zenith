@@ -1,5 +1,6 @@
 <script lang="ts">
-import { BlockInstance, description } from '@/composables/blocks/instance';
+import { description, BlockInstance } from '@/composables/blocks/instance';
+import { SingleInputBlockInstance } from '@/composables/blocks/singleInput';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 
 export class Instance extends BlockInstance {
@@ -19,6 +20,7 @@ import Input from '../elements/Input.vue';
 import Block from '../elements/Block.vue';
 
 const instance = new Instance();
+onUnmounted(() => instance.unmount());
 </script>
 
 <template>

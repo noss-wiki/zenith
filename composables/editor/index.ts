@@ -1,4 +1,5 @@
 import type { Block } from '../blocks';
+import { FocusReason } from '../blocks/hooks';
 import type { ComponentType, ComponentClass, Component } from './component';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
@@ -151,7 +152,9 @@ export class Editor extends DOMEventfull {
 
     // insert block if none exist
     if (this.blocks.length === 0) this.add(0, 'text');
-    this.blocks[0].interact.focus();
+    const bi = Math.min(i, this.blocks.length - 1);
+
+    this.blocks[bi].interact.focus();
   }
 
   select(block: Block) {
@@ -191,7 +194,7 @@ export class Editor extends DOMEventfull {
       this.blocks.splice(index + 1, 0, text);
       block.root.insertAdjacentElement('afterend', text.root);
       if (carry) text.interact.carry(carry);
-      text.interact.focus(0);
+      text.instance.focus(FocusReason.Insert);
     }
   }
 
@@ -209,7 +212,7 @@ export class Editor extends DOMEventfull {
       const text = createBlock('text');
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
-      text.interact.focus();
+      text.instance.focus(FocusReason.Insert);
     } else if (e.key === 'Backspace') {
       if (
         sel &&
@@ -237,7 +240,8 @@ export class Editor extends DOMEventfull {
     ) {
       if (e.key === 'ArrowLeft' && sel.focusOffset < 1 && index > 0) {
         const prev = this.blocks[index - 1];
-        if (prev.meta.arrows === true) prev.interact.focus();
+        if (prev.meta.arrows === true)
+          prev.instance.focus(FocusReason.ArrowPrevious);
         else if (prev.meta.arrows === 'manual') {
           // call hook
         }
@@ -249,7 +253,7 @@ export class Editor extends DOMEventfull {
           next.meta.arrows === true &&
           sel.focusOffset === block.instance.inputs[0].getContent().length
         ) {
-          next.instance.inputs[0].focus(0);
+          next.instance.focus(FocusReason.ArrowNext);
         } else if (next.meta.arrows === 'manual') {
           // call hook
         }
