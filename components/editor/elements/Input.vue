@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BlockInstance } from '@/composables/blocks';
+import type { InputData } from '@/composables/blocks/data';
 
 const props = defineProps<{
   instance: BlockInstance;
@@ -59,6 +60,26 @@ const res = props.instance.register('input', {
 
   carry(data) {
     this.setContent(this.getContent() + data);
+  },
+
+  import(data) {},
+  export() {
+    const nodes = text.childNodes;
+    const res: InputData = [];
+
+    for (const node of nodes) {
+      if (node.nodeType === 3)
+        res.push({
+          type: 'text',
+          style: {},
+          content: node.textContent ?? '',
+        });
+      else if (node.nodeType === 1) {
+        const e = node as Element;
+        // save styled text and inline blocks
+      }
+    }
+    return res;
   },
 });
 

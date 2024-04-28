@@ -24,3 +24,18 @@ export enum FocusReason {
    */
   ArrowPrevious = 'arrowPrevious',
 }
+
+export enum ExportReason {
+  /**
+   * When the content of this block is saved.
+   */
+  Save = 'save',
+  /**
+   * When the block gets duplicated.
+   */
+  Duplicate = 'duplicate',
+  /**
+   * When this block is transformed to another block.
+   */
+  TurnInto = 'turninto',
+}

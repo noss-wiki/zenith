@@ -1,10 +1,12 @@
-import { FocusReason } from './hooks';
 import type {
   BlockDescription,
+  ResolvedBlockDescription,
   BlockDescriptionDefaults,
   InputRegister,
   InputRegisterHandler,
 } from '.';
+import { BlockData } from './data';
+import { FocusReason, ExportReason } from './hooks';
 import { Logger } from '../classes/logger';
 import { Eventfull } from '../classes/eventfull';
 
@@ -22,13 +24,11 @@ interface Register {
 }
 
 export class BlockInstance extends Eventfull {
-  static readonly meta: Readonly<Required<BlockDescription>>;
-  readonly meta: Readonly<Required<BlockDescription>>;
+  static readonly meta: ResolvedBlockDescription;
+  readonly meta: ResolvedBlockDescription;
 
   id: string;
 
-  // watch this to move handle
-  hover = ref(false);
   _attached?: HTMLElement;
   #interactable: BlockInstanceInteractable;
 
@@ -83,6 +83,7 @@ export class BlockInstance extends Eventfull {
   }
 
   // Hooks
+  // TODO: Add hook(s) for carrying and importing content
   // ?TODO: Add result returns to hooks, that indicated whether or not the action was successfull
 
   /**
@@ -104,6 +105,14 @@ export class BlockInstance extends Eventfull {
       // focus at first character
       this.inputs[0]?.focus(0);
     }
+  }
+
+  import(data: BlockData) {}
+
+  export(reason: ExportReason): BlockData {
+    const blockData = new BlockData(this.meta);
+    // call export hook on inputs and add to the `BlockData` instance
+    return blockData;
   }
 }
 

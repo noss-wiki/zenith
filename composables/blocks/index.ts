@@ -1,3 +1,6 @@
+import type { InputData } from './data';
+import type { ExportReason } from './hooks';
+
 export type { BlockInstance, BlockInstanceInteractable } from './instance';
 export { instances } from './instance';
 export * from './templates';
@@ -51,6 +54,7 @@ export interface BlockDescription {
   arrows?: true | false | 'manual';
 }
 
+export type ResolvedBlockDescription = Readonly<Required<BlockDescription>>;
 export interface BlockDescriptionDefaults extends BlockDescription {
   readonly carry: 'both';
   readonly arrows: true;
@@ -67,6 +71,9 @@ export interface InputRegisterHandler {
   focus(char?: number): void;
 
   carry(content: string): void;
+
+  import(data: InputData): void;
+  export(reason: ExportReason): InputData;
 }
 
 export interface InputRegister extends InputRegisterHandler {
