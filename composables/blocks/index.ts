@@ -62,14 +62,10 @@ export interface BlockDescriptionDefaults extends BlockDescription {
 
 export interface InputRegisterHandler {
   content?: string;
-
-  getContent(): string;
-  setContent(content: string): void;
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */
   focus(char?: number): void;
-
   carry(content: string): void;
 
   import(data: InputData): void;

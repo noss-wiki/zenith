@@ -45,11 +45,13 @@ export class BlockInstance extends Eventfull {
     instances.push(this.#interactable);
   }
 
-  /* mount() {}
+  /* mount() {} */
 
   unmount() {
     super.unmount();
-  } */
+
+    this.inputs = [];
+  }
 
   register(
     type: RegisterType,
@@ -76,6 +78,7 @@ export class BlockInstance extends Eventfull {
       return {
         index: val.index,
         deregister: () => {
+          console.log('unmounted');
           this.inputs.splice(val.index, 1);
         },
       };

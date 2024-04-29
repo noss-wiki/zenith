@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BlockInstance } from '@/composables/blocks';
-import type { InputData } from '@/composables/blocks/data';
+import type { InputContent, InputData } from '@/composables/blocks/data';
 
 const props = defineProps<{
   instance: BlockInstance;
@@ -10,30 +10,100 @@ if (typeof props.instance.register !== 'function')
   throw new Error('Incorrect instance argument provided');
 
 let text: HTMLParagraphElement;
-let textNode = document.createTextNode('');
+
+function getContent(): InputData {
+  if (!text) return [];
+  const res: InputData = [];
+
+  for (const node of text.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE)
+      res.push({
+        type: 'text',
+        style: {},
+        content: node.textContent ?? '',
+      });
+    else if (node.nodeType === Node.ELEMENT_NODE) {
+      const ele = node as Element;
+      if (ele.tagName === 'br') continue;
+      if (ele.tagName === 'span' && ele.classList.contains('noss-text-node')) {
+        res.push({
+          type: 'text',
+          style: {}, // get style
+          content: ele.textContent ?? '',
+        });
+      }
+    }
+  }
+
+  return res;
+}
+
+function createTextNode(data: InputContent): Text | Element {
+  if (Object.keys(data.style).length === 0)
+    return document.createTextNode(data.content);
+
+  const res = document.createElement('span');
+  res.textContent = data.content;
+  res.className = 'noss-text-node';
+  // apply style
+  return res;
+}
+
+function* contentIter(
+  content: InputData
+): Generator<[InputContent, number], void, unknown> {
+  for (let i = 0; i < content.length; i++) {
+    yield [content[i], i];
+  }
+}
+
+function getNodeAtChar(
+  char: number | undefined,
+  content: InputData = getContent()
+):
+  | (InputContent & {
+      char: number;
+      index: number;
+    })
+  | undefined {
+  if (content.length === 0) {
+    text.appendChild(
+      createTextNode({
+        type: 'text',
+        style: {},
+        content: '',
+      })
+    );
+    content = getContent();
+  }
+
+  if (char) {
+    for (const [node, i] of contentIter(content)) {
+      if (node.type === 'text') char -= node.content.length;
+      else char -= 1;
+
+      if (char <= 0)
+        return {
+          ...node,
+          char: node.content.length + char,
+          index: i,
+        };
+    }
+  }
+
+  const data = content[content.length - 1];
+  const length = data.type === 'text' ? data.content.length : 1;
+
+  return {
+    ...data,
+    char: length,
+    index: content.length - 1,
+  };
+}
 
 // TODO: Add support for multiple textnodes in the p element; neede for inline blocks, like: inline equation, etc.
 const res = props.instance.register('input', {
-  setContent(data: string) {
-    if (textNode && text && !text.contains(textNode)) {
-      text.innerHTML = '';
-      text.append(textNode, document.createElement('br'));
-    }
-    if (textNode) textNode.data = data;
-    else if (text) {
-      text.innerHTML = data;
-    }
-  },
-  getContent() {
-    if (textNode && text && text.contains(textNode)) return textNode.data;
-    else if (text)
-      return text.childNodes[0].nodeType === 3
-        ? (text.childNodes[0] as Text).data
-        : '';
-    else return '';
-  },
-
-  focus(char?: number) {
+  /* focus(char?: number) {
     if (!text) return;
     if (typeof char !== 'number' || char > this.getContent().length)
       char = this.getContent().length;
@@ -56,30 +126,31 @@ const res = props.instance.register('input', {
     setTimeout(() => {
       sel.addRange(range);
     }, 1);
-  },
+  }, */
 
-  carry(data) {
+  /* carry(data) {
     this.setContent(this.getContent() + data);
+  }, */
+
+  focus(char) {
+    const node = getNodeAtChar(char);
+    console.log(getContent());
   },
+  carry(data) {},
 
-  import(data) {},
-  export() {
-    const nodes = text.childNodes;
-    const res: InputData = [];
+  import(data) {
+    if (!text) return;
+    text.innerHTML = '';
 
-    for (const node of nodes) {
-      if (node.nodeType === 3)
-        res.push({
-          type: 'text',
-          style: {},
-          content: node.textContent ?? '',
-        });
-      else if (node.nodeType === 1) {
-        const e = node as Element;
-        // save styled text and inline blocks
+    for (const i of data) {
+      if (i.type === 'text') text.appendChild(createTextNode(i));
+      else {
+        // add other blocks
       }
     }
-    return res;
+  },
+  export() {
+    return getContent();
   },
 });
 
