@@ -1,4 +1,4 @@
-import type { InputData } from './data';
+import type { InputData, AdvancedInputContent } from './data';
 import type { ExportReason } from './hooks';
 
 export type { BlockInstance, BlockInstanceInteractable } from './instance';
@@ -51,7 +51,7 @@ export interface BlockDescription {
    * if it is manual you will have to define its functionality with the hook and false simply disables this functionality.
    * @default true
    */
-  arrows?: true | false | 'manual';
+  arrows?: boolean;
 }
 
 export type ResolvedBlockDescription = Readonly<Required<BlockDescription>>;
@@ -61,7 +61,8 @@ export interface BlockDescriptionDefaults extends BlockDescription {
 }
 
 export interface InputRegisterHandler {
-  content?: string;
+  ref: Ref<HTMLElement | undefined>;
+  getContent(): InputData;
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */

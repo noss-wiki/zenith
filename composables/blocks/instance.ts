@@ -103,7 +103,7 @@ export class BlockInstance extends Eventfull {
       reason === FocusReason.ArrowPrevious
     ) {
       // focus at last character
-      this.inputs[0]?.focus();
+      this.inputs[this.inputs.length - 1]?.focus();
     } else {
       // focus at first character
       this.inputs[0]?.focus(0);

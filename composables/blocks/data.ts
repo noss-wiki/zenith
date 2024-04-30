@@ -5,6 +5,11 @@ export type InputContent = {
   style: {};
   content: string;
 };
+export type AdvancedInputContent = InputContent & {
+  char: number;
+  index: number;
+  node: Text | Element;
+};
 export type InputData = InputContent[];
 
 export class BlockData {

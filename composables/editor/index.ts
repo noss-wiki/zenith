@@ -242,20 +242,25 @@ export class Editor extends DOMEventfull {
         const prev = this.blocks[index - 1];
         if (prev.meta.arrows === true)
           prev.instance.focus(FocusReason.ArrowPrevious);
-        else if (prev.meta.arrows === 'manual') {
-          // call hook
-        }
       } else if (e.key === 'ArrowRight' && index < this.blocks.length - 1) {
         const next = this.blocks[index + 1];
         // TODO: selection's anchornode is the paragraph element if ctrl was used, but then offset doesn't work
-        // TODO: work diffierently if shift is used (selections)
-        if (
-          next.meta.arrows === true &&
-          sel.focusOffset === block.instance.inputs[0].getContent().length
-        ) {
-          next.instance.focus(FocusReason.ArrowNext);
-        } else if (next.meta.arrows === 'manual') {
-          // call hook
+        // TODO: work diffierently if shift is used (selections; focus the block and focus next block if pressed again, etc.)
+        if (next.meta.arrows === true) {
+          const input =
+            this.blocks[index].instance.inputs[next.instance.inputs.length - 1];
+          const nodeIndex = input.getContent().length - 1;
+
+          if (sel.focusNode === input.ref.value)
+            next.instance.focus(FocusReason.ArrowNext);
+          else if (input.ref.value) {
+            const node = input.ref.value.childNodes[nodeIndex];
+            if (
+              sel.focusNode === node &&
+              sel.focusOffset === node.textContent?.length
+            )
+              next.instance.focus(FocusReason.ArrowNext);
+          }
         }
       }
     }

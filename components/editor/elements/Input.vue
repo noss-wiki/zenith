@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { BlockInstance } from '@/composables/blocks';
-import type { InputContent, InputData } from '@/composables/blocks/data';
+import type {
+  InputContent,
+  InputData,
+  AdvancedInputContent,
+} from '@/composables/blocks/data';
 
 const props = defineProps<{
   instance: BlockInstance;
@@ -10,12 +14,22 @@ if (typeof props.instance.register !== 'function')
   throw new Error('Incorrect instance argument provided');
 
 let text: HTMLParagraphElement;
+const textRef = ref<HTMLElement>();
+
+function clean(nodeList: NodeListOf<ChildNode>): NodeListOf<ChildNode> {
+  if (nodeList[nodeList.length - 1].nodeType === Node.TEXT_NODE) {
+    let parent = nodeList[0].parentElement;
+    parent?.removeChild(nodeList[nodeList.length - 1]);
+    if (parent) return parent.childNodes;
+  }
+  return nodeList;
+}
 
 function getContent(): InputData {
   if (!text) return [];
   const res: InputData = [];
 
-  for (const node of text.childNodes) {
+  for (const node of clean(text.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE)
       res.push({
         type: 'text',
@@ -57,17 +71,12 @@ function* contentIter(
   }
 }
 
-function getNodeAtChar(
+function getDataAtChar(
   char: number | undefined,
   content: InputData = getContent()
-):
-  | (InputContent & {
-      char: number;
-      index: number;
-    })
-  | undefined {
+): AdvancedInputContent | undefined {
   if (content.length === 0) {
-    text.appendChild(
+    text.prepend(
       createTextNode({
         type: 'text',
         style: {},
@@ -77,7 +86,14 @@ function getNodeAtChar(
     content = getContent();
   }
 
-  if (char) {
+  if (char === 0)
+    return {
+      ...content[0],
+      char: 0,
+      index: 0,
+      node: text.childNodes[0] as Text | Element,
+    };
+  else if (char) {
     for (const [node, i] of contentIter(content)) {
       if (node.type === 'text') char -= node.content.length;
       else char -= 1;
@@ -87,6 +103,7 @@ function getNodeAtChar(
           ...node,
           char: node.content.length + char,
           index: i,
+          node: text.childNodes[i] as Text | Element,
         };
     }
   }
@@ -98,43 +115,37 @@ function getNodeAtChar(
     ...data,
     char: length,
     index: content.length - 1,
+    node: text.childNodes[content.length - 1] as Text | Element,
   };
+}
+
+function focusElement(node: Text | Element | Node, index: number) {
+  const range = document.createRange();
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  range.setStart(node, index);
+  range.collapse(true);
+  sel.removeAllRanges();
+  setTimeout(() => {
+    sel.addRange(range);
+  }, 1);
 }
 
 // TODO: Add support for multiple textnodes in the p element; neede for inline blocks, like: inline equation, etc.
 const res = props.instance.register('input', {
-  /* focus(char?: number) {
-    if (!text) return;
-    if (typeof char !== 'number' || char > this.getContent().length)
-      char = this.getContent().length;
-    else if (char < 0) char = this.getContent().length + char;
-    if (char < 0) char = 0;
+  ref: textRef,
 
-    if (textNode && text && !text.contains(textNode)) {
-      textNode.data = this.getContent();
-      text.innerHTML = '';
-      text.append(textNode, document.createElement('br'));
-    } else if (!textNode) return;
-
-    const range = document.createRange();
-    const sel = window.getSelection();
-    if (!sel) return;
-
-    range.setStart(textNode, char);
-    range.collapse(true);
-    sel.removeAllRanges();
-    setTimeout(() => {
-      sel.addRange(range);
-    }, 1);
-  }, */
-
-  /* carry(data) {
-    this.setContent(this.getContent() + data);
-  }, */
+  getContent() {
+    return getContent();
+  },
 
   focus(char) {
-    const node = getNodeAtChar(char);
-    console.log(getContent());
+    const data = getDataAtChar(char);
+    if (!data) return false;
+
+    const block = text.childNodes[data.index];
+    if (data.type === 'text') focusElement(block, data.char);
   },
   carry(data) {},
 
@@ -154,6 +165,9 @@ const res = props.instance.register('input', {
   },
 });
 
+onMounted(() => {
+  textRef.value = text;
+});
 onUnmounted(() => res?.deregister());
 </script>
 
