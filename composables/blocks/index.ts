@@ -1,4 +1,4 @@
-import type { InputData, AdvancedInputContent } from './data';
+import type { InputData, AdvancedInputContent, ImportData } from './data';
 import type { ExportReason } from './hooks';
 
 export type { BlockInstance, BlockInstanceInteractable } from './instance';
@@ -69,7 +69,7 @@ export interface InputRegisterHandler {
   focus(char?: number): void;
   carry(content: string): void;
 
-  import(data: InputData): void;
+  import(data: ImportData): void;
   export(reason: ExportReason): InputData;
 }
 

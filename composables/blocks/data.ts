@@ -11,11 +11,12 @@ export type AdvancedInputContent = InputContent & {
   node: Text | Element;
 };
 export type InputData = InputContent[];
+export type ImportData = {
+  index: number;
+  content: InputData;
+};
 
-export class BlockData {
+export interface BlockData {
   meta: ResolvedBlockDescription;
-
-  constructor(meta: ResolvedBlockDescription) {
-    this.meta = meta;
-  }
+  inputs: ImportData[];
 }

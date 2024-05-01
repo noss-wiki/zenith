@@ -3,6 +3,7 @@ export enum FocusReason {
    * When this block is created and inserted in the editor.
    */
   Insert = 'insert',
+  Duplicate = 'duplicate',
   /**
    * When a previous block is deleted and this block gets focussed because of it.
    */

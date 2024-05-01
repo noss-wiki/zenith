@@ -5,7 +5,7 @@ import type {
   InputRegister,
   InputRegisterHandler,
 } from '.';
-import { BlockData } from './data';
+import type { BlockData, ImportData } from './data';
 import { FocusReason, ExportReason } from './hooks';
 import { Logger } from '../classes/logger';
 import { Eventfull } from '../classes/eventfull';
@@ -99,6 +99,7 @@ export class BlockInstance extends Eventfull {
     if (this.meta.inputs === 0 || this.inputs.length === 0) return;
 
     if (
+      reason === FocusReason.Duplicate ||
       reason === FocusReason.DeleteLast ||
       reason === FocusReason.ArrowPrevious
     ) {
@@ -110,12 +111,26 @@ export class BlockInstance extends Eventfull {
     }
   }
 
-  import(data: BlockData) {}
+  carry(content: string) {}
+
+  import(data: BlockData) {
+    // TODO: Check if this.meta and data.meta are compatible
+    if (this.inputs.length !== data.inputs.length) return false; // only reject if there are to little available?
+
+    for (let i = 0; i < this.inputs.length; i++)
+      this.inputs[i].import(data.inputs[i]);
+  }
 
   export(reason: ExportReason): BlockData {
-    const blockData = new BlockData(this.meta);
-    // call export hook on inputs and add to the `BlockData` instance
-    return blockData;
+    return {
+      meta: this.meta,
+      inputs: this.inputs.map<ImportData>((e) => {
+        return {
+          index: e.index,
+          content: e.export(reason),
+        };
+      }),
+    };
   }
 }
 

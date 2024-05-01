@@ -153,7 +153,7 @@ const res = props.instance.register('input', {
     if (!text) return;
     text.innerHTML = '';
 
-    for (const i of data) {
+    for (const i of data.content) {
       if (i.type === 'text') text.appendChild(createTextNode(i));
       else {
         // add other blocks

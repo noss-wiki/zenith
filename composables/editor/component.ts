@@ -1,5 +1,6 @@
 import type { Editor } from '.';
 import type { Block } from '../blocks';
+import { ExportReason, FocusReason } from '../blocks/hooks';
 import { Eventfull } from '../classes/eventfull';
 import { Logger } from '../classes/logger';
 import useLazy from '../useLazy';
@@ -141,7 +142,7 @@ export class HandleComponent extends Component {
     if (this.last) this.editor.remove(this.last);
     this.last = undefined;
   }
-  addBelow<T>(type?: T) {
+  addBelow<T>(type?: T, focus: boolean = true) {
     if (!this.mounted || !this.last) return;
     const i = this.editor.blocks.indexOf(this.last) + 1;
     if (i === 0) return;
@@ -150,7 +151,7 @@ export class HandleComponent extends Component {
       i,
       typeof type === 'string' ? type : 'text'
     );
-    setTimeout(() => inserted.interact.focus(), 0);
+    if (focus) setTimeout(() => inserted.interact.focus(), 0);
     return inserted as Block<Default<T>>;
   }
   addAbove<T>(type?: T) {
@@ -166,10 +167,14 @@ export class HandleComponent extends Component {
     return inserted as Block<Default<T>>;
   }
   duplicate() {
-    if (!this.mounted || !this.last) return;
-    const inserted = this.addBelow(this.last.type);
-    // TODO: Implement a way to get content, probs in new instances classes
-    inserted?.interact.carry('dupe');
+    if (!this.mounted || !this.last) return false;
+    const inserted = this.addBelow(this.last.type, false);
+    if (!inserted) return false;
+
+    const data = this.last.instance.export(ExportReason.Duplicate);
+    inserted.instance.import(data);
+    // FIX: Data gets deleted when focussing for some reason? and it errors
+    useLazy(() => inserted.instance.focus(FocusReason.Duplicate));
   }
 
   // helper
