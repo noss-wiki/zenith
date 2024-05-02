@@ -9,6 +9,8 @@ import { createVNode, render } from 'vue';
 
 import * as text from '@/components/editor/blocks/Text.vue';
 import * as header from '@/components/editor/blocks/Header.vue';
+import * as sub_header from '@/components/editor/blocks/SubHeader.vue';
+import * as sub_sub_header from '@/components/editor/blocks/SubSubHeader.vue';
 
 type BlockImport = {
   Instance: typeof BlockInstance;
@@ -20,9 +22,14 @@ type BlockInfo = {
   component: Component;
 };
 
-export const meta = [text.Instance.meta, header.Instance.meta];
-export const defaultBlock = info(text);
-export const blocks: BlockInfo[] = [defaultBlock, info(header)];
+export const blocks: BlockInfo[] = [
+  info(text),
+  info(header),
+  info(sub_header),
+  info(sub_sub_header),
+];
+export const defaultBlock = blocks[0];
+export const meta = blocks.map((e) => e.meta);
 
 function info(info: BlockImport): BlockInfo {
   return {
