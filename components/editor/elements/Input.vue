@@ -16,13 +16,22 @@ if (typeof props.instance.register !== 'function')
 let text: HTMLParagraphElement;
 const textRef = ref<HTMLElement>();
 
-function clean(nodeList: NodeListOf<ChildNode>): NodeListOf<ChildNode> {
-  if (nodeList[nodeList.length - 1].nodeType === Node.TEXT_NODE) {
-    let parent = nodeList[0].parentElement;
-    parent?.removeChild(nodeList[nodeList.length - 1]);
-    if (parent) return parent.childNodes;
+/**
+ * Returns all elements before a \<br> element, or the end of the array
+ */
+function clean(nodeList: NodeListOf<ChildNode>): ChildNode[] {
+  let res: ChildNode[] = [];
+
+  for (const node of Array.from(nodeList)) {
+    if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      (node as Element).tagName === 'BR'
+    )
+      break;
+    else res.push(node);
   }
-  return nodeList;
+
+  return res;
 }
 
 function getContent(): InputData {
@@ -38,8 +47,8 @@ function getContent(): InputData {
       });
     else if (node.nodeType === Node.ELEMENT_NODE) {
       const ele = node as Element;
-      if (ele.tagName === 'br') continue;
-      if (ele.tagName === 'span' && ele.classList.contains('noss-text-node')) {
+      if (ele.tagName === 'BR') continue;
+      if (ele.tagName === 'SPAN' && ele.classList.contains('noss-text-node')) {
         res.push({
           type: 'text',
           style: {}, // get style
