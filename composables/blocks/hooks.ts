@@ -3,7 +3,14 @@ export enum FocusReason {
    * When this block is created and inserted in the editor.
    */
   Insert = 'insert',
+  /**
+   * When this block is duplicated
+   */
   Duplicate = 'duplicate',
+  /**
+   * When a block was turned into this block
+   */
+  TurnInto = 'turnInto',
   /**
    * When a previous block is deleted and this block gets focussed because of it.
    */

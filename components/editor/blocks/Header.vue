@@ -10,6 +10,7 @@ export class Instance extends BlockInstance {
     type: 'header',
     category: 'simple_text',
     inputs: 1,
+    centerHandle: true,
     icon,
   } as const);
 }

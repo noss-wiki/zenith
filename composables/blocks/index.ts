@@ -39,6 +39,10 @@ export interface BlockDescription {
    */
   readonly icon: string;
   /**
+   * Will center the handle to the height of the block, only to be used for single line blocks
+   */
+  centerHandle?: boolean;
+  /**
    * - Forwards means that content from this block can be carried to previous.
    * - Backwards means that content from next block can be carried to this block.
    * @default "both"
@@ -56,6 +60,7 @@ export interface BlockDescription {
 
 export type ResolvedBlockDescription = Readonly<Required<BlockDescription>>;
 export interface BlockDescriptionDefaults extends BlockDescription {
+  readonly centerHandle: false;
   readonly carry: 'both';
   readonly arrows: true;
 }

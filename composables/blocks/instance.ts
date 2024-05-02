@@ -78,7 +78,6 @@ export class BlockInstance extends Eventfull {
       return {
         index: val.index,
         deregister: () => {
-          console.log('unmounted');
           this.inputs.splice(val.index, 1);
         },
       };
@@ -100,6 +99,7 @@ export class BlockInstance extends Eventfull {
 
     if (
       reason === FocusReason.Duplicate ||
+      reason === FocusReason.TurnInto ||
       reason === FocusReason.DeleteLast ||
       reason === FocusReason.ArrowPrevious
     ) {

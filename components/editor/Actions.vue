@@ -63,9 +63,15 @@ const { blocks, sorted, categories } = useBlocks();
           <template v-for="(category, index) in categories">
             <Divider v-if="sorted[category].length > 0 && index > 0" menu />
             <Button
-              v-for="{ name, icon } in sorted[category]"
+              v-for="{ name, icon, type } in sorted[category]"
               surface
               transparent
+              @click="
+                () => {
+                  component.handle?.turnInto(type);
+                  component.hide();
+                }
+              "
             >
               <div class="icon" v-html="icon" style="height: 1.5rem"></div>
               {{ name }}

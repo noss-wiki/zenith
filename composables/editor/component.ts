@@ -116,7 +116,7 @@ export class HandleComponent extends Component {
     this.ref.value.classList.remove('hidden');
   }
 
-  hide(id: string) {
+  hide(id: string | number | Block<string>) {
     const block = this._getBlock(id);
     if (this.active === undefined || this.active !== block) return;
     useLazy(() => {
@@ -173,8 +173,21 @@ export class HandleComponent extends Component {
 
     const data = this.last.instance.export(ExportReason.Duplicate);
     inserted.instance.import(data);
-    // FIX: Data gets deleted when focussing for some reason? and it errors
     useLazy(() => inserted.instance.focus(FocusReason.Duplicate));
+  }
+  turnInto(type: string = 'text') {
+    if (!this.mounted || !this.last) return false;
+    const inserted = this.addBelow(type, false);
+    if (!inserted) return false;
+
+    const data = this.last.instance.export(ExportReason.TurnInto);
+    inserted.instance.import(data);
+    this.editor.remove(this.last);
+
+    this.hide(this.last);
+    this.last = inserted;
+    this._moveHandle(inserted);
+    useLazy(() => inserted.instance.focus(FocusReason.TurnInto));
   }
 
   // helper
@@ -183,8 +196,10 @@ export class HandleComponent extends Component {
     if (!block.instance._attached) return;
     const editorRect = this.editor.editor.getBoundingClientRect();
     const blockRect = block.instance._attached.getBoundingClientRect();
+    const height =
+      this.last?.meta.centerHandle === true ? blockRect.height / 2 - 12 : 0;
 
-    const top = blockRect.top - editorRect.top;
+    const top = blockRect.top - editorRect.top + height;
     this.ref.value.style.setProperty('--offset-top', `${top}px`);
   }
 

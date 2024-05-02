@@ -118,6 +118,7 @@ export class Editor extends DOMEventfull {
 
   // Blocks
 
+  // TODO: Update this to the new BlockData content
   add<T extends string>(index: number, type: T, content?: string): Block<T> {
     const block = createBlock(type);
     if (index === 0) {
