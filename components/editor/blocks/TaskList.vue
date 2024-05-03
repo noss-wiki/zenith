@@ -10,7 +10,9 @@ export class Instance extends BlockInstance {
     type: 'task_list',
     category: 'list',
     inputs: 1,
-    centerHandle: true,
+    deleteBehaviour: 'text',
+    insertEmptyBehaviour: 'text',
+    insertTypeBehaviour: 'persistent',
     icon,
   } as const);
 

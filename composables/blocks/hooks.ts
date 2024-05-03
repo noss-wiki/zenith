@@ -46,4 +46,9 @@ export enum ExportReason {
    * When this block is transformed to another block.
    */
   TurnInto = 'turninto',
+  /**
+   * Simply to check if this block is empty
+   */
+  CheckEmpty = 'checkEmpty',
+  Carry = 'carry',
 }

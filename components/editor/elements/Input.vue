@@ -5,6 +5,7 @@ import type {
   InputData,
   AdvancedInputContent,
 } from '@/composables/blocks/data';
+import { ExportReason } from '@/composables/blocks/hooks';
 
 const props = defineProps<{
   instance: BlockInstance;
@@ -34,31 +35,50 @@ function clean(nodeList: NodeListOf<ChildNode>): ChildNode[] {
   return res;
 }
 
-function getContent(): InputData {
+function getContent<T extends boolean>(
+  nodes?: T
+): T extends true ? (InputContent & { node: Node })[] : InputData {
   if (!text) return [];
-  const res: InputData = [];
+  const res: (InputContent & { node?: Node })[] = [];
+  nodes ??= false as T;
 
   for (const node of clean(text.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE)
-      res.push({
-        type: 'text',
-        style: {},
-        content: node.textContent ?? '',
-      });
+      if (nodes)
+        res.push({
+          type: 'text',
+          style: {},
+          content: node.textContent ?? '',
+          node,
+        });
+      else
+        res.push({
+          type: 'text',
+          style: {},
+          content: node.textContent ?? '',
+        });
     else if (node.nodeType === Node.ELEMENT_NODE) {
       const ele = node as Element;
       if (ele.tagName === 'BR') continue;
       if (ele.tagName === 'SPAN' && ele.classList.contains('noss-text-node')) {
-        res.push({
-          type: 'text',
-          style: {}, // get style
-          content: ele.textContent ?? '',
-        });
+        if (nodes)
+          res.push({
+            type: 'text',
+            style: {}, // get style
+            content: ele.textContent ?? '',
+            node,
+          });
+        else
+          res.push({
+            type: 'text',
+            style: {}, // get style
+            content: ele.textContent ?? '',
+          });
       }
     }
   }
 
-  return res;
+  return res as T extends true ? (InputContent & { node: Node })[] : InputData;
 }
 
 function createTextNode(data: InputContent): Text | Element {
@@ -72,6 +92,14 @@ function createTextNode(data: InputContent): Text | Element {
   return res;
 }
 
+function appendBeforeEnd(element: Text | Element) {
+  const last = text.childNodes[text.childNodes.length - 1];
+  if ((last as Element).tagName === 'BR') {
+    text.removeChild(last);
+    text.append(element, last);
+  } else text.appendChild(element);
+}
+
 function* contentIter(
   content: InputData
 ): Generator<[InputContent, number], void, unknown> {
@@ -83,7 +111,7 @@ function* contentIter(
 function getDataAtChar(
   char: number | undefined,
   content: InputData = getContent()
-): AdvancedInputContent | undefined {
+): AdvancedInputContent {
   if (content.length === 0) {
     text.prepend(
       createTextNode({
@@ -143,20 +171,36 @@ function focusElement(node: Text | Element | Node, index: number) {
 
 const res = props.instance.register('input', {
   ref: textRef,
-
-  getContent() {
-    return getContent();
+  getContent(nodes) {
+    return getContent(nodes);
   },
-
   focus(char) {
     const data = getDataAtChar(char);
-    if (!data) return false;
 
     const block = text.childNodes[data.index];
     if (data.type === 'text') focusElement(block, data.char);
   },
-  carry(data) {},
+  carry(data) {
+    const content = getContent(true);
+    const last = content[content.length - 1];
+    if (
+      last &&
+      last.type === 'text' &&
+      data[0].type === 'text' &&
+      last.style == data[0].style
+    ) {
+      last.content += data[0].content;
+      last.node.textContent = last.content;
+      data.splice(0, 1);
+    }
 
+    for (const i of data) {
+      if (i.type === 'text') appendBeforeEnd(createTextNode(i));
+      else {
+        // add other blocks
+      }
+    }
+  },
   import(data) {
     if (!text) return;
     text.innerHTML = '';
@@ -167,9 +211,41 @@ const res = props.instance.register('input', {
         // add other blocks
       }
     }
+
+    text.appendChild(document.createElement('br'));
   },
-  export() {
-    return getContent();
+  export(reason, char) {
+    if (reason !== ExportReason.Carry) return getContent();
+    char ??= 0;
+
+    const content = getContent();
+    const data = getDataAtChar(char, content);
+    let res: InputData = content.slice(data.index + 1);
+    for (let i = data.index; i < content.length; i++)
+      text.removeChild(text.childNodes[i]);
+
+    if (data.type !== 'text')
+      res.unshift({
+        type: data.type,
+        style: data.style,
+        content: data.content,
+      });
+    else {
+      res.unshift({
+        type: 'text',
+        style: data.style,
+        content: data.content.slice(data.char).trim(),
+      });
+      appendBeforeEnd(
+        createTextNode({
+          type: 'text',
+          style: data.style,
+          content: data.content.slice(0, data.char).trim(),
+        })
+      );
+    }
+
+    return res;
   },
 });
 

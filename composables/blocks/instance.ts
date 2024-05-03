@@ -23,6 +23,7 @@ interface Register {
   };
 }
 
+// TODO: Hooks that get called when the block has multiple inputs (like insert, etc.)
 export class BlockInstance extends Eventfull {
   static readonly meta: ResolvedBlockDescription;
   readonly meta: ResolvedBlockDescription;
@@ -111,7 +112,7 @@ export class BlockInstance extends Eventfull {
     }
   }
 
-  carry(content: string) {}
+  carry(data: BlockData) {}
 
   import(data: BlockData) {
     // TODO: Check if this.meta and data.meta are compatible
@@ -157,13 +158,6 @@ export class BlockInstanceInteractable {
     if (i < 0) return;
 
     this.instance.inputs[i].focus(char);
-  }
-
-  carry(content: string) {
-    const i = this.instance.inputs.length - 1;
-    if (i < 0) return;
-
-    this.instance.inputs[i].carry(content);
   }
 }
 

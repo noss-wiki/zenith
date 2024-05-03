@@ -1,4 +1,9 @@
-import type { InputData, AdvancedInputContent, ImportData } from './data';
+import type {
+  InputData,
+  InputContent,
+  AdvancedInputContent,
+  ImportData,
+} from './data';
 import type { ExportReason } from './hooks';
 
 export type { BlockInstance, BlockInstanceInteractable } from './instance';
@@ -39,12 +44,40 @@ export interface BlockDescription {
    */
   readonly icon: string;
   /**
+   * Specifies what should happen when backspace is pressed when there is no content in the block
+   * - delete; the block will be deleted
+   * - text; the block will be turned into a text input
+   *
+   * @default "delete"
+   */
+  deleteBehaviour?: 'delete' | 'text';
+  /**
+   * Specifies what should happen when a new block is inserted, because enter was pressed in this block (not with ctrl+enter)
+   * - insert; inserts a new block
+   * - text; turns this block into a text input
+   *
+   * @default "insert"
+   */
+  insertEmptyBehaviour?: 'insert' | 'text';
+  /**
+   * Specifies what should happen when a new block is inserted related to the new block's type, because enter was pressed in this block (not with ctrl+enter)
+   * - text; the block will be a text input
+   * - persistent; the block type will be the same as this one
+   *
+   * @default "text"
+   */
+  insertTypeBehaviour?: 'text' | 'persistent';
+  // TODO: it should not center to full height when content overflows, instead it should only center to the height of a single layer
+  /**
    * Will center the handle to the height of the block, only to be used for single line blocks
+   *
+   * @default false
    */
   centerHandle?: boolean;
   /**
    * - Forwards means that content from this block can be carried to previous.
    * - Backwards means that content from next block can be carried to this block.
+   *
    * @default "both"
    */
   carry?: 'forwards' | 'backwards' | 'both';
@@ -53,6 +86,7 @@ export interface BlockDescription {
    * e.g. you are at the end of the previous block and press arrow right,
    * if this value is true it will move into the first input of the block,
    * if it is manual you will have to define its functionality with the hook and false simply disables this functionality.
+   *
    * @default true
    */
   arrows?: boolean;
@@ -60,6 +94,9 @@ export interface BlockDescription {
 
 export type ResolvedBlockDescription = Readonly<Required<BlockDescription>>;
 export interface BlockDescriptionDefaults extends BlockDescription {
+  readonly deleteBehaviour: 'delete';
+  readonly insertEmptyBehaviour: 'insert';
+  readonly insertTypeBehaviour: 'text';
   readonly centerHandle: false;
   readonly carry: 'both';
   readonly arrows: true;
@@ -67,15 +104,21 @@ export interface BlockDescriptionDefaults extends BlockDescription {
 
 export interface InputRegisterHandler {
   ref: Ref<HTMLElement | undefined>;
-  getContent(): InputData;
+  getContent<T extends boolean>(
+    nodes?: T
+  ): T extends true ? (InputContent & { node: Node })[] : InputData;
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */
   focus(char?: number): void;
-  carry(content: string): void;
+  carry(data: InputData): void;
 
   import(data: ImportData): void;
-  export(reason: ExportReason): InputData;
+  /**
+   * @param reason What the export will be used for
+   * @param char Will be the char at which to carry if reason is `ExportReason.carry`
+   */
+  export(reason: ExportReason, char?: number): InputData;
 }
 
 export interface InputRegister extends InputRegisterHandler {

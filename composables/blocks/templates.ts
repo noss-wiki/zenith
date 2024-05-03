@@ -62,6 +62,9 @@ export function createBlock<T extends string>(type: T): Block<T> {
   let root = ele.children[0] as HTMLElement;
   instance.attach(root);
 
+  block.meta.deleteBehaviour ??= 'delete';
+  block.meta.insertEmptyBehaviour ??= 'insert';
+  block.meta.insertTypeBehaviour ??= 'text';
   block.meta.carry ??= 'both';
   block.meta.arrows ??= true;
 

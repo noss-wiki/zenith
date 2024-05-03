@@ -1,5 +1,5 @@
 import type { Block } from '../blocks';
-import { FocusReason } from '../blocks/hooks';
+import { ExportReason, FocusReason } from '../blocks/hooks';
 import type { ComponentType, ComponentClass, Component } from './component';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
@@ -130,7 +130,7 @@ export class Editor extends DOMEventfull {
       curr.root.insertAdjacentElement('afterend', block.root);
     }
 
-    if (content) block.interact.carry(content);
+    //if (content) block.interact.carry(content);
     this.blocks.splice(index, 0, block);
     return block;
   }
@@ -174,28 +174,52 @@ export class Editor extends DOMEventfull {
     if (!block || index === -1) return;
     const type = e.inputType as InputTypes;
 
-    let carry: string | undefined;
-
     if (type === 'insertParagraph') {
+      let carry = false;
       // Remove linebreak
-      const node = (window.getSelection()?.anchorNode as Text) ?? undefined;
-      if (node.data.endsWith('\n')) node.data = node.data.slice(0, -1);
+      const node = (window.getSelection()?.anchorNode ?? undefined) as
+        | Text
+        | undefined;
+      if (node && node.data.endsWith('\n')) node.data = node.data.slice(0, -1);
       else {
-        // check if caret was inside of the content, if so carry to new block
-        const sel = window.getSelection();
-        if (sel) {
-          const offset = sel.focusOffset - 1;
-          carry = node.data.slice(offset).trim();
-          node.data = node.data.slice(0, offset);
-        }
+        carry = true;
       }
 
-      // Insert new node
-      const text = createBlock('text');
-      this.blocks.splice(index + 1, 0, text);
-      block.root.insertAdjacentElement('afterend', text.root);
-      if (carry) text.interact.carry(carry);
-      text.instance.focus(FocusReason.Insert);
+      if (block.meta.inputs === 1) {
+        const data = block.instance.export(ExportReason.CheckEmpty);
+
+        if (
+          block.meta.insertEmptyBehaviour === 'text' &&
+          (data.inputs[0].content.length === 0 ||
+            data.inputs[0].content[0].content === '') // no InputData, or no content in first InputData
+        ) {
+          const text = this.add(index + 1, 'text');
+          this.remove(block);
+
+          useLazy(() => text.instance.focus(FocusReason.TurnInto));
+        } else {
+          let type = 'text';
+
+          if (block.meta.insertTypeBehaviour === 'persistent')
+            type = block.meta.type;
+
+          // Insert new node
+          const text = this.add(index + 1, type);
+          if (carry) {
+            const char = getCharAtSelection(block);
+            if (char >= 0) {
+              const res = block.instance.inputs[0].export(
+                ExportReason.Carry,
+                char
+              );
+              text.instance.inputs[0].carry(res);
+            }
+          }
+          text.instance.focus(FocusReason.Insert);
+        }
+      } else {
+        // call hook to determine what to do
+      }
     }
   }
 
@@ -219,18 +243,28 @@ export class Editor extends DOMEventfull {
         sel &&
         sel.anchorNode &&
         sel.focusOffset < 1 &&
-        index > 0 &&
         (block.meta.carry === 'backwards' || block.meta.carry === 'both')
       ) {
-        const prev = this.blocks[index - 1];
-        const content = (sel.anchorNode as Text).data ?? '';
+        if (block.meta.deleteBehaviour === 'delete' && index > 0) {
+          const prev = this.blocks[index - 1];
+          const data = block.instance.export(ExportReason.Carry);
+          const content = (sel.anchorNode as Text).data ?? '';
 
-        prev.interact.carry(content.trim());
-        if (content.length > 0) prev.interact.focus(-content.length);
-        else prev.interact.focus();
+          /*  prev.instance.carry(data);
+          if (content.length > 0) prev.interact.focus(-content.length);
+          else  */ prev.instance.focus(FocusReason.ArrowPrevious);
 
-        block.unmount();
-        this.blocks.splice(index, 1);
+          this.component('handle')?.hide(block);
+          block.unmount();
+          this.blocks.splice(index, 1);
+        } else if (block.meta.deleteBehaviour === 'text') {
+          const text = this.add(index + 1, 'text');
+          const data = block.instance.export(ExportReason.TurnInto);
+          text.instance.import(data);
+          this.remove(block);
+
+          useLazy(() => text.instance.focus(FocusReason.TurnInto));
+        }
       }
     }
     // Arrow keys
@@ -266,4 +300,32 @@ export class Editor extends DOMEventfull {
       }
     }
   }
+}
+
+/**
+ * Only works on blocks with a single input
+ * @returns `-1` means it failed, other positive values indicate the char
+ */
+function getCharAtSelection(block: Block): number {
+  const sel = window.getSelection();
+  if (!sel) return -1;
+
+  const input = block.instance.inputs[0];
+  const content = input.getContent(true);
+  const data = content.find((e) => e.node === sel.focusNode);
+  if (!data) return -1; // last char
+
+  let res = 0;
+  const index = content.indexOf(data);
+  if (index > 0) {
+    for (let i = 0; i < index; i++) {
+      if (content[i].type === 'text') res += content[i].content.length;
+      else res++;
+    }
+  }
+
+  if (data.type !== 'text') res++;
+  else res += sel.focusOffset - 1;
+
+  return res;
 }
