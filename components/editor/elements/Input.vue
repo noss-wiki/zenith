@@ -141,7 +141,6 @@ function focusElement(node: Text | Element | Node, index: number) {
   }, 1);
 }
 
-// TODO: Add support for multiple textnodes in the p element; neede for inline blocks, like: inline equation, etc.
 const res = props.instance.register('input', {
   ref: textRef,
 
@@ -190,7 +189,3 @@ onUnmounted(() => res?.deregister());
     <br />
   </p>
 </template>
-
-<style scoped>
-/* stylelint-disable-next-line no-empty-source */
-</style>

@@ -11,6 +11,7 @@ import * as text from '@/components/editor/blocks/Text.vue';
 import * as header from '@/components/editor/blocks/Header.vue';
 import * as sub_header from '@/components/editor/blocks/SubHeader.vue';
 import * as sub_sub_header from '@/components/editor/blocks/SubSubHeader.vue';
+import * as task_list from '@/components/editor/blocks/TaskList.vue';
 
 type BlockImport = {
   Instance: typeof BlockInstance;
@@ -27,6 +28,7 @@ export const blocks: BlockInfo[] = [
   info(header),
   info(sub_header),
   info(sub_sub_header),
+  info(task_list),
 ];
 export const defaultBlock = blocks[0];
 export const meta = blocks.map((e) => e.meta);

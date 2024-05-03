@@ -31,7 +31,6 @@ onUnmounted(() => instance.unmount());
 </template>
 
 <style scoped>
-/* stylelint-disable-next-line selector-class-pattern */
 .noss-sub_header-block {
   font-size: 1.5em;
   font-weight: 600;

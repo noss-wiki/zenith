@@ -35,6 +35,7 @@ const background = computed(() => {
 <template>
   <div
     class="btn"
+    role="button"
     :class="{
       'btn-large': large,
       'btn-small': small,
