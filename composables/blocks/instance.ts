@@ -5,7 +5,7 @@ import type {
   InputRegister,
   InputRegisterHandler,
 } from '.';
-import type { BlockData, ImportData } from './data';
+import type { BlockData, ImportData, InputData } from './data';
 import { FocusReason, ExportReason } from './hooks';
 import { Logger } from '../classes/logger';
 import { Eventfull } from '../classes/eventfull';
@@ -112,7 +112,13 @@ export class BlockInstance extends Eventfull {
     }
   }
 
-  carry(data: BlockData) {}
+  carry(data: InputData) {
+    const length = getInputDataLength(data);
+    const input = this.inputs[this.inputs.length - 1];
+    if (!input) return false;
+    input.carry(data);
+    useLazy(() => input.focus(-length));
+  }
 
   import(data: BlockData) {
     // TODO: Check if this.meta and data.meta are compatible
@@ -171,4 +177,10 @@ export function description<T extends BlockDescription>(desc: T): Defaults<T> {
   desc.carry ??= 'both';
   desc.arrows ??= true;
   return desc as Defaults<T>;
+}
+
+function getInputDataLength(data: InputData): number {
+  let res = 0;
+  for (const i of data) res += i.type === 'text' ? i.content.length : 1;
+  return res;
 }

@@ -1,6 +1,7 @@
 import type { Block } from '../blocks';
-import { ExportReason, FocusReason } from '../blocks/hooks';
 import type { ComponentType, ComponentClass, Component } from './component';
+import type { InputData } from '../blocks/data';
+import { ExportReason, FocusReason } from '../blocks/hooks';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './component';
 import { createBlock } from '../blocks';
@@ -220,7 +221,10 @@ export class Editor extends DOMEventfull {
       } else {
         // call hook to determine what to do
       }
-    }
+    } /*  else {
+      console.log(type);
+      e.preventDefault();
+    } */
   }
 
   #keydown(e: KeyboardEvent) {
@@ -234,25 +238,26 @@ export class Editor extends DOMEventfull {
 
     if (e.key === 'Enter' && e.ctrlKey) {
       // Insert new node
+      // doesn't work
       const text = createBlock('text');
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
       text.instance.focus(FocusReason.Insert);
     } else if (e.key === 'Backspace') {
+      const prev = this.blocks[index - 1];
       if (
         sel &&
         sel.anchorNode &&
         sel.focusOffset < 1 &&
         (block.meta.carry === 'backwards' || block.meta.carry === 'both')
       ) {
-        if (block.meta.deleteBehaviour === 'delete' && index > 0) {
-          const prev = this.blocks[index - 1];
-          const data = block.instance.export(ExportReason.Carry);
-          const content = (sel.anchorNode as Text).data ?? '';
-
-          /*  prev.instance.carry(data);
-          if (content.length > 0) prev.interact.focus(-content.length);
-          else  */ prev.instance.focus(FocusReason.ArrowPrevious);
+        if (
+          block.meta.deleteBehaviour === 'delete' &&
+          prev &&
+          prev.meta.deleteNextCarryBehaviour === true
+        ) {
+          const data = block.instance.inputs[0].export(ExportReason.Carry);
+          prev.instance.carry(data);
 
           this.component('handle')?.hide(block);
           block.unmount();
@@ -279,7 +284,6 @@ export class Editor extends DOMEventfull {
           prev.instance.focus(FocusReason.ArrowPrevious);
       } else if (e.key === 'ArrowRight' && index < this.blocks.length - 1) {
         const next = this.blocks[index + 1];
-        // TODO: selection's anchornode is the paragraph element if ctrl was used, but then offset doesn't work
         // TODO: work diffierently if shift is used (selections; focus the block and focus next block if pressed again, etc.)
         if (next.meta.arrows === true) {
           const input =

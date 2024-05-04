@@ -4,6 +4,7 @@ import type {
   InputContent,
   InputData,
   AdvancedInputContent,
+  InputContentStyle,
 } from '@/composables/blocks/data';
 import { ExportReason } from '@/composables/blocks/hooks';
 
@@ -81,6 +82,12 @@ function getContent<T extends boolean>(
   return res as T extends true ? (InputContent & { node: Node })[] : InputData;
 }
 
+function getContentLength(content: InputData): number {
+  let res = 0;
+  for (const i of content) res += i.type === 'text' ? i.content.length : 1;
+  return res;
+}
+
 function createTextNode(data: InputContent): Text | Element {
   if (Object.keys(data.style).length === 0)
     return document.createTextNode(data.content);
@@ -123,6 +130,8 @@ function getDataAtChar(
     content = getContent();
   }
 
+  if (char && char < 0) char = getContentLength(content) + char;
+
   if (char === 0)
     return {
       ...content[0],
@@ -130,7 +139,7 @@ function getDataAtChar(
       index: 0,
       node: text.childNodes[0] as Text | Element,
     };
-  else if (char) {
+  else if (char !== undefined) {
     for (const [node, i] of contentIter(content)) {
       if (node.type === 'text') char -= node.content.length;
       else char -= 1;
@@ -146,11 +155,11 @@ function getDataAtChar(
   }
 
   const data = content[content.length - 1];
-  const length = data.type === 'text' ? data.content.length : 1;
+  const offset = data.type === 'text' ? data.content.length : 1;
 
   return {
     ...data,
-    char: length,
+    char: offset,
     index: content.length - 1,
     node: text.childNodes[content.length - 1] as Text | Element,
   };
@@ -169,6 +178,21 @@ function focusElement(node: Text | Element | Node, index: number) {
   }, 1);
 }
 
+function compareStyles(
+  style1: InputContentStyle,
+  style2: InputContentStyle
+): boolean {
+  if (Object.keys(style1).length !== Object.keys(style2).length) return false;
+  for (const prop in style1) {
+    if (
+      style1[prop as keyof InputContentStyle] !==
+      style2[prop as keyof InputContentStyle]
+    )
+      return false;
+  }
+  return true;
+}
+
 const res = props.instance.register('input', {
   ref: textRef,
   getContent(nodes) {
@@ -183,11 +207,12 @@ const res = props.instance.register('input', {
   carry(data) {
     const content = getContent(true);
     const last = content[content.length - 1];
+
     if (
       last &&
       last.type === 'text' &&
       data[0].type === 'text' &&
-      last.style == data[0].style
+      compareStyles(last.style, data[0].style)
     ) {
       last.content += data[0].content;
       last.node.textContent = last.content;

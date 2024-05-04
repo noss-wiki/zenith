@@ -2,7 +2,7 @@ import type { BlockDescription, ResolvedBlockDescription } from '.';
 
 export type InputContent = {
   type: 'text';
-  style: {};
+  style: InputContentStyle;
   content: string;
 };
 export type AdvancedInputContent = InputContent & {
@@ -20,3 +20,5 @@ export interface BlockData {
   meta: ResolvedBlockDescription;
   inputs: ImportData[];
 }
+
+export interface InputContentStyle {}

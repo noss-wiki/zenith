@@ -44,13 +44,21 @@ export interface BlockDescription {
    */
   readonly icon: string;
   /**
-   * Specifies what should happen when backspace is pressed when there is no content in the block
-   * - delete; the block will be deleted
-   * - text; the block will be turned into a text input
+   * Specifies what should happen when backspace is pressed and focusOffset is 0
+   * - delete; the block will be deleted, if that's allowed by the previous block
+   * - text; the block will be turned into a text input, content will be carried
    *
    * @default "delete"
    */
   deleteBehaviour?: 'delete' | 'text';
+  /**
+   * Specifies what should happen when the next block is deleted
+   * - true; this block will carry content of next block
+   * - false; this block won't carry and the next block, will stay the same
+   *
+   * @default true
+   */
+  deleteNextCarryBehaviour?: boolean;
   /**
    * Specifies what should happen when a new block is inserted, because enter was pressed in this block (not with ctrl+enter)
    * - insert; inserts a new block
@@ -74,6 +82,7 @@ export interface BlockDescription {
    * @default false
    */
   centerHandle?: boolean;
+  // TODO: this can probably be removed
   /**
    * - Forwards means that content from this block can be carried to previous.
    * - Backwards means that content from next block can be carried to this block.
@@ -95,6 +104,7 @@ export interface BlockDescription {
 export type ResolvedBlockDescription = Readonly<Required<BlockDescription>>;
 export interface BlockDescriptionDefaults extends BlockDescription {
   readonly deleteBehaviour: 'delete';
+  readonly deleteNextCarryBehaviour: false;
   readonly insertEmptyBehaviour: 'insert';
   readonly insertTypeBehaviour: 'text';
   readonly centerHandle: false;
