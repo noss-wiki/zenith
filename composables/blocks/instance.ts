@@ -86,7 +86,6 @@ export class BlockInstance extends Eventfull {
   }
 
   // Hooks
-  // TODO: Add hook(s) for carrying and importing content
   // ?TODO: Add result returns to hooks, that indicated whether or not the action was successfull
 
   /**
@@ -117,7 +116,7 @@ export class BlockInstance extends Eventfull {
     const input = this.inputs[this.inputs.length - 1];
     if (!input) return false;
     input.carry(data);
-    useLazy(() => input.focus(-length));
+    useLazy(() => input.focus(length === 0 ? undefined : -length));
   }
 
   import(data: BlockData) {
