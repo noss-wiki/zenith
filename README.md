@@ -1,6 +1,7 @@
 # TODO
 - feat: chromium compatibility; chrome inserts div as child in p element
 
+- Forward input events to the focussed block
 - Saving and loading of pages (using the existing export and import hooks)
 - slash commands (also @ inline blocks, like mentions etc. and lists)
 - Undo and redo
@@ -8,7 +9,9 @@
   - listen to input events releted to this in editor
 - Formatting
   - Allow modifying style on input nodes
-  - Listen for shortcuts
+  - Listen on shortcuts
+- Shortcuts
+  - Event handler
 - Copy and pasting
 
 - Improve block title and descriptions

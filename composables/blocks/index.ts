@@ -1,6 +1,7 @@
 import type {
   InputData,
   InputContent,
+  NodeInputContent,
   AdvancedInputContent,
   ImportData,
 } from './data';
@@ -116,7 +117,7 @@ export interface InputRegisterHandler {
   ref: Ref<HTMLElement | undefined>;
   getContent<T extends boolean>(
     nodes?: T
-  ): T extends true ? (InputContent & { node: Node })[] : InputData;
+  ): T extends true ? NodeInputContent[] : InputData;
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */

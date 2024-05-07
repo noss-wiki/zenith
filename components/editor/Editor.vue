@@ -11,10 +11,11 @@ onUnmounted(() => editor.unmount());
 <template>
   <div class="editor" ref="root" noss-editor-root>
     <div class="header"></div>
-    <div class="content" noss-editor-content></div>
+    <div class="content" noss-editor-content data-content-editable-host></div>
     <div class="handle">
       <EditorHandle :instance="editor" />
       <EditorActions :instance="editor" />
+      <EditorSelectionMenu :instance="editor" />
     </div>
   </div>
 </template>

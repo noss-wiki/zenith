@@ -5,6 +5,9 @@ export type InputContent = {
   style: InputContentStyle;
   content: string;
 };
+export type NodeInputContent = InputContent & {
+  node: Text | Element;
+};
 export type AdvancedInputContent = InputContent & {
   char: number;
   index: number;

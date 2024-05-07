@@ -7,6 +7,7 @@ defineProps<{
    * It adds negative padding of 0.5rem to both sides
    */
   menu?: boolean;
+  vertical?: boolean;
 }>();
 </script>
 
@@ -14,7 +15,8 @@ defineProps<{
   <div
     class="divider"
     :class="{
-      menu: $props.menu,
+      menu,
+      vertical,
     }"
   ></div>
 </template>
@@ -24,11 +26,17 @@ defineProps<{
   background: var(--color-inactive-dimmed);
   height: 1px;
   width: 100%;
+  flex-shrink: 0;
 
   &.menu {
     width: calc(100% + 1rem);
     margin: 0.5rem 0;
     margin-inline: -0.5rem;
+  }
+
+  &.vertical {
+    width: 1px;
+    height: 100%;
   }
 }
 </style>

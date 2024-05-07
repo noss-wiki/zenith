@@ -1,9 +1,9 @@
 import type { Block } from '../blocks';
-import type { ComponentType, ComponentClass, Component } from './component';
+import type { ComponentType, ComponentClass, Component } from './components';
 import type { InputData } from '../blocks/data';
 import { ExportReason, FocusReason } from '../blocks/hooks';
 import { DOMEventfull } from '../classes/DOMEventfull';
-import { createComponent } from './component';
+import { createComponent } from './components';
 import { createBlock } from '../blocks';
 
 type InputTypes =
@@ -236,6 +236,7 @@ export class Editor extends DOMEventfull {
 
     const sel = window.getSelection();
 
+    // ctrl + enter
     if (e.key === 'Enter' && e.ctrlKey) {
       // Insert new node
       // doesn't work
@@ -243,7 +244,9 @@ export class Editor extends DOMEventfull {
       this.blocks.splice(index, 1, text);
       block.root.insertAdjacentElement('afterend', text.root);
       text.instance.focus(FocusReason.Insert);
-    } else if (e.key === 'Backspace') {
+    }
+    // Backspace
+    else if (e.key === 'Backspace') {
       const prev = this.blocks[index - 1];
       if (
         sel &&
@@ -303,6 +306,7 @@ export class Editor extends DOMEventfull {
         }
       }
     }
+    // TODO: Format shortcuts, listen for the shortcut, find targeted input and calculate begin and end characters of selection
   }
 }
 

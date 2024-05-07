@@ -1,70 +1,7 @@
-import type { Editor } from '.';
-import type { Block } from '../blocks';
-import { ExportReason, FocusReason } from '../blocks/hooks';
-import { Eventfull } from '../classes/eventfull';
-import { Logger } from '../classes/logger';
-import useLazy from '../useLazy';
-
-export type ComponentType = 'handle' | 'actions';
-export type ComponentClass<T extends ComponentType> = T extends 'actions'
-  ? ActionsComponent
-  : T extends 'handle'
-  ? HandleComponent
-  : Component;
-
-export function createComponent<T extends ComponentType>(
-  type: T,
-  editor: Editor
-): ComponentClass<T> {
-  if (type === 'actions')
-    return new ActionsComponent(type, editor) as ComponentClass<T>;
-  else if (type === 'handle')
-    return new HandleComponent(type, editor) as ComponentClass<T>;
-  return new Component(type, editor) as ComponentClass<T>;
-}
-
-export class Component extends Eventfull {
-  type: ComponentType;
-  /**
-   * This should be an element ref to the root of the component template
-   * `ref.value` will always be defined if `mounted` is true, otherwise it might be undefined, even if type says it isn't
-   */
-  ref: Ref<HTMLElement> = ref<HTMLElement>() as Ref<HTMLElement>;
-  mounted = false;
-  editor: Editor;
-
-  constructor(type: ComponentType, editor: Editor) {
-    super();
-    this.type = type;
-    this.editor = editor;
-  }
-
-  mount(ref: Ref<HTMLElement | undefined>): boolean | void {
-    if (ref.value === undefined) return false;
-    this.ref = ref as Ref<HTMLElement>;
-    return (this.mounted = true);
-  }
-
-  unmount() {
-    super.unmount();
-    this.mounted = false;
-  }
-}
-
-// TODO: Move these to seperate files?
-
-export class ActionsComponent extends Component {
-  type = 'actions' as const;
-  show = ref<boolean>(false);
-
-  get handle() {
-    return this.editor.component('handle');
-  }
-
-  hide() {
-    this.show.value = false;
-  }
-}
+import type { Block } from '@/composables/blocks';
+import { Component } from './component';
+import { Logger } from '@/composables/classes/logger';
+import { ExportReason, FocusReason } from '@/composables/blocks/hooks';
 
 type Default<T> = T extends string ? T : 'text';
 

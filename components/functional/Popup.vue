@@ -1,5 +1,8 @@
 <script setup lang="ts">
 const show = defineModel<boolean>({ required: true });
+const props = defineProps<{
+  beforeClose?: () => void;
+}>();
 let root: HTMLElement;
 
 watchEffect(() => {
@@ -12,7 +15,10 @@ watchEffect(() => {
 
 const click = (e: MouseEvent) => {
   const t = e.target as HTMLElement;
-  if (show.value === true && t.tagName === 'HTML') show.value = false;
+  if (show.value === true && t.tagName === 'HTML') {
+    show.value = false;
+    props.beforeClose?.();
+  }
 };
 
 onMounted(() => document.addEventListener('click', click));
