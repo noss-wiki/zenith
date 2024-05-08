@@ -1,41 +1,42 @@
 import type { Block, InputRegister } from '@/composables/blocks';
-import type { NodeInputContent } from '@/composables/blocks/data';
+import type {
+  NodeInputContent,
+  InputData,
+  BlockSelection,
+  FormatType,
+} from '@/composables/blocks/data';
 import { Component } from './component';
-
-interface BlockSelection {
-  block: Block;
-  input: InputRegister;
-  /**
-   * The number of the char in the block input content at which the selection anchor is positioned,
-   * which means this can be more than the end.
-   */
-  start: number;
-  /**
-   * The number of the char in the block input content at which the selection focus is positioned,
-   * which means this can be less than the start.
-   */
-  end: number;
-}
 
 export class SelectionComponent extends Component {
   type = 'selection' as const;
-  show = ref<boolean>(true);
+  show = ref<boolean>(false);
 
   selection: BlockSelection | null = null;
 
   mount(ref: Ref<HTMLElement | undefined>) {
     if (super.mount(ref) === false) return;
 
-    this.on('element:mouseup', (e) => this.#onMouseup(), document.body);
+    this.on('element:selectionchange', (e) => this.#update());
+    //this.on('element:mouseup', (e) => this.#onMouseup());
+  }
+
+  format(type: FormatType) {
+    if (!this.selection) return;
+    this.selection.input.format({
+      ...this.selection,
+      type,
+    });
   }
 
   deselect() {
     this.selection = null;
+    this.show.value = false;
   }
 
-  #onMouseup() {
+  #update() {
     const sel = window.getSelection();
-    if (!sel || sel.focusOffset === sel.anchorOffset) return;
+    if (!sel) return;
+    if (sel.focusOffset === sel.anchorOffset) return this.deselect();
 
     const block = this.editor.blocks.find((e) =>
       e.root.contains(sel.anchorNode)
@@ -46,14 +47,20 @@ export class SelectionComponent extends Component {
     if (!block || !input) return;
 
     const content = input.getContent(true);
-    const startNode = content.find((e) => e.node === sel.anchorNode);
-    const endNode = content.find((e) => e.node === sel.focusNode);
-    if (!startNode || !endNode) return;
-
-    const start = getCharToNode(content, startNode, sel.anchorOffset);
-    const end = getCharToNode(content, endNode, sel.focusOffset);
+    let start, end;
+    if (sel.focusNode !== input.ref.value) {
+      const startNode = content.find((e) => e.node === sel.anchorNode);
+      const endNode = content.find((e) => e.node === sel.focusNode);
+      if (!startNode || !endNode) return;
+      start = getCharToNode(content, startNode, sel.anchorOffset);
+      end = getCharToNode(content, endNode, sel.focusOffset);
+    } else {
+      start = 0;
+      end = getContentLength(content);
+    }
 
     this.selection = { block, input, start, end };
+    this.show.value = true;
   }
 }
 
@@ -73,5 +80,11 @@ function getCharToNode(
     else res += content[i].content.length;
   }
 
+  return res;
+}
+
+function getContentLength(content: InputData): number {
+  let res = 0;
+  for (const i of content) res += i.type === 'text' ? i.content.length : 1;
   return res;
 }

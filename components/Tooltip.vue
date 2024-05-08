@@ -1,59 +1,25 @@
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    /**
-     * The delay in miliseconds it takes for the tooltip to open on button hover
-     * @default 600
-     */
-    delay?: number;
+    position?: 'top' | 'bottom' | 'left' | 'right';
+    center?: boolean;
   }>(),
   {
-    delay: 600,
+    position: 'top',
+    center: false,
   }
 );
-
-// TODO: This code shoul propably be moved to the button component
-
-let tooltip: HTMLDivElement;
-let timeout: number | null;
-let timing = false;
-
-const enter = () => {
-  if (timing === true) return;
-  timeout = window.setTimeout(() => {
-    tooltip.classList.add('active');
-  }, props.delay);
-  timing = true;
-};
-
-const leave = () => {
-  if (typeof timeout !== 'number') return;
-  window.clearTimeout(timeout);
-  tooltip.classList.remove('active');
-  timing = false;
-};
-
-let parent: HTMLElement | undefined;
-
-onMounted(() => {
-  parent =
-    tooltip.parentElement && tooltip.parentElement.classList.contains('btn')
-      ? tooltip.parentElement
-      : undefined;
-  if (!parent) return;
-  parent.addEventListener('mouseenter', enter);
-  parent.addEventListener('mouseleave', leave);
-});
-
-onUnmounted(() => {
-  if (!parent) return;
-  parent.removeEventListener('mouseenter', enter);
-  parent.removeEventListener('mouseleave', leave);
-});
 </script>
 
 <template>
-  <div class="tooltip" ref="tooltip">
+  <div
+    class="tooltip"
+    :class="{
+      'tooltip-center': center,
+    }"
+    v-bind:class="props.position"
+    ref="tooltip"
+  >
     <slot />
   </div>
 </template>
@@ -65,25 +31,33 @@ onUnmounted(() => {
   left: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   gap: 0.1rem;
-  padding: 0.25rem;
-  width: 8rem;
+  padding: 0.25rem 0.5rem;
   background: var(--color-hover-surface);
   font-size: 0.75em;
+
+  &.tooltip-center {
+    align-items: center;
+    justify-content: center;
+  }
 }
 </style>
 
 <style>
 .btn > .tooltip {
-  top: calc(var(--size) + 0.5rem);
+  top: unset;
+  bottom: calc(var(--size) + 0.5rem);
   left: 50%;
   translate: -50%;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
   border-radius: var(--radius-small);
+
+  &.bottom {
+    top: calc(var(--size) + 0.5rem);
+    bottom: unset;
+  }
 }
 
 .btn > .tooltip.active {

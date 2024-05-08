@@ -18,8 +18,10 @@ export class Eventfull {
 
   unmount() {
     for (const i of this.#listeners) {
-      if (!i.type.startsWith('element:') || !i.element) return;
-      i.element.removeEventListener(i.type.replace('element:', ''), i.cb);
+      if (!i.type.startsWith('element:')) continue;
+      if (!i.element)
+        document.removeEventListener(i.type.replace('element:', ''), i.cb);
+      else i.element.removeEventListener(i.type.replace('element:', ''), i.cb);
     }
   }
 
@@ -31,8 +33,8 @@ export class Eventfull {
   on(type: string, cb: (e: any) => void): void;
   on(type: string, cb: (e: any) => void, element?: Element) {
     if (type.startsWith('element:')) {
-      if (!element) return;
-      element.addEventListener(type.replace('element:', ''), cb);
+      if (!element) document.addEventListener(type.replace('element:', ''), cb);
+      else element.addEventListener(type.replace('element:', ''), cb);
     }
 
     this.#listeners.push({

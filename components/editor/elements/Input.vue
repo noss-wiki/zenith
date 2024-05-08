@@ -3,6 +3,7 @@ import type { BlockInstance } from '@/composables/blocks';
 import type {
   InputContent,
   InputData,
+  NodeInputContent,
   AdvancedInputContent,
   InputContentStyle,
 } from '@/composables/blocks/data';
@@ -38,7 +39,7 @@ function clean(nodeList: NodeListOf<ChildNode>): ChildNode[] {
 
 function getContent<T extends boolean>(
   nodes?: T
-): T extends true ? (InputContent & { node: Node })[] : InputData {
+): T extends true ? NodeInputContent[] : InputData {
   if (!text) return [];
   const res: (InputContent & { node?: Node })[] = [];
   nodes ??= false as T;
@@ -79,7 +80,7 @@ function getContent<T extends boolean>(
     }
   }
 
-  return res as T extends true ? (InputContent & { node: Node })[] : InputData;
+  return res as T extends true ? NodeInputContent[] : InputData;
 }
 
 function getContentLength(content: InputData): number {
@@ -225,6 +226,11 @@ const res = props.instance.register('input', {
         // add other blocks
       }
     }
+  },
+  format(format) {
+    // check if they are in the same node, if so seperate the content into new node
+    // else calculate the multiple nodes it should create
+    // also check if there are the same nodes after each other that could be merged
   },
   import(data) {
     if (!text) return;

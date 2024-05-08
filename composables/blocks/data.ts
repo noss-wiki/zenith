@@ -1,4 +1,9 @@
-import type { BlockDescription, ResolvedBlockDescription } from '.';
+import type {
+  BlockDescription,
+  ResolvedBlockDescription,
+  Block,
+  InputRegister,
+} from '.';
 
 export type InputContent = {
   type: 'text';
@@ -25,3 +30,24 @@ export interface BlockData {
 }
 
 export interface InputContentStyle {}
+
+export interface BlockSelection {
+  block: Block;
+  input: InputRegister;
+  /**
+   * The number of the char in the block input content at which the selection anchor is positioned,
+   * which means this can be more than the end.
+   */
+  start: number;
+  /**
+   * The number of the char in the block input content at which the selection focus is positioned,
+   * which means this can be less than the start.
+   */
+  end: number;
+}
+
+export type FormatType = 'bold' | 'italic' | 'underline' | 'strike-through';
+
+export interface BlockFormat extends BlockSelection {
+  type: FormatType;
+}

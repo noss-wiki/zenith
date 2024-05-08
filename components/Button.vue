@@ -11,11 +11,19 @@ const props = defineProps<{
   surface?: boolean;
   outline?: boolean;
   transparent?: boolean;
+  square?: boolean;
   // layout
   iconOnly?: boolean;
   tooltip?: boolean;
+  /**
+   * The delay in miliseconds it takes for the tooltip to open on button hover
+   * @default 600
+   */
+  tooltipDelay?: number;
   dropdown?: boolean;
 }>();
+
+let button: HTMLElement;
 
 const color = computed(() => {
   if (typeof props.color === 'string') {
@@ -30,12 +38,48 @@ const background = computed(() => {
     else return props.color;
   } else return colors.hoverSurface;
 });
+
+// tooltip
+const delay = props.tooltipDelay ?? 600;
+let tooltip: HTMLDivElement | null = null;
+let timeout: number | null;
+let timing = false;
+
+const enter = () => {
+  if (!tooltip || timing === true) return;
+  timeout = window.setTimeout(() => {
+    tooltip?.classList.add('active');
+  }, delay);
+  timing = true;
+};
+
+const leave = () => {
+  if (typeof timeout !== 'number' || !tooltip) return;
+  window.clearTimeout(timeout);
+  tooltip.classList.remove('active');
+  timing = false;
+};
+
+onMounted(() => {
+  if (!props.tooltip || !button) return;
+  tooltip = button.querySelector('.tooltip');
+  if (!tooltip) return;
+  button.addEventListener('mouseenter', enter);
+  button.addEventListener('mouseleave', leave);
+});
+
+onUnmounted(() => {
+  if (!button) return;
+  button.removeEventListener('mouseenter', enter);
+  button.removeEventListener('mouseleave', leave);
+});
 </script>
 
 <template>
   <div
     class="btn"
     role="button"
+    ref="button"
     :class="{
       'btn-large': large,
       'btn-small': small,
@@ -43,8 +87,9 @@ const background = computed(() => {
       'btn-outline': outline,
       'btn-transparent': transparent,
       'btn-icon-only': props.iconOnly,
-      'btn-tooltip': tooltip,
+      'btn-tooltip': props.tooltip,
       'btn-dropdown': dropdown,
+      'btn-square': square,
     }"
   >
     <slot />
@@ -126,9 +171,11 @@ const background = computed(() => {
   flex-shrink: 0;
   --color: var(--color-text);
 }
-</style>
 
-<style>
+.btn-square {
+  border-radius: 0;
+}
+
 .btn-tooltip,
 .btn-dropdown {
   position: relative;

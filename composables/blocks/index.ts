@@ -4,6 +4,7 @@ import type {
   NodeInputContent,
   AdvancedInputContent,
   ImportData,
+  BlockFormat,
 } from './data';
 import type { ExportReason } from './hooks';
 
@@ -123,6 +124,7 @@ export interface InputRegisterHandler {
    */
   focus(char?: number): void;
   carry(data: InputData): void;
+  format(format: BlockFormat): void;
 
   import(data: ImportData): void;
   /**
