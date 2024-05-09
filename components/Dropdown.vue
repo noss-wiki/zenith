@@ -1,7 +1,16 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    position?: 'right' | 'left' | 'bottom';
+  }>(),
+  {
+    position: 'right',
+  }
+);
+</script>
 
 <template>
-  <div class="dropdown-menu">
+  <div class="dropdown-menu" v-bind:class="position">
     <div class="content">
       <slot />
     </div>
@@ -11,10 +20,21 @@
 <style scoped>
 .dropdown-menu {
   position: absolute;
-  right: -21rem;
-  top: -0.5rem;
+  right: -22rem;
+  top: -1.5rem;
   display: flex;
-  padding-left: 1rem;
+  padding: 1rem;
+
+  &.left {
+    right: unset;
+    left: -21rem;
+  }
+
+  &.bottom {
+    right: unset;
+    left: -1rem;
+    top: calc(var(--size, 2.5rem));
+  }
 }
 
 .content {

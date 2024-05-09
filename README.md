@@ -13,6 +13,7 @@
 - Shortcuts
   - Event handler
 - Copy and pasting
+  - Markdown compatibility; change to correct format of nodes upon pasting
 
 - Improve block title and descriptions
 

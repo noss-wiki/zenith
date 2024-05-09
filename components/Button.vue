@@ -17,7 +17,7 @@ const props = defineProps<{
   tooltip?: boolean;
   /**
    * The delay in miliseconds it takes for the tooltip to open on button hover
-   * @default 600
+   * @default 300
    */
   tooltipDelay?: number;
   dropdown?: boolean;
@@ -40,7 +40,7 @@ const background = computed(() => {
 });
 
 // tooltip
-const delay = props.tooltipDelay ?? 600;
+const delay = props.tooltipDelay ?? 300;
 let tooltip: HTMLDivElement | null = null;
 let timeout: number | null;
 let timing = false;
@@ -95,6 +95,7 @@ onUnmounted(() => {
     <slot />
     <MaterialSymbol
       v-if="dropdown"
+      class="dropdown-arrow"
       symbol="chevron_right"
       style="margin-left: auto; margin-right: -0.25rem"
     />
@@ -179,5 +180,11 @@ onUnmounted(() => {
 .btn-tooltip,
 .btn-dropdown {
   position: relative;
+}
+</style>
+
+<style>
+.dropdown-menu.bottom + .dropdown-arrow {
+  rotate: 90deg;
 }
 </style>

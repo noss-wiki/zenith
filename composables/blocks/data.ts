@@ -7,7 +7,7 @@ import type {
 
 export type InputContent = {
   type: 'text';
-  style: InputContentStyle;
+  style: FormatType[];
   content: string;
 };
 export type NodeInputContent = InputContent & {
@@ -29,8 +29,6 @@ export interface BlockData {
   inputs: ImportData[];
 }
 
-export interface InputContentStyle {}
-
 export interface BlockSelection {
   block: Block;
   input: InputRegister;
@@ -46,7 +44,19 @@ export interface BlockSelection {
   end: number;
 }
 
-export type FormatType = 'bold' | 'italic' | 'underline' | 'strike-through';
+export type FormatType =
+  | 'bold'
+  | 'italic'
+  | 'underline'
+  | 'strike-through'
+  | 'accent';
+export const formatTypes = [
+  'bold',
+  'italic',
+  'underline',
+  'strike-through',
+  'accent',
+] as const;
 
 export interface BlockFormat extends BlockSelection {
   type: FormatType;

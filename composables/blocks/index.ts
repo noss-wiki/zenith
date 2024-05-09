@@ -5,6 +5,7 @@ import type {
   AdvancedInputContent,
   ImportData,
   BlockFormat,
+  BlockSelection,
 } from './data';
 import type { ExportReason } from './hooks';
 
@@ -122,7 +123,7 @@ export interface InputRegisterHandler {
   /**
    * Handles the focussing of the element, this will only be called after mounting, so you don't have to worry about refs to elements
    */
-  focus(char?: number): void;
+  focus(char?: number | BlockSelection): void;
   carry(data: InputData): void;
   format(format: BlockFormat): void;
 

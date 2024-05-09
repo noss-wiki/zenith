@@ -5,8 +5,9 @@ import type {
   InputData,
   NodeInputContent,
   AdvancedInputContent,
-  InputContentStyle,
+  FormatType,
 } from '@/composables/blocks/data';
+import { formatTypes } from '@/composables/blocks/data';
 import { ExportReason } from '@/composables/blocks/hooks';
 
 const props = defineProps<{
@@ -49,31 +50,36 @@ function getContent<T extends boolean>(
       if (nodes)
         res.push({
           type: 'text',
-          style: {},
+          style: [],
           content: node.textContent ?? '',
           node,
         });
       else
         res.push({
           type: 'text',
-          style: {},
+          style: [],
           content: node.textContent ?? '',
         });
     else if (node.nodeType === Node.ELEMENT_NODE) {
       const ele = node as Element;
       if (ele.tagName === 'BR') continue;
       if (ele.tagName === 'SPAN' && ele.classList.contains('noss-text-node')) {
+        const style: FormatType[] = [];
+        for (const [_key, value] of ele.classList.entries())
+          if (formatTypes.includes(value as FormatType))
+            style.push(value as FormatType);
+
         if (nodes)
           res.push({
             type: 'text',
-            style: {}, // get style
+            style,
             content: ele.textContent ?? '',
             node,
           });
         else
           res.push({
             type: 'text',
-            style: {}, // get style
+            style,
             content: ele.textContent ?? '',
           });
       }
@@ -90,14 +96,21 @@ function getContentLength(content: InputData): number {
 }
 
 function createTextNode(data: InputContent): Text | Element {
-  if (Object.keys(data.style).length === 0)
-    return document.createTextNode(data.content);
+  if (data.style.length === 0) return document.createTextNode(data.content);
 
   const res = document.createElement('span');
   res.textContent = data.content;
   res.className = 'noss-text-node';
-  // apply style
+  for (const i of data.style) res.classList.add(i);
+
   return res;
+}
+
+function appendAtIndex<T extends Text | Element>(index: number, element: T): T {
+  const beforeNode = text.childNodes[index];
+  if (!beforeNode) text.appendChild(element);
+  else text.insertBefore(element, beforeNode);
+  return element;
 }
 
 function appendBeforeEnd(element: Text | Element) {
@@ -124,7 +137,7 @@ function getDataAtChar(
     text.prepend(
       createTextNode({
         type: 'text',
-        style: {},
+        style: [],
         content: '',
       })
     );
@@ -145,7 +158,7 @@ function getDataAtChar(
       if (node.type === 'text') char -= node.content.length;
       else char -= 1;
 
-      if (char <= 0)
+      if (char < 0)
         return {
           ...node,
           char: node.content.length + char,
@@ -166,12 +179,12 @@ function getDataAtChar(
   };
 }
 
-function focusElement(node: Text | Element | Node, index: number) {
+function focusElement(node: Text | Element | Node, start: number) {
   const range = document.createRange();
   const sel = window.getSelection();
   if (!sel) return;
 
-  range.setStart(node, index);
+  range.setStart(node, start);
   range.collapse(true);
   sel.removeAllRanges();
   setTimeout(() => {
@@ -179,19 +192,61 @@ function focusElement(node: Text | Element | Node, index: number) {
   }, 1);
 }
 
-function compareStyles(
-  style1: InputContentStyle,
-  style2: InputContentStyle
-): boolean {
-  if (Object.keys(style1).length !== Object.keys(style2).length) return false;
-  for (const prop in style1) {
-    if (
-      style1[prop as keyof InputContentStyle] !==
-      style2[prop as keyof InputContentStyle]
-    )
-      return false;
+function focusNodes(
+  startNode: Element | Text | Node,
+  endNode: Element | Text | Node,
+  startChar: number = 0,
+  endChar?: number,
+  reversed: boolean = false
+) {
+  const range = document.createRange();
+  const sel = window.getSelection();
+  if (!sel) return;
+
+  if (
+    startNode.nodeType === Node.ELEMENT_NODE &&
+    (startNode as Element).tagName === 'SPAN'
+  )
+    startNode = startNode.childNodes[0];
+  if (
+    endNode.nodeType === Node.ELEMENT_NODE &&
+    (endNode as Element).tagName === 'SPAN'
+  )
+    endNode = endNode.childNodes[0];
+
+  endChar ??= endNode.textContent?.length ?? 0;
+
+  if (reversed) {
+    range.setStart(endNode, endChar);
+    range.collapse(true);
+  } else {
+    range.setStart(startNode, startChar);
+    range.setEnd(endNode, endChar);
+  }
+
+  sel.removeAllRanges();
+  setTimeout(() => {
+    sel.addRange(range);
+    if (reversed) sel.extend(startNode, startChar);
+  }, 1);
+}
+
+function compareStyles(style1: FormatType[], style2: FormatType[]): boolean {
+  if (style1.length !== style2.length) return false;
+  for (let i = 0; i < style1.length; i++) {
+    if (!style2.includes(style1[i])) return false;
   }
   return true;
+}
+
+function addToStyle(style: FormatType[], add: FormatType): FormatType[] {
+  style = style.slice();
+  if (!style.includes(add)) {
+    style.push(add);
+    return style;
+  }
+  style.splice(style.indexOf(add), 1);
+  return style;
 }
 
 const res = props.instance.register('input', {
@@ -200,10 +255,39 @@ const res = props.instance.register('input', {
     return getContent(nodes);
   },
   focus(char) {
-    const data = getDataAtChar(char);
+    if (typeof char === 'number') {
+      const data = getDataAtChar(char);
 
-    const block = text.childNodes[data.index];
-    if (data.type === 'text') focusElement(block, data.char);
+      const block = text.childNodes[data.index];
+      if (data.type === 'text') focusElement(block, data.char);
+    } else if (char !== undefined) {
+      const start = char.start < char.end ? char.start : char.end;
+      const end = start === char.start ? char.end : char.start;
+      const reversed = start === char.end;
+
+      let content = getContent();
+      let startNode = getDataAtChar(start, content);
+      let endNode = getDataAtChar(end, content);
+      if (
+        startNode.type === 'text' &&
+        startNode.char === startNode.content.length &&
+        content[startNode.index + 1] !== undefined
+      )
+        startNode = {
+          ...content[startNode.index + 1],
+          char: 0,
+          index: startNode.index + 1,
+          node: text.childNodes[startNode.index + 1] as Element | Text,
+        };
+
+      focusNodes(
+        startNode.node,
+        endNode.node,
+        startNode.char,
+        endNode.char,
+        reversed
+      );
+    }
   },
   carry(data) {
     const content = getContent(true);
@@ -228,9 +312,108 @@ const res = props.instance.register('input', {
     }
   },
   format(format) {
+    if (format.start === format.end) return;
+    // correct order
+    const start = format.start < format.end ? format.start : format.end;
+    const end = start === format.start ? format.end : format.start;
+    const reversed = start === format.end;
+    let startChar = 0;
+    let endChar = undefined;
+
+    let content = getContent();
+    let startNode = getDataAtChar(start, content);
+    let endNode = getDataAtChar(end, content);
+
+    if (
+      (startNode.type === 'text' && start === startNode.content.length) || // end of text node
+      (startNode.type !== 'text' && start === 1) // end of non-text node
+    )
+      startNode = {
+        ...content[startNode.index + 1],
+        char: 0,
+        index: startNode.index + 1,
+        node: text.childNodes[startNode.index + 1] as Element | Text,
+      };
+
+    if (startNode.index === endNode.index) {
+      // same node
+      if (startNode.type !== 'text') return; // non-text node can't be formatted
+
+      if (endNode.char === startNode.content.length && startNode.char === 0) {
+        const style = addToStyle(startNode.style, format.type);
+        if (
+          content[startNode.index - 1] &&
+          content[startNode.index - 1].type === 'text' &&
+          compareStyles(content[startNode.index - 1].style, style)
+        ) {
+          // new and prev node are the same
+          text.childNodes[startNode.index - 1].textContent += startNode.content;
+          text.removeChild(startNode.node);
+          startChar = content[startNode.index - 1].content.length;
+        } else {
+          if (style.length === 0 || startNode.style.length === 0) {
+            // node needs to be replaced
+            appendAtIndex(
+              startNode.index,
+              createTextNode({
+                type: 'text',
+                content: startNode.content,
+                style: style,
+              })
+            );
+            text.removeChild(startNode.node);
+          } else {
+            // only style needs to be updated
+            const span = startNode.node as HTMLSpanElement;
+            span.className = 'noss-text-node';
+            for (const i of style) span.classList.add(i);
+          }
+        }
+      } else if (endNode.char === startNode.content.length) {
+        // last char is at the end of current node
+        startNode.node.textContent = startNode.content.slice(0, startNode.char);
+        appendAtIndex(
+          startNode.index + 1,
+          createTextNode({
+            type: 'text',
+            content: startNode.content.slice(startNode.char),
+            style: addToStyle(startNode.style, format.type),
+          })
+        );
+      } else if (startNode.char === 0) {
+        // first char is at the beginning of current node
+        startNode.node.textContent = startNode.content.slice(endNode.char);
+        appendAtIndex(
+          startNode.index,
+          createTextNode({
+            type: 'text',
+            content: startNode.content.slice(0, endNode.char),
+            style: addToStyle(startNode.style, format.type),
+          })
+        );
+      }
+    }
     // check if they are in the same node, if so seperate the content into new node
     // else calculate the multiple nodes it should create
     // also check if there are the same nodes after each other that could be merged
+
+    // focus correct nodes
+    content = getContent();
+    startNode = getDataAtChar(start, content);
+    endNode = getDataAtChar(end, content);
+    if (
+      startNode.type === 'text' &&
+      startNode.char === startNode.content.length &&
+      content[startNode.index + 1] !== undefined
+    )
+      startNode = {
+        ...content[startNode.index + 1],
+        char: 0,
+        index: startNode.index + 1,
+        node: text.childNodes[startNode.index + 1] as Element | Text,
+      };
+
+    focusNodes(startNode.node, endNode.node, startChar, endChar, reversed);
   },
   import(data) {
     if (!text) return;
@@ -296,3 +479,37 @@ onUnmounted(() => res?.deregister());
     <br />
   </p>
 </template>
+
+<style>
+[data-content-editable-leaf] span.accent {
+  --color: var(--color-primary);
+
+  color: var(--color);
+}
+
+[data-content-editable-leaf] span.bold {
+  font-weight: 700;
+}
+
+[data-content-editable-leaf] span.italic {
+  font-style: italic;
+}
+
+[data-content-editable-leaf] span.strike-through {
+  text-decoration: line-through;
+}
+
+[data-content-editable-leaf] span.underline {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: var(--color, var(--color-text));
+    width: 100%;
+    height: 2px;
+  }
+}
+</style>

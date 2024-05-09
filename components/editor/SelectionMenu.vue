@@ -4,8 +4,9 @@ import type { Editor } from '@/composables/editor';
 import BoldIcon from '@/assets/icons/format/bold.svg';
 import ClearIcon from '@/assets/icons/format/clear.svg';
 import CodeIcon from '@/assets/icons/format/code.svg';
-import ColorIcon from '@/assets/icons/format/color.svg';
+import AccentIcon from '@/assets/icons/format/color.svg';
 import ItalicIcon from '@/assets/icons/format/italic.svg';
+import LinkIcon from '@/assets/icons/format/link.svg';
 import MentionIcon from '@/assets/icons/format/mention.svg';
 import UnderlineIcon from '@/assets/icons/format/underline.svg';
 import StrikeThroughIcon from '@/assets/icons/format/strike-through.svg';
@@ -18,6 +19,8 @@ let selectionMenu = ref<HTMLElement>();
 const component = instance.attach('selection');
 onMounted(() => component.mount(selectionMenu));
 onUnmounted(() => instance.detach(component));
+
+const { blocks, sorted, categories } = useBlocks();
 </script>
 
 <template>
@@ -33,13 +36,22 @@ onUnmounted(() => instance.detach(component));
         }
       "
     >
-      <Button surface transparent square> Link </Button>
-      <Divider vertical />
-      <Button surface transparent square> Text </Button>
-      <Divider vertical />
-      <Button surface transparent icon-only square>
-        <ColorIcon />
-        <!-- add dropdown to select color -->
+      <Button surface transparent square dropdown>
+        Text
+        <Dropdown position="bottom">
+          <template v-for="(category, index) in categories">
+            <Divider v-if="sorted[category].length > 0 && index > 0" menu />
+            <Button
+              v-for="{ name, icon, type } in sorted[category]"
+              surface
+              transparent
+              @click="component.turnInto(type)"
+            >
+              <div class="icon" v-html="icon" style="height: 1.5rem"></div>
+              {{ name }}
+            </Button>
+          </template>
+        </Dropdown>
       </Button>
       <Divider vertical />
       <Button
@@ -48,9 +60,29 @@ onUnmounted(() => instance.detach(component));
         icon-only
         square
         tooltip
+        @click="() => component.format('accent')"
+      >
+        <AccentIcon
+          class="style-icon"
+          :data-active="component.styles.accent.value"
+        />
+        <Tooltip>
+          Accent
+          <span class="shortcut">Ctrl + Shift + H</span>
+        </Tooltip>
+      </Button>
+      <Button
+        surface
+        transparent
+        icon-only
+        square
+        tooltip
         @click="() => component.format('bold')"
       >
-        <BoldIcon />
+        <BoldIcon
+          class="style-icon"
+          :data-active="component.styles.bold.value"
+        />
         <Tooltip>
           Bold
           <span class="shortcut">Ctrl + B</span>
@@ -64,7 +96,10 @@ onUnmounted(() => instance.detach(component));
         tooltip
         @click="() => component.format('italic')"
       >
-        <ItalicIcon />
+        <ItalicIcon
+          class="style-icon"
+          :data-active="component.styles.italic.value"
+        />
         <Tooltip>
           Italicize
           <span class="shortcut">Ctrl + I</span>
@@ -78,7 +113,10 @@ onUnmounted(() => instance.detach(component));
         tooltip
         @click="() => component.format('underline')"
       >
-        <UnderlineIcon />
+        <UnderlineIcon
+          class="style-icon"
+          :data-active="component.styles.underline.value"
+        />
         <Tooltip>
           Underline
           <span class="shortcut">Ctrl + U</span>
@@ -92,7 +130,10 @@ onUnmounted(() => instance.detach(component));
         tooltip
         @click="() => component.format('strike-through')"
       >
-        <StrikeThroughIcon />
+        <StrikeThroughIcon
+          class="style-icon"
+          :data-active="component.styles['strike-through'].value"
+        />
         <Tooltip>
           Strike-through
           <span class="shortcut">Ctrl + Shift + X or Alt + Shift + 5</span>
@@ -113,16 +154,47 @@ onUnmounted(() => instance.detach(component));
           <span class="shortcut">Ctrl + E</span>
         </Tooltip>
       </Button>
+      <Button surface transparent icon-only square tooltip>
+        <LinkIcon />
+        <Tooltip>
+          Add link
+          <span class="shortcut">Ctrl + K</span>
+        </Tooltip>
+      </Button>
+      <Divider vertical />
+      <Button surface transparent icon-only square tooltip>
+        <ClearIcon />
+        <Tooltip>
+          Clear formatting
+          <span class="shortcut">Ctrl + /</span>
+        </Tooltip>
+      </Button>
+      <Divider vertical />
+      <Button surface transparent icon-only square tooltip>
+        <MaterialSymbol symbol="comment" style="font-size: 1.25rem" />
+        <Tooltip> Comment on selected text </Tooltip>
+      </Button>
+      <Button
+        surface
+        transparent
+        icon-only
+        square
+        tooltip
+        @click="component.select()"
+      >
+        <MaterialSymbol symbol="more_horiz" />
+        <Tooltip> Select entire block </Tooltip>
+      </Button>
     </div>
   </Transition>
 </template>
 
 <style scoped>
 .selection-menu {
-  --offset: 0px;
+  --offset: 14rem;
 
   position: absolute;
-  top: calc(11rem + var(--offset));
+  top: calc(var(--offset) - 3rem);
   left: 0;
   display: flex;
   height: 2.5rem;
@@ -135,6 +207,14 @@ onUnmounted(() => instance.detach(component));
 
   & > :last-child {
     border-radius: 0 var(--radius-default) var(--radius-default) 0;
+  }
+}
+
+.style-icon {
+  transition: color 0.3s ease;
+
+  &[data-active='true'] {
+    color: var(--color-primary);
   }
 }
 

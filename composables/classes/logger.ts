@@ -18,7 +18,6 @@ export class Logger {
    * @param stack Will display this at the end of the warning, to help indentify function call. Format something like: `Logger.error`
    */
   error(msg: string, stack?: string) {
-    console.log(this.#name);
     if (stack) console.error(`${fstring(this.#name, msg)}\n  at ${stack}`);
     else console.error(fstring(this.#name, msg));
   }
