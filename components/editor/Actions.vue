@@ -99,7 +99,7 @@ const { blocks, sorted, categories } = useBlocks();
   --block-left: 0px;
 
   position: absolute;
-  top: calc(14rem + var(--block-top));
+  top: calc(var(--block-top));
   left: -2rem;
   z-index: 100;
   transform: translate(-100%, -50%);

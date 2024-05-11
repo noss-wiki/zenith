@@ -2,9 +2,11 @@
 withDefaults(
   defineProps<{
     expandable?: boolean;
+    iconOnly?: boolean;
   }>(),
   {
     expandable: false,
+    iconOnly: false,
   }
 );
 </script>
@@ -14,7 +16,9 @@ withDefaults(
     <div class="button">
       <div class="info">
         <div class="icon">R</div>
-        <span class="name">Robin de Vos</span>
+        <Transition name="label">
+          <span v-show="!iconOnly" class="name">Robin de Vos</span>
+        </Transition>
       </div>
       <!-- <Arrow v-if="$props.expandable" style="rotate: 180deg" /> -->
     </div>
@@ -54,6 +58,7 @@ withDefaults(
 }
 
 .icon {
+  min-width: 2rem;
   width: 2rem;
   height: 2rem;
   background: var(--color-primary);
@@ -70,6 +75,8 @@ withDefaults(
 
 span.name {
   font-weight: 500;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .dropdown {
@@ -80,5 +87,16 @@ span.name {
   height: 10rem;
   background: var(--color-raised-surface);
   border-radius: var(--radius-default);
+}
+
+.label-enter-active,
+.label-leave-active {
+  transition: width 0.3s ease;
+  width: 100%;
+}
+
+.label-enter-from,
+.label-leave-to {
+  width: 0;
 }
 </style>

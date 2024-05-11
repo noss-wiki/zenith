@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import WorkspaceSelect from '@/components/WorkspaceSelect.vue';
 
-const { click } = useClickLevel();
+const open = ref(true);
+const hover = ref(false);
 </script>
 
 <template>
   <div class="wrapper">
-    <nav class="editor-nav">
+    <nav class="editor-nav" :class="{ collapsed: !open, hover }">
       <div class="top">
-        <WorkspaceSelect width="calc(var(--width) + 3.5rem)" />
-        <Button icon-only transparent large>
+        <Transition name="workspace-select">
+          <WorkspaceSelect v-show="open" width="calc(var(--width) + 3.5rem)" />
+        </Transition>
+        <Button icon-only transparent large class="collapse-btn">
           <MaterialSymbol symbol="keyboard_double_arrow_left" />
-          <!-- <Tooltip> Collapse </Tooltip> -->
         </Button>
       </div>
       <div class="links">
@@ -30,7 +32,7 @@ const { click } = useClickLevel();
           </Button>
         </div>
       </div>
-      <Account expandable />
+      <Account expandable :icon-only="!open" />
     </nav>
     <main>
       <Editor />
@@ -53,6 +55,7 @@ nav {
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
+  transition: width 0.3s ease;
 
   & > .top {
     display: flex;
@@ -66,6 +69,14 @@ nav {
     flex-direction: column;
     gap: 0.5rem;
   }
+
+  [data-reduced-motion] & {
+    transition: none;
+  }
+
+  &.collapsed {
+    width: 4rem;
+  }
 }
 
 main {
@@ -73,5 +84,32 @@ main {
   height: 100%;
   display: grid;
   place-items: center;
+}
+
+.collapse-btn {
+  transition: rotate 0.3s ease;
+
+  [data-reduced-motion] & {
+    transition: none;
+  }
+
+  nav.collapsed & {
+    rotate: 180deg;
+  }
+}
+
+.workspace-select-enter-active,
+.workspace-select-leave-active {
+  transition: width 0.3s ease;
+  overflow: hidden;
+
+  [data-reduced-motion] & {
+    transition: none;
+  }
+}
+
+.workspace-select-enter-from,
+.workspace-select-leave-to {
+  width: 0;
 }
 </style>

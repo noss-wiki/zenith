@@ -260,6 +260,11 @@ const res = props.instance.register('input', {
 
       const block = text.childNodes[data.index];
       if (data.type === 'text') focusElement(block, data.char);
+    } else if (char === undefined) {
+      // focus last
+      const content = getContent(true);
+      const node = content[content.length - 1];
+      if (node.type === 'text') focusElement(node.node, node.content.length);
     } else if (char !== undefined) {
       const start = char.start < char.end ? char.start : char.end;
       const end = start === char.start ? char.end : char.start;

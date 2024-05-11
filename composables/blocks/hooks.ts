@@ -12,13 +12,9 @@ export enum FocusReason {
    */
   TurnInto = 'turnInto',
   /**
-   * When a previous block is deleted and this block gets focussed because of it.
+   * When the next block is deleted and this block gets focussed because of it.
    */
   Delete = 'delete',
-  /**
-   * When the last block is deleted and this is the new last block.
-   */
-  DeleteLast = 'deleteLast',
   /**
    * When arrow keys were used from the previous block to travel (downwards) into this block.
    *

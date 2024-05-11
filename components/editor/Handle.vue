@@ -56,7 +56,7 @@ onUnmounted(() => instance.detach(component));
 
   position: absolute;
   z-index: 10;
-  top: calc(14rem + var(--offset-top));
+  top: calc(var(--offset-top));
   left: -3.75rem;
   display: flex;
   align-items: center;

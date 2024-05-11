@@ -130,7 +130,10 @@ export class SelectionComponent extends Component {
     this.show.value = true;
     if (this.ref.value) {
       const rect = block.root.getBoundingClientRect();
-      this.ref.value.style.setProperty('--offset', `${rect.top}px`);
+      this.ref.value.style.setProperty(
+        '--offset',
+        `calc(${rect.top}px - 14rem)`
+      );
     }
   }
 }

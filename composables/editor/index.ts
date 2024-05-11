@@ -119,8 +119,7 @@ export class Editor extends DOMEventfull {
 
   // Blocks
 
-  // TODO: Update this to the new BlockData content
-  add<T extends string>(index: number, type: T, content?: string): Block<T> {
+  add<T extends string>(index: number, type: T): Block<T> {
     const block = createBlock(type);
     if (index === 0) {
       if (this.blocks.length > 0)
@@ -131,7 +130,6 @@ export class Editor extends DOMEventfull {
       curr.root.insertAdjacentElement('afterend', block.root);
     }
 
-    //if (content) block.interact.carry(content);
     this.blocks.splice(index, 0, block);
     return block;
   }
@@ -236,14 +234,10 @@ export class Editor extends DOMEventfull {
 
     const sel = window.getSelection();
 
-    // ctrl + enter
+    // ctrl + enter; inserts new node below, no matter where cursor is located
     if (e.key === 'Enter' && e.ctrlKey) {
-      // Insert new node
-      // doesn't work
-      const text = createBlock('text');
-      this.blocks.splice(index, 1, text);
-      block.root.insertAdjacentElement('afterend', text.root);
-      text.instance.focus(FocusReason.Insert);
+      const text = this.add(index + 1, 'text');
+      useLazy(() => text.instance.focus(FocusReason.Insert));
     }
     // Backspace
     else if (e.key === 'Backspace') {
@@ -251,7 +245,9 @@ export class Editor extends DOMEventfull {
       if (
         sel &&
         sel.anchorNode &&
-        sel.focusOffset < 1 &&
+        sel.anchorOffset === 0 &&
+        sel.focusOffset === 0 &&
+        block.meta.inputs === 1 &&
         (block.meta.carry === 'backwards' || block.meta.carry === 'both')
       ) {
         if (

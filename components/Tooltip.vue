@@ -35,6 +35,7 @@ const props = withDefaults(
   padding: 0.25rem 0.5rem;
   background: var(--color-hover-surface);
   font-size: 0.75em;
+  white-space: nowrap;
 
   &.tooltip-center {
     align-items: center;

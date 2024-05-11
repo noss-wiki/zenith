@@ -10,12 +10,14 @@ onUnmounted(() => editor.unmount());
 
 <template>
   <div class="editor" ref="root" noss-editor-root>
-    <div class="header"></div>
-    <div class="content" noss-editor-content data-content-editable-host></div>
-    <div class="handle">
-      <EditorHandle :instance="editor" />
-      <EditorActions :instance="editor" />
-      <EditorSelectionMenu :instance="editor" />
+    <div class="inner">
+      <div class="header"></div>
+      <div class="content" noss-editor-content data-content-editable-host></div>
+      <div class="components">
+        <EditorHandle :instance="editor" />
+        <EditorActions :instance="editor" />
+        <EditorSelectionMenu :instance="editor" />
+      </div>
     </div>
   </div>
 </template>
@@ -24,8 +26,20 @@ onUnmounted(() => editor.unmount());
 .editor {
   --block-hover-padding: 6rem;
 
-  isolation: isolate;
   padding-top: 14rem;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* breaks overflow-x which cuts of the actions menu */
+
+  /* overflow-y: auto; */
+}
+
+.inner {
+  isolation: isolate;
   width: 60rem;
   height: 100%;
   position: relative;
@@ -36,5 +50,6 @@ onUnmounted(() => editor.unmount());
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  overflow-x: hidden;
 }
 </style>

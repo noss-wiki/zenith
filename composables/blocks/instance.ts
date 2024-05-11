@@ -100,7 +100,7 @@ export class BlockInstance extends Eventfull {
     if (
       reason === FocusReason.Duplicate ||
       reason === FocusReason.TurnInto ||
-      reason === FocusReason.DeleteLast ||
+      reason === FocusReason.Delete ||
       reason === FocusReason.ArrowPrevious
     ) {
       // focus at last character
