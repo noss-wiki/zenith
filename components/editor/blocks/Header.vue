@@ -1,6 +1,5 @@
 <script lang="ts">
 import { description, BlockInstance } from '@/composables/blocks/instance';
-import { SingleInputBlockInstance } from '@/composables/blocks/singleInput';
 import icon from '@/assets/icons/blocks/header.svg?raw';
 
 export class Instance extends BlockInstance {

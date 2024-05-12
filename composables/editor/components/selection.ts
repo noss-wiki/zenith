@@ -4,6 +4,7 @@ import type {
   InputData,
   BlockSelection,
   FormatType,
+  AdvancedInputContent,
 } from '@/composables/blocks/data';
 import { formatTypes } from '@/composables/blocks/data';
 import { Component } from './component';
@@ -25,7 +26,6 @@ export class SelectionComponent extends Component {
     if (super.mount(ref) === false) return;
 
     this.on('element:selectionchange', (e) => this.#update());
-    //this.on('element:mouseup', (e) => this.#onMouseup());
   }
 
   turnInto(type: string = 'text') {
@@ -83,43 +83,33 @@ export class SelectionComponent extends Component {
     if (!block || !input) return;
 
     const content = input.getContent(true);
-    let start, end, style;
-    if (sel.focusNode !== input.ref.value) {
+    let start = 0,
+      end = 0,
+      style: FormatType[] = [];
+
+    if (sel.anchorNode === input.ref.value)
+      if (sel.anchorOffset === 0) start = 0;
+      else start = getContentLength(content);
+    else {
       let startNode = content.find(
-        (e) =>
-          e.node === sel.anchorNode ||
-          (sel.anchorNode !== null &&
-            Array.from(e.node.childNodes).includes(sel.anchorNode as ChildNode))
+        (e) => e.node === sel.anchorNode || e.node.contains(sel.anchorNode)
       );
-      let endNode = content.find(
-        (e) =>
-          e.node === sel.focusNode ||
-          (sel.focusNode !== null &&
-            Array.from(e.node.childNodes).includes(sel.focusNode as ChildNode))
-      );
-      if (!startNode || !endNode) return;
-
+      if (!startNode) return;
       start = getCharToNode(content, startNode, sel.anchorOffset);
-      end = getCharToNode(content, endNode, sel.focusOffset);
-
-      let ei = content.indexOf(endNode);
-      if (
-        endNode.type === 'text' &&
-        sel.focusOffset === endNode.content.length &&
-        content[ei + 1] !== undefined
-      )
-        endNode = content[ei + 1];
-
-      style = getStylesAtSelection(content, startNode, endNode);
-    } else {
-      start = 0;
-      end = getContentLength(content);
-      style = getStylesAtSelection(
-        content,
-        content[0],
-        content[content.length - 1]
-      );
     }
+
+    if (sel.focusNode === input.ref.value)
+      if (sel.focusOffset === 0) end = 0;
+      else end = getContentLength(content);
+    else {
+      let endNode = content.find(
+        (e) => e.node === sel.focusNode || e.node.contains(sel.focusNode)
+      );
+      if (!endNode) return;
+      end = getCharToNode(content, endNode, sel.focusOffset);
+    }
+
+    style = getStylesAtSelection(content, start, end);
 
     for (const prop in this.styles)
       this.styles[prop as keyof typeof this.styles].value = style.includes(
@@ -147,7 +137,7 @@ function getCharToNode(
   if (index === -1) return -1;
   else if (index === 0) return char;
 
-  let res = char;
+  let res = node.type === 'text' ? char : 0;
 
   for (let i = 0; i < index; i++) {
     if (content[i].type !== 'text') res += 1;
@@ -159,23 +149,70 @@ function getCharToNode(
 
 function getStylesAtSelection(
   content: NodeInputContent[],
-  start: NodeInputContent,
-  end: NodeInputContent
-) {
-  const startIndex = content.indexOf(start);
-  const endIndex = content.indexOf(end);
-  if (startIndex < 0 || endIndex < 0) return [];
-  if (startIndex === endIndex) return start.style;
+  start: number,
+  end: number
+): FormatType[] {
+  const startNode = getNodeAtChar(content, start, end);
+  const endNode = getNodeAtChar(content, end, start);
+  if (!startNode || !endNode) return [];
+  if (startNode.index === endNode.index) return startNode.style;
 
   let res = formatTypes.slice();
-  if (startIndex < endIndex)
-    for (let i = startIndex; i < endIndex + 1; i++)
+  if (startNode.index < endNode.index)
+    for (let i = startNode.index; i < endNode.index + 1; i++)
       res = res.filter((e) => content[i].style.includes(e));
   else
-    for (let i = endIndex; i < startIndex + 1; i++)
+    for (let i = endNode.index; i < startNode.index + 1; i++)
       res = res.filter((e) => content[i].style.includes(e));
 
   return res;
+}
+
+/**
+ * If `other` is specified, it will correct the node for the selection.
+ */
+export function getNodeAtChar(
+  content: NodeInputContent[],
+  char?: number,
+  other?: number
+): AdvancedInputContent | undefined {
+  if (content.length === 0) return undefined;
+
+  let node: NodeInputContent | undefined = undefined;
+  let remain = 0,
+    index = 0;
+  if (char && char < 0) char = getContentLength(content) + char;
+  else if (char === undefined) char = getContentLength(content);
+
+  if (char === 0) node = content[0];
+  else {
+    let c = char;
+    for (let i = 0; i < content.length; i++) {
+      c -= content[i].type === 'text' ? content[i].content.length : 1;
+      if (c === 0) {
+        if (other !== undefined && char < other) {
+          node = content[i + 1];
+          index = i + 1;
+          break;
+        } else if (other !== undefined && char > other) {
+          node = content[i];
+          index = i;
+          break;
+        }
+      } else if (c < 0) {
+        node = content[i];
+        index = i;
+        remain = content[i].content.length + c;
+        break;
+      }
+    }
+  }
+  if (node === undefined) return undefined;
+  return {
+    ...node,
+    char: remain,
+    index,
+  };
 }
 
 function getContentLength(content: InputData): number {

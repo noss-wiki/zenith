@@ -89,6 +89,42 @@ function getContent<T extends boolean>(
   return res as T extends true ? NodeInputContent[] : InputData;
 }
 
+function* peekIter(
+  content: NodeInputContent[]
+): Generator<
+  [NodeInputContent, NodeInputContent | undefined, () => void],
+  void,
+  unknown
+> {
+  for (let i = 0; i < content.length; i++) {
+    const curr = content[i];
+    if (!curr) break;
+    const next = content[i + 1];
+    yield [
+      curr,
+      next,
+      () => {
+        content.splice(i + 1, 1);
+      },
+    ];
+  }
+}
+
+/**
+ * Checks if two of the same nodes are next to each other and merges them
+ */
+function cleanSameNodes(content: NodeInputContent[] = getContent(true)) {
+  for (const [curr, next, deleteNext] of peekIter(content)) {
+    if (curr.type !== 'text' || !next || next.type !== 'text') continue;
+    if (!compareStyles(curr.style, next.style)) continue;
+    // nodes are the same; can be merged
+    curr.content += next.content;
+    curr.node.textContent = curr.content;
+    text.removeChild(next.node);
+    deleteNext();
+  }
+}
+
 function getContentLength(content: InputData): number {
   let res = 0;
   for (const i of content) res += i.type === 'text' ? i.content.length : 1;
@@ -345,8 +381,9 @@ const res = props.instance.register('input', {
       if (startNode.type !== 'text') return; // non-text node can't be formatted
 
       if (endNode.char === startNode.content.length && startNode.char === 0) {
+        // entire node is selected
         const style = addToStyle(startNode.style, format.type);
-        if (
+        /* if (
           content[startNode.index - 1] &&
           content[startNode.index - 1].type === 'text' &&
           compareStyles(content[startNode.index - 1].style, style)
@@ -355,27 +392,28 @@ const res = props.instance.register('input', {
           text.childNodes[startNode.index - 1].textContent += startNode.content;
           text.removeChild(startNode.node);
           startChar = content[startNode.index - 1].content.length;
+        } else { */
+        if (style.length === 0 || startNode.style.length === 0) {
+          // node needs to be replaced
+          appendAtIndex(
+            startNode.index,
+            createTextNode({
+              type: 'text',
+              content: startNode.content,
+              style: style,
+            })
+          );
+          text.removeChild(startNode.node);
         } else {
-          if (style.length === 0 || startNode.style.length === 0) {
-            // node needs to be replaced
-            appendAtIndex(
-              startNode.index,
-              createTextNode({
-                type: 'text',
-                content: startNode.content,
-                style: style,
-              })
-            );
-            text.removeChild(startNode.node);
-          } else {
-            // only style needs to be updated
-            const span = startNode.node as HTMLSpanElement;
-            span.className = 'noss-text-node';
-            for (const i of style) span.classList.add(i);
-          }
+          // only style needs to be updated
+          const span = startNode.node as HTMLSpanElement;
+          span.className = 'noss-text-node';
+          for (const i of style) span.classList.add(i);
         }
       } else if (endNode.char === startNode.content.length) {
-        // last char is at the end of current node
+        // Last char is at the end of current node
+        // > Node can be split in two
+
         startNode.node.textContent = startNode.content.slice(0, startNode.char);
         appendAtIndex(
           startNode.index + 1,
@@ -386,7 +424,9 @@ const res = props.instance.register('input', {
           })
         );
       } else if (startNode.char === 0) {
-        // first char is at the beginning of current node
+        // First char is at the beginning of current node
+        // > Node can be split in two
+
         startNode.node.textContent = startNode.content.slice(endNode.char);
         appendAtIndex(
           startNode.index,
@@ -396,11 +436,18 @@ const res = props.instance.register('input', {
             style: addToStyle(startNode.style, format.type),
           })
         );
+      } else {
+        // somewhere in the middle of the node
+        // > Node needs to be split in three
       }
+    } else {
+      // not same node
     }
     // check if they are in the same node, if so seperate the content into new node
     // else calculate the multiple nodes it should create
     // also check if there are the same nodes after each other that could be merged
+
+    cleanSameNodes();
 
     // focus correct nodes
     content = getContent();
@@ -486,25 +533,25 @@ onUnmounted(() => res?.deregister());
 </template>
 
 <style>
-[data-content-editable-leaf] span.accent {
+[data-content-editable-leaf] .accent {
   --color: var(--color-primary);
 
   color: var(--color);
 }
 
-[data-content-editable-leaf] span.bold {
+[data-content-editable-leaf] .bold {
   font-weight: 700;
 }
 
-[data-content-editable-leaf] span.italic {
+[data-content-editable-leaf] .italic {
   font-style: italic;
 }
 
-[data-content-editable-leaf] span.strike-through {
+[data-content-editable-leaf] .strike-through {
   text-decoration: line-through;
 }
 
-[data-content-editable-leaf] span.underline {
+[data-content-editable-leaf] .underline {
   position: relative;
 
   &::after {
