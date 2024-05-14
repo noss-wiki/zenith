@@ -72,7 +72,6 @@ export class HandleComponent extends Component {
 
     const c = this.editor.component('actions');
     if (c) c.show.value = true;
-    console.log(this.last);
   }
   remove() {
     if (!this.mounted) return;

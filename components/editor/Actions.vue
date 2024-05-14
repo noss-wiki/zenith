@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Editor } from '@/composables/editor';
+import DuplicateIcon from '@/assets/icons/duplicate.svg';
 
 const { instance } = defineProps<{
   instance: Editor;
@@ -54,7 +55,16 @@ const { blocks, sorted, categories } = useBlocks();
         "
       >
         <MaterialSymbol symbol="content_copy" />
+        Copy
+      </Button>
+      <Button surface transparent>
+        <DuplicateIcon />
         Duplicate
+      </Button>
+      <Divider menu />
+      <Button surface transparent>
+        <MaterialSymbol symbol="open_in_new" />
+        Seperate into sub-page
       </Button>
       <Button surface transparent dropdown>
         <MaterialSymbol symbol="swap_horiz" />
