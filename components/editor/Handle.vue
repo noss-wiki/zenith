@@ -17,7 +17,7 @@ onUnmounted(() => instance.detach(component));
     <Button
       surface
       icon-only
-      small
+      tiny
       transparent
       tooltip
       @click="
@@ -36,7 +36,7 @@ onUnmounted(() => instance.detach(component));
     <Button
       surface
       icon-only
-      small
+      tiny
       transparent
       tooltip
       @click="() => component.select()"

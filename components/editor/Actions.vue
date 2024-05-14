@@ -80,11 +80,6 @@ const { blocks, sorted, categories } = useBlocks();
         </Dropdown>
       </Button>
       <Divider menu />
-      <Button surface transparent dropdown>
-        <MaterialSymbol symbol="border_color" />
-        Color
-      </Button>
-      <Divider menu />
       <div class="last-edited">
         <p>Last edited by Robin de Vos</p>
         <p>8 april 20224, 17:29</p>

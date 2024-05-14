@@ -7,6 +7,7 @@ const props = defineProps<{
   // size
   large?: boolean;
   small?: boolean;
+  tiny?: boolean;
   // styles
   surface?: boolean;
   outline?: boolean;
@@ -14,6 +15,7 @@ const props = defineProps<{
   square?: boolean;
   // layout
   iconOnly?: boolean;
+  iconHover?: boolean;
   tooltip?: boolean;
   /**
    * The delay in miliseconds it takes for the tooltip to open on button hover
@@ -83,10 +85,12 @@ onUnmounted(() => {
     :class="{
       'btn-large': large,
       'btn-small': small,
+      'btn-tiny': tiny,
       'btn-surface': surface,
       'btn-outline': outline,
       'btn-transparent': transparent,
       'btn-icon-only': props.iconOnly,
+      'btn-icon-hover': props.iconHover,
       'btn-tooltip': props.tooltip,
       'btn-dropdown': dropdown,
       'btn-square': square,
@@ -119,7 +123,6 @@ onUnmounted(() => {
   cursor: pointer;
   transition: color 0.3s ease, background 0.3s ease, filter 0.3s ease;
   color: var(--color);
-  fill: var(--color);
   background: v-bind('background');
   filter: none;
   user-select: none;
@@ -134,6 +137,10 @@ onUnmounted(() => {
 }
 
 .btn-small {
+  --size: 2rem;
+}
+
+.btn-tiny {
   --size: 1.5rem;
   --radius: var(--radius-small);
 }
@@ -165,11 +172,15 @@ onUnmounted(() => {
   }
 }
 
-.btn-icon-only {
+.btn-icon-only,
+.btn-icon-hover {
   width: var(--size);
   padding: 0;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.btn-icon-only {
   --color: var(--color-text);
 }
 

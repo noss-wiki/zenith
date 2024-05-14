@@ -3,6 +3,9 @@
 
 - Forward input events to the focussed block
 - Saving and loading of pages (using the existing export and import hooks)
+- Editor behaviour
+  - Seperate special behaviour in seperate files
+  - Allow custom behaviour fo
 - Commands and special blocks
   - / Commands
   - @ Commands

@@ -36,7 +36,7 @@ const { blocks, sorted, categories } = useBlocks();
         }
       "
     >
-      <Button surface transparent square dropdown>
+      <Button surface transparent small dropdown>
         Text
         <Dropdown position="bottom">
           <template v-for="(category, index) in categories">
@@ -53,12 +53,17 @@ const { blocks, sorted, categories } = useBlocks();
           </template>
         </Dropdown>
       </Button>
+      <Button surface transparent small tooltip>
+        <MaterialSymbol symbol="comment" style="font-size: 1.25rem" />
+        Comment
+        <Tooltip> Comment on selected text </Tooltip>
+      </Button>
       <Divider vertical />
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="() => component.format('accent')"
       >
@@ -74,8 +79,8 @@ const { blocks, sorted, categories } = useBlocks();
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="() => component.format('bold')"
       >
@@ -91,8 +96,8 @@ const { blocks, sorted, categories } = useBlocks();
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="() => component.format('italic')"
       >
@@ -108,8 +113,8 @@ const { blocks, sorted, categories } = useBlocks();
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="() => component.format('underline')"
       >
@@ -125,8 +130,8 @@ const { blocks, sorted, categories } = useBlocks();
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="() => component.format('strike-through')"
       >
@@ -140,21 +145,21 @@ const { blocks, sorted, categories } = useBlocks();
         </Tooltip>
       </Button>
       <Divider vertical />
-      <Button surface transparent icon-only square tooltip>
+      <Button surface transparent icon-hover small tooltip>
         <MentionIcon />
         <Tooltip>
           Mention
           <span class="shortcut">@</span>
         </Tooltip>
       </Button>
-      <Button surface transparent icon-only square tooltip>
+      <Button surface transparent icon-hover small tooltip>
         <CodeIcon />
         <Tooltip>
           Mark as code
           <span class="shortcut">Ctrl + E</span>
         </Tooltip>
       </Button>
-      <Button surface transparent icon-only square tooltip>
+      <Button surface transparent icon-hover small tooltip>
         <LinkIcon />
         <Tooltip>
           Add link
@@ -162,7 +167,7 @@ const { blocks, sorted, categories } = useBlocks();
         </Tooltip>
       </Button>
       <Divider vertical />
-      <Button surface transparent icon-only square tooltip>
+      <Button surface transparent icon-hover small tooltip>
         <ClearIcon />
         <Tooltip>
           Clear formatting
@@ -170,15 +175,11 @@ const { blocks, sorted, categories } = useBlocks();
         </Tooltip>
       </Button>
       <Divider vertical />
-      <Button surface transparent icon-only square tooltip>
-        <MaterialSymbol symbol="comment" style="font-size: 1.25rem" />
-        <Tooltip> Comment on selected text </Tooltip>
-      </Button>
       <Button
         surface
         transparent
-        icon-only
-        square
+        icon-hover
+        small
         tooltip
         @click="component.select()"
       >
@@ -198,15 +199,13 @@ const { blocks, sorted, categories } = useBlocks();
   left: 0;
   display: flex;
   height: 2.5rem;
+  padding: 0.25rem;
   background: var(--color-raised-surface);
   border-radius: var(--radius-default);
 
-  & > :first-child {
-    border-radius: var(--radius-default) 0 0 var(--radius-default);
-  }
-
-  & > :last-child {
-    border-radius: 0 var(--radius-default) var(--radius-default) 0;
+  & > .divider {
+    margin: 0.25rem;
+    height: calc(100% - 0.5rem);
   }
 }
 

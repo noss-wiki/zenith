@@ -1,4 +1,3 @@
-import type { Block, InputRegister } from '@/composables/blocks';
 import type {
   NodeInputContent,
   InputData,

@@ -379,20 +379,9 @@ const res = props.instance.register('input', {
     if (startNode.index === endNode.index) {
       // same node
       if (startNode.type !== 'text') return; // non-text node can't be formatted
-
       if (endNode.char === startNode.content.length && startNode.char === 0) {
         // entire node is selected
         const style = addToStyle(startNode.style, format.type);
-        /* if (
-          content[startNode.index - 1] &&
-          content[startNode.index - 1].type === 'text' &&
-          compareStyles(content[startNode.index - 1].style, style)
-        ) {
-          // new and prev node are the same
-          text.childNodes[startNode.index - 1].textContent += startNode.content;
-          text.removeChild(startNode.node);
-          startChar = content[startNode.index - 1].content.length;
-        } else { */
         if (style.length === 0 || startNode.style.length === 0) {
           // node needs to be replaced
           appendAtIndex(
