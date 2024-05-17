@@ -214,7 +214,8 @@ export class Editor extends DOMEventfull {
               text.instance.inputs[0].carry(res);
             }
           }
-          text.instance.focus(FocusReason.Insert);
+          console.log(text);
+          useLazy(() => text.instance.focus(FocusReason.Insert));
         }
       } else {
         // call hook to determine what to do

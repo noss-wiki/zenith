@@ -8,6 +8,11 @@ import type {
   FormatType,
 } from '@/composables/blocks/data';
 import { formatTypes } from '@/composables/blocks/data';
+import {
+  getContentLength,
+  getCharAtNode,
+  getNodeAtChar,
+} from '@/composables/utils/content';
 import { ExportReason } from '@/composables/blocks/hooks';
 
 const props = defineProps<{
@@ -86,6 +91,20 @@ function getContent<T extends boolean>(
     }
   }
 
+  if (res.length === 0) {
+    const data = {
+      type: 'text',
+      content: '',
+      style: [] as FormatType[],
+    } as const;
+    const node = createTextNode(data);
+    text.prepend(node);
+    res.push({
+      ...data,
+      node,
+    });
+  }
+
   return res as T extends true ? NodeInputContent[] : InputData;
 }
 
@@ -125,12 +144,6 @@ function cleanSameNodes(content: NodeInputContent[] = getContent(true)) {
   }
 }
 
-function getContentLength(content: InputData): number {
-  let res = 0;
-  for (const i of content) res += i.type === 'text' ? i.content.length : 1;
-  return res;
-}
-
 function createTextNode(data: InputContent): Text | Element {
   if (data.style.length === 0) return document.createTextNode(data.content);
 
@@ -163,56 +176,6 @@ function* contentIter(
   for (let i = 0; i < content.length; i++) {
     yield [content[i], i];
   }
-}
-
-function getDataAtChar(
-  char: number | undefined,
-  content: InputData = getContent()
-): AdvancedInputContent {
-  if (content.length === 0) {
-    text.prepend(
-      createTextNode({
-        type: 'text',
-        style: [],
-        content: '',
-      })
-    );
-    content = getContent();
-  }
-
-  if (char && char < 0) char = getContentLength(content) + char;
-
-  if (char === 0)
-    return {
-      ...content[0],
-      char: 0,
-      index: 0,
-      node: text.childNodes[0] as Text | Element,
-    };
-  else if (char !== undefined) {
-    for (const [node, i] of contentIter(content)) {
-      if (node.type === 'text') char -= node.content.length;
-      else char -= 1;
-
-      if (char < 0)
-        return {
-          ...node,
-          char: node.content.length + char,
-          index: i,
-          node: text.childNodes[i] as Text | Element,
-        };
-    }
-  }
-
-  const data = content[content.length - 1];
-  const offset = data.type === 'text' ? data.content.length : 1;
-
-  return {
-    ...data,
-    char: offset,
-    index: content.length - 1,
-    node: text.childNodes[content.length - 1] as Text | Element,
-  };
 }
 
 function focusElement(node: Text | Element | Node, start: number) {
@@ -291,14 +254,14 @@ const res = props.instance.register('input', {
     return getContent(nodes);
   },
   focus(char) {
+    const content = getContent(true);
     if (typeof char === 'number') {
-      const data = getDataAtChar(char);
+      const data = getNodeAtChar(content, char);
 
       const block = text.childNodes[data.index];
       if (data.type === 'text') focusElement(block, data.char);
     } else if (char === undefined) {
       // focus last
-      const content = getContent(true);
       const node = content[content.length - 1];
       if (node.type === 'text') focusElement(node.node, node.content.length);
     } else if (char !== undefined) {
@@ -306,20 +269,8 @@ const res = props.instance.register('input', {
       const end = start === char.start ? char.end : char.start;
       const reversed = start === char.end;
 
-      let content = getContent();
-      let startNode = getDataAtChar(start, content);
-      let endNode = getDataAtChar(end, content);
-      if (
-        startNode.type === 'text' &&
-        startNode.char === startNode.content.length &&
-        content[startNode.index + 1] !== undefined
-      )
-        startNode = {
-          ...content[startNode.index + 1],
-          char: 0,
-          index: startNode.index + 1,
-          node: text.childNodes[startNode.index + 1] as Element | Text,
-        };
+      let startNode = getNodeAtChar(content, start);
+      let endNode = getNodeAtChar(content, end);
 
       focusNodes(
         startNode.node,
@@ -361,9 +312,9 @@ const res = props.instance.register('input', {
     let startChar = 0;
     let endChar = undefined;
 
-    let content = getContent();
-    let startNode = getDataAtChar(start, content);
-    let endNode = getDataAtChar(end, content);
+    let content = getContent(true);
+    let startNode = getNodeAtChar(content, start, end);
+    let endNode = getNodeAtChar(content, end, start);
 
     if (
       (startNode.type === 'text' && start === startNode.content.length) || // end of text node
@@ -432,16 +383,14 @@ const res = props.instance.register('input', {
     } else {
       // not same node
     }
-    // check if they are in the same node, if so seperate the content into new node
-    // else calculate the multiple nodes it should create
-    // also check if there are the same nodes after each other that could be merged
 
+    // makes focussing not work correctly
     cleanSameNodes();
 
     // focus correct nodes
-    content = getContent();
-    startNode = getDataAtChar(start, content);
-    endNode = getDataAtChar(end, content);
+    content = getContent(true);
+    startNode = getNodeAtChar(content, start);
+    endNode = getNodeAtChar(content, end);
     if (
       startNode.type === 'text' &&
       startNode.char === startNode.content.length &&
@@ -473,8 +422,8 @@ const res = props.instance.register('input', {
     if (reason !== ExportReason.Carry) return getContent();
     char ??= 0;
 
-    const content = getContent();
-    const data = getDataAtChar(char, content);
+    const content = getContent(true);
+    const data = getNodeAtChar(content, char);
     let res: InputData = content.slice(data.index + 1);
     for (let i = data.index; i < content.length; i++)
       text.removeChild(text.childNodes[i]);
