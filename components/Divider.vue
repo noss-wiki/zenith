@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Editor } from '@/composables/editor';
+import type { Editor } from '@/editor';
 
 defineProps<{
   /**

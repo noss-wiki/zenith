@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Editor } from '@/composables/editor';
+import type { Editor } from '@/editor';
 
 import BoldIcon from '@/assets/icons/format/bold.svg';
 import ClearIcon from '@/assets/icons/format/clear.svg';

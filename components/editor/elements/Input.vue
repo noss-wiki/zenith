@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import type { BlockInstance } from '@/composables/blocks';
+import type { BlockInstance } from '@/editor/blocks';
 import type {
   InputNode,
   InputNodeElement,
   FormatType,
-} from '@/composables/blocks/data';
-import { formatTypes } from '@/composables/blocks/data';
-import {
-  getContentLength,
-  getCharAtNode,
-  getNodeAtChar,
-} from '@/composables/utils/content';
-import { ExportReason } from '@/composables/blocks/hooks';
+} from '@/editor/blocks/data';
+import { formatTypes } from '@/editor/blocks/data';
+import { getContentLength, getCharAtNode, getNodeAtChar } from '@/editor/utils';
+import { ExportReason } from '@/editor/blocks/hooks';
 
 const props = defineProps<{
   instance: BlockInstance;

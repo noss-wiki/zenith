@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { BlockInstance } from '@/composables/blocks';
-import type { BlockDescription } from '@/composables/blocks';
+import type { BlockInstance } from '@/editor/blocks';
+import type { BlockDescription } from '@/editor/blocks';
 
 const props = defineProps<{
   instance: BlockInstance;

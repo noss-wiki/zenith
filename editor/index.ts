@@ -1,9 +1,9 @@
-import type { Block } from '../blocks';
+import type { Block } from './blocks';
 import type { ComponentType, ComponentClass, Component } from './components';
-import { ExportReason, FocusReason } from '../blocks/hooks';
-import { DOMEventfull } from '../classes/DOMEventfull';
+import { ExportReason, FocusReason } from './blocks/hooks';
+import { DOMEventfull } from '../composables/classes/DOMEventfull';
 import { createComponent } from './components';
-import { createBlock } from '../blocks';
+import { createBlock } from './blocks';
 
 type InputTypes =
   | 'insertParagraph'

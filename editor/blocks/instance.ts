@@ -7,8 +7,8 @@ import type {
 } from '.';
 import type { BlockData, ImportData, InputNode } from './data';
 import { FocusReason, ExportReason } from './hooks';
-import { Logger } from '../classes/logger';
-import { Eventfull } from '../classes/eventfull';
+import { Logger } from '@/composables/classes/logger';
+import { Eventfull } from '@/composables/classes/eventfull';
 
 export const instances: BlockInstanceInteractable[] = [];
 

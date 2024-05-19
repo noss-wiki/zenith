@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Editor } from '@/composables/editor';
+import { Editor } from '@/editor';
 
 let root: HTMLDivElement;
 let editor = new Editor();

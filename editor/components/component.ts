@@ -1,5 +1,5 @@
 import type { Editor } from '..';
-import { Eventfull } from '../../classes/eventfull';
+import { Eventfull } from '@/composables/classes/eventfull';
 
 export type ComponentType = 'handle' | 'actions' | 'selection';
 

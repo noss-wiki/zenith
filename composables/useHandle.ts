@@ -1,4 +1,4 @@
-import { editor } from './editor';
+import { editor } from '../editor';
 
 type Enter = () => void;
 type Leave = () => void;

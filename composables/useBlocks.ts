@@ -1,5 +1,5 @@
-import type { BlockDescription, Category } from './blocks';
-import { categories, meta } from './blocks';
+import type { BlockDescription, Category } from '@/editor/blocks';
+import { categories, meta } from '@/editor/blocks';
 
 export type SortedBlocks = {
   [x in Category]: BlockDescription[];

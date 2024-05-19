@@ -1,7 +1,7 @@
-import type { Block } from '@/composables/blocks';
+import type { Block } from '../blocks';
 import { Component } from './component';
 import { Logger } from '@/composables/classes/logger';
-import { ExportReason, FocusReason } from '@/composables/blocks/hooks';
+import { ExportReason, FocusReason } from '../blocks/hooks';
 
 type Default<T> = T extends string ? T : 'text';
 

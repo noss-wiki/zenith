@@ -2,13 +2,9 @@ import type {
   InputNodeElement,
   BlockSelection,
   FormatType,
-} from '@/composables/blocks/data';
-import { formatTypes } from '@/composables/blocks/data';
-import {
-  getCharAtNode,
-  getNodeAtChar,
-  getContentLength,
-} from '@/composables/utils/content';
+} from '@/editor/blocks/data';
+import { formatTypes } from '@/editor/blocks/data';
+import { getCharAtNode, getNodeAtChar, getContentLength } from '@/editor/utils';
 import { Component } from './component';
 
 export class SelectionComponent extends Component {
