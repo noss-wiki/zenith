@@ -1,6 +1,10 @@
 # TODO
 - feat: chromium compatibility; chrome inserts div as child in p element
 
+- Organize editor related code better
+  - Move to seperate folder in root
+  - Seperate behaviour into seperate files with functions to improve readability
+
 - Forward input events to the focussed block
 - Saving and loading of pages (using the existing export and import hooks)
 - Editor behaviour

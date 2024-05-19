@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { BlockInstance } from '@/composables/blocks';
 import type {
-  InputContent,
-  InputData,
-  NodeInputContent,
-  AdvancedInputContent,
+  InputNode,
+  InputNodeElement,
   FormatType,
 } from '@/composables/blocks/data';
 import { formatTypes } from '@/composables/blocks/data';
@@ -45,12 +43,12 @@ function clean(nodeList: NodeListOf<ChildNode>): ChildNode[] {
 
 function getContent<T extends boolean>(
   nodes?: T
-): T extends true ? NodeInputContent[] : InputData {
+): T extends true ? InputNodeElement[] : InputNode[] {
   if (!text) return [];
-  const res: (InputContent & { node?: Node })[] = [];
+  const res: (InputNode & { node?: Node })[] = [];
   nodes ??= false as T;
 
-  for (const node of clean(text.childNodes)) {
+  for (const node of clean(text.childNodes) as Element[]) {
     if (node.nodeType === Node.TEXT_NODE)
       if (nodes)
         res.push({
@@ -105,13 +103,13 @@ function getContent<T extends boolean>(
     });
   }
 
-  return res as T extends true ? NodeInputContent[] : InputData;
+  return res as T extends true ? InputNodeElement[] : InputNode[];
 }
 
 function* peekIter(
-  content: NodeInputContent[]
+  content: InputNodeElement[]
 ): Generator<
-  [NodeInputContent, NodeInputContent | undefined, () => void],
+  [InputNodeElement, InputNodeElement | undefined, () => void],
   void,
   unknown
 > {
@@ -132,7 +130,7 @@ function* peekIter(
 /**
  * Checks if two of the same nodes are next to each other and merges them
  */
-function cleanSameNodes(content: NodeInputContent[] = getContent(true)) {
+function cleanSameNodes(content: InputNodeElement[] = getContent(true)) {
   for (const [curr, next, deleteNext] of peekIter(content)) {
     if (curr.type !== 'text' || !next || next.type !== 'text') continue;
     if (!compareStyles(curr.style, next.style)) continue;
@@ -144,7 +142,7 @@ function cleanSameNodes(content: NodeInputContent[] = getContent(true)) {
   }
 }
 
-function createTextNode(data: InputContent): Text | Element {
+function createTextNode(data: InputNode): Text | Element {
   if (data.style.length === 0) return document.createTextNode(data.content);
 
   const res = document.createElement('span');
@@ -171,8 +169,8 @@ function appendBeforeEnd(element: Text | Element) {
 }
 
 function* contentIter(
-  content: InputData
-): Generator<[InputContent, number], void, unknown> {
+  content: InputNode[]
+): Generator<[InputNode, number], void, unknown> {
   for (let i = 0; i < content.length; i++) {
     yield [content[i], i];
   }
@@ -309,8 +307,6 @@ const res = props.instance.register('input', {
     const start = format.start < format.end ? format.start : format.end;
     const end = start === format.start ? format.end : format.start;
     const reversed = start === format.end;
-    let startChar = 0;
-    let endChar = undefined;
 
     let content = getContent(true);
     let startNode = getNodeAtChar(content, start, end);
@@ -389,21 +385,16 @@ const res = props.instance.register('input', {
 
     // focus correct nodes
     content = getContent(true);
-    startNode = getNodeAtChar(content, start);
-    endNode = getNodeAtChar(content, end);
-    if (
-      startNode.type === 'text' &&
-      startNode.char === startNode.content.length &&
-      content[startNode.index + 1] !== undefined
-    )
-      startNode = {
-        ...content[startNode.index + 1],
-        char: 0,
-        index: startNode.index + 1,
-        node: text.childNodes[startNode.index + 1] as Element | Text,
-      };
+    startNode = getNodeAtChar(content, start, end);
+    endNode = getNodeAtChar(content, end, start);
 
-    focusNodes(startNode.node, endNode.node, startChar, endChar, reversed);
+    focusNodes(
+      startNode.node,
+      endNode.node,
+      startNode.char,
+      endNode.char,
+      reversed
+    );
   },
   import(data) {
     if (!text) return;
@@ -424,7 +415,7 @@ const res = props.instance.register('input', {
 
     const content = getContent(true);
     const data = getNodeAtChar(content, char);
-    let res: InputData = content.slice(data.index + 1);
+    let res: InputNode[] = content.slice(data.index + 1);
     for (let i = data.index; i < content.length; i++)
       text.removeChild(text.childNodes[i]);
 

@@ -1,6 +1,5 @@
 import type { Block } from '../blocks';
 import type { ComponentType, ComponentClass, Component } from './components';
-import type { InputData } from '../blocks/data';
 import { ExportReason, FocusReason } from '../blocks/hooks';
 import { DOMEventfull } from '../classes/DOMEventfull';
 import { createComponent } from './components';

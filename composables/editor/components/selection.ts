@@ -1,5 +1,5 @@
 import type {
-  NodeInputContent,
+  InputNodeElement,
   BlockSelection,
   FormatType,
 } from '@/composables/blocks/data';
@@ -131,7 +131,7 @@ export class SelectionComponent extends Component {
 }
 
 function getStylesAtSelection(
-  content: NodeInputContent[],
+  content: InputNodeElement[],
   start: number,
   end: number
 ): FormatType[] {

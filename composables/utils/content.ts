@@ -1,10 +1,75 @@
 import type {
-  InputData,
-  NodeInputContent,
-  AdvancedInputContent,
+  InputNode,
+  InputNodeElement,
+  InputNodeSelection,
+  FormatType,
 } from '../blocks/data';
+import { formatTypes } from '../blocks/data';
+import { createTextNode } from './nodes';
 
-export function getContentLength(content: InputData): number {
+export function getContent<T extends boolean>(
+  root: HTMLElement,
+  nodes?: T
+): T extends true ? InputNodeElement[] : InputNode[] {
+  if (!root) return [];
+  const res: (InputNode & { node?: Node })[] = [];
+  nodes ??= false as T;
+
+  for (const node of clean(root.childNodes)) {
+    if (node.nodeType === Node.TEXT_NODE)
+      if (nodes)
+        res.push({
+          type: 'text',
+          style: [],
+          content: node.textContent ?? '',
+          node,
+        });
+      else
+        res.push({
+          type: 'text',
+          style: [],
+          content: node.textContent ?? '',
+        });
+    else if (node.nodeType === Node.ELEMENT_NODE) {
+      const ele = node as Element;
+      if (ele.tagName === 'BR') continue;
+      if (ele.tagName === 'SPAN' && ele.classList.contains('noss-text-node')) {
+        const style: FormatType[] = [];
+        for (const [_key, value] of ele.classList.entries())
+          if (formatTypes.includes(value as FormatType))
+            style.push(value as FormatType);
+
+        if (nodes)
+          res.push({
+            type: 'text',
+            style,
+            content: ele.textContent ?? '',
+            node,
+          });
+        else
+          res.push({
+            type: 'text',
+            style,
+            content: ele.textContent ?? '',
+          });
+      }
+    }
+  }
+
+  if (res.length === 0) {
+    const data = createTextNode({
+      type: 'text',
+      content: '',
+      style: [] as FormatType[],
+    });
+    root.prepend(data.node);
+    res.push(data);
+  }
+
+  return res as T extends true ? InputNodeElement[] : InputNode[];
+}
+
+export function getContentLength(content: InputNode[]): number {
   let res = 0;
   for (const i of content) res += i.type === 'text' ? i.content.length : 1;
   return res;
@@ -17,8 +82,8 @@ export function getContentLength(content: InputData): number {
  * @returns The character where the node is located with the offset added, or -1 if the node was not found in the content
  */
 export function getCharAtNode(
-  content: NodeInputContent[],
-  node: NodeInputContent,
+  content: InputNodeElement[],
+  node: InputNodeElement,
   offset: number
 ): number {
   const index = content.indexOf(node);
@@ -42,11 +107,11 @@ export function getCharAtNode(
  * @returns The node at the character, or the last item if it was not found
  */
 export function getNodeAtChar(
-  content: NodeInputContent[],
+  content: InputNodeElement[],
   char?: number,
   anchor?: number
-): AdvancedInputContent {
-  let node: NodeInputContent | undefined = undefined;
+): InputNodeSelection {
+  let node: InputNodeElement | undefined = undefined;
   let remain = 0,
     index = 0;
   if (char && char < 0) char = getContentLength(content) + char;
@@ -87,4 +152,19 @@ export function getNodeAtChar(
     char: remain,
     index,
   };
+}
+
+function clean(nodeList: NodeListOf<ChildNode>): ChildNode[] {
+  let res: ChildNode[] = [];
+
+  for (const node of Array.from(nodeList)) {
+    if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      (node as Element).tagName === 'BR'
+    )
+      break;
+    else res.push(node);
+  }
+
+  return res;
 }

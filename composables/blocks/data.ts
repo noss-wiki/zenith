@@ -5,24 +5,26 @@ import type {
   InputRegister,
 } from '.';
 
-export type InputContent = {
+export interface InputNode {
   type: 'text';
   style: FormatType[];
   content: string;
-};
-export type NodeInputContent = InputContent & {
+}
+
+export interface InputNodeElement extends InputNode {
   node: Text | Element;
-};
-export type AdvancedInputContent = InputContent & {
+}
+
+export interface InputNodeSelection extends InputNode {
+  node: Text | Element;
   char: number;
   index: number;
-  node: Text | Element;
-};
-export type InputData = InputContent[];
-export type ImportData = {
+}
+
+export interface ImportData {
   index: number;
-  content: InputData;
-};
+  content: InputNode[];
+}
 
 export interface BlockData {
   meta: ResolvedBlockDescription;

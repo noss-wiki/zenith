@@ -5,7 +5,7 @@ import type {
   InputRegister,
   InputRegisterHandler,
 } from '.';
-import type { BlockData, ImportData, InputData } from './data';
+import type { BlockData, ImportData, InputNode } from './data';
 import { FocusReason, ExportReason } from './hooks';
 import { Logger } from '../classes/logger';
 import { Eventfull } from '../classes/eventfull';
@@ -111,7 +111,7 @@ export class BlockInstance extends Eventfull {
     }
   }
 
-  carry(data: InputData) {
+  carry(data: InputNode[]) {
     const length = getInputDataLength(data);
     const input = this.inputs[this.inputs.length - 1];
     if (!input) return false;
@@ -178,7 +178,7 @@ export function description<T extends BlockDescription>(desc: T): Defaults<T> {
   return desc as Defaults<T>;
 }
 
-function getInputDataLength(data: InputData): number {
+function getInputDataLength(data: InputNode[]): number {
   let res = 0;
   for (const i of data) res += i.type === 'text' ? i.content.length : 1;
   return res;
