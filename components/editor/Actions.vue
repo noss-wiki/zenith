@@ -44,6 +44,10 @@ const { blocks, sorted, categories } = useBlocks();
         <MaterialSymbol symbol="delete" />
         Delete
       </Button>
+      <Button surface transparent>
+        <MaterialSymbol symbol="content_copy" />
+        Copy
+      </Button>
       <Button
         surface
         transparent
@@ -54,10 +58,6 @@ const { blocks, sorted, categories } = useBlocks();
           }
         "
       >
-        <MaterialSymbol symbol="content_copy" />
-        Copy
-      </Button>
-      <Button surface transparent>
         <DuplicateIcon />
         Duplicate
       </Button>

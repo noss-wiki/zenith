@@ -7,7 +7,7 @@ import type {
 } from './data';
 import type { ExportReason } from './hooks';
 
-export type { BlockInstance, BlockInstanceInteractable } from './instance';
+export { BlockInstance, BlockInstanceInteractable } from './instance';
 export { instances } from './instance';
 export * from './templates';
 

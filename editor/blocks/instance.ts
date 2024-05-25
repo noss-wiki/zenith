@@ -29,6 +29,7 @@ export class BlockInstance extends Eventfull {
   readonly meta: ResolvedBlockDescription;
 
   id: string;
+  type: string;
 
   _attached?: HTMLElement;
   #interactable: BlockInstanceInteractable;
@@ -40,6 +41,7 @@ export class BlockInstance extends Eventfull {
   constructor() {
     super();
     this.meta = (<typeof BlockInstance>this.constructor).meta;
+    this.type = this.meta.type;
 
     this.id = Math.random().toString(36).slice(2);
     this.#interactable = new BlockInstanceInteractable(this);

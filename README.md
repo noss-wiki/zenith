@@ -2,8 +2,9 @@
 - feat: chromium compatibility; chrome inserts div as child in p element
 
 - Organize editor related code better
-  - Move to seperate folder in root
   - Seperate behaviour into seperate files with functions to improve readability
+  - Use transactions (like [prosemirror](https://prosemirror.net/docs/ref/#state.Transaction))
+    - This helps with undo/redo
 
 - Forward input events to the focussed block
 - Saving and loading of pages (using the existing export and import hooks)
@@ -18,7 +19,6 @@
     - Emoji's using https://www.npmjs.com/package/node-emoji
   - Lists
 - Undo and redo
-  - add a `changemap` to allow moving forwards and backwards
   - listen to input events releted to this in editor
 - Formatting
   - Allow modifying style on input nodes
