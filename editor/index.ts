@@ -5,6 +5,8 @@ import { DOMEventfull } from '../composables/classes/DOMEventfull';
 import { createComponent } from './components';
 import { createBlock } from './blocks';
 
+import './lib/schema/expression';
+
 type InputTypes =
   | 'insertParagraph'
   | 'insertLineBreak'
