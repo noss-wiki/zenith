@@ -1,15 +1,19 @@
-import { description, BlockInstance } from '../blocks/instance';
+import type { NodeMetaData, NodeSchema } from './Node';
 import { Node } from './Node';
+import { description, BlockInstance } from '../blocks/instance';
+import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 
 export default class Paragraph extends Node {
-  static readonly meta = description({
+  static meta: NodeMetaData = {
     name: 'Paragraph',
     description: 'Simple plain text',
-    type: 'paragraph',
-    category: 'simple_text',
-    inputs: 1,
-    icon: '',
-  } as const);
+    icon,
+  };
+
+  static schema: NodeSchema = {
+    content: 'inline*',
+    group: 'block',
+  };
 
   isBlock = true;
 

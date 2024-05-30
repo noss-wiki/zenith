@@ -9,7 +9,7 @@ Where
 - `modifier`, is one of the following `*`, `?`, `+`, `{1,2}` (this is like regex capturing group, so second number can be omitted, to allow more than)
   - ` `, 1 times
   - `*`, 0 or more
-  - `?`, 0 of 1
+  - `?`, 0 or 1
   - `+`, 1 or more
   - `{1,2}`, regex-like range expression
 
@@ -21,21 +21,33 @@ https://prosemirror.net/docs/guide/#schema.content_expressions
 type ExpressionGroup = string;
 type ExpressionModifier = '*' | '?' | '+' | `{${number},${number | ''}}` | '';
 
+interface ParsedExpression {
+  expression: string;
+  selectors: SingleExpressionMatch[];
+}
+
 /**
  * The structure of a single expression is e.g. `paragraph+`, but not `heading paragraph+`
  */
 interface SingleExpressionMatch {
-  modifier: string;
-
-  rangeStart: number;
   /**
-   * The maximum of the range, is `-1` if it should match infinte times (`*`, `+`, `{1,}`)
+   * The raw selector
    */
-  rangeEnd: number;
+  selector: string;
+  /**
+   * The raw modifier
+   */
+  modifier?: string;
+  /**
+   * The range on which the selector applies,
+   * if the second value is `-1` it should match infinte times (`*`, `+`, `{1,}`)
+   */
+  range: [number, number];
 }
 
 const expressionRegex =
-  /([a-zA-Z]+|\([a-zA-Z |]+\))(\*|\+|\?|(\{[0-9]+,[0-9]*\}))?/g;
+  /(?<selector>[a-zA-Z]+|\([a-zA-Z |]+\))(?<modifier>\*|\+|\?|(\{[0-9]+,[0-9]*\}))?/g;
+const rangeRegex = /{(?<start>[0-9]*),(?<end>[0-9]*) *}/;
 
 export class ContentExpression {
   expression: string;
@@ -44,14 +56,47 @@ export class ContentExpression {
     this.expression = expression;
   }
 
-  parse() {
+  parse(): ParsedExpression {
     const matches = matchAll(this.expression, expressionRegex);
+    if (matches === null)
+      return {
+        expression: this.expression,
+        selectors: [],
+      };
+    const res: SingleExpressionMatch[] = [];
+
+    for (const match of matches) {
+      if (!match.groups) continue;
+      let { selector, modifier } = match.groups as {
+        selector: string;
+        modifier: ExpressionModifier;
+      };
+
+      let range: [number, number] = [1, 1];
+      if (modifier === '?') range = [0, 1];
+      else if (modifier === '+') range = [1, -1];
+      else if (modifier === '*') range = [0, -1];
+      else if (modifier && modifier.startsWith('{')) {
+        let rangeMatch = rangeRegex.exec(modifier);
+        if (!rangeMatch || !rangeMatch.groups) continue;
+        let { start, end } = rangeMatch.groups;
+        if (!end) end = '-1';
+        range = [parseInt(start), parseInt(end)];
+      }
+
+      res.push({ selector, modifier, range });
+    }
+
+    return {
+      expression: this.expression,
+      selectors: res,
+    };
   }
 
   // static methods
   static validate(expression: string) {
+    // TODO: proper validation
     const match = expression.match(expressionRegex);
-    console.log(matchAll(expression, expressionRegex));
     return match !== null;
   }
 
@@ -60,11 +105,12 @@ export class ContentExpression {
   }
 }
 
-ContentExpression.validate('heading paragraph+');
-ContentExpression.validate('(paragraph | blockquote)+');
-ContentExpression.validate('block?');
-ContentExpression.validate('text{2,231}');
-ContentExpression.validate('text');
+/* new ContentExpression('(paragraph | blockquote)+').parse();
+new ContentExpression('heading paragraph+').parse();
+new ContentExpression('text{2,231}').parse();
+new ContentExpression('text').parse();
+new ContentExpression('text*').parse();
+new ContentExpression('text?').parse(); */
 
 function matchAll(expression: string, regex: RegExp) {
   let res = [],

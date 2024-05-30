@@ -1,13 +1,17 @@
-import { Eventfull } from '@/composables/classes/eventfull';
+import type { ContentExpression } from '../lib/schema/expression';
 import type { ResolvedBlockDescription } from '../blocks';
+import { Eventfull } from '@/composables/classes/eventfull';
 
 export class Node extends Eventfull {
   // TODO: Update description to include less
-  static readonly meta: ResolvedBlockDescription;
-  readonly meta: ResolvedBlockDescription;
+  static readonly meta: NodeMetaData;
+  readonly meta: NodeMetaData;
+
+  static readonly schema: NodeSchema;
+  readonly schema: NodeSchema;
 
   id: string;
-  type: string;
+  type: string = '';
   root?: HTMLElement;
 
   /**
@@ -41,6 +45,8 @@ export class Node extends Eventfull {
    * @default false
    */
   isLeaf = false;
+
+  //isAtom
   /**
    * Wheter or not this node is a text node
    * @default false
@@ -49,8 +55,10 @@ export class Node extends Eventfull {
 
   constructor() {
     super();
-    this.meta = (<typeof Node>this.constructor).meta;
-    this.type = this.meta.type;
+    const Class = <typeof Node>this.constructor;
+    // TODO: error if not defined
+    this.meta = Class.meta ?? {};
+    this.schema = Class.schema ?? {};
     this.id = Math.random().toString(36).slice(2);
 
     if (this.isBlock === true && this.isInline === null) this.isInline = false;
@@ -84,4 +92,34 @@ export class Node extends Eventfull {
   *iter(): Generator<[Node, number], void, unknown> {
     for (let i = 0; i < this.content.length; i++) yield [this.content[i], i];
   }
+}
+
+/**
+ * Meta data is data that is displayed (or used to display) info about this node in the ui.
+ * Like the commands menu, or in the selection toolbar.
+ */
+export interface NodeMetaData {
+  /**
+   * The name that will be displayed to the user, e.g. in the commands menu
+   */
+  name: string;
+  /**
+   * The description that will be displayed to the user, e.g. in the commands menu
+   */
+  description: string;
+  /**
+   * Raw html code for icon, import using `*.svg?raw`
+   */
+  icon: string;
+}
+
+export interface NodeSchema {
+  /**
+   * The content expression for this node, when left empty it allows no content.
+   */
+  content?: string | ContentExpression;
+  /**
+   * The group or space seperated groups to which this Node belongs.
+   */
+  group?: string;
 }
