@@ -1,11 +1,11 @@
 import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
 import { Node, Outlet } from './Node';
-import icon from '@/assets/icons/blocks/paragraph.svg?raw';
+import icon from '@/assets/icons/blocks/sub_sub_header.svg?raw';
 
-export default class Paragraph extends Node {
+export default class SubSubHeader extends Node {
   static meta: NodeMetaData = {
-    name: 'Paragraph',
-    description: 'Simple plain text',
+    name: 'Heading 3',
+    description: 'The smallest heading',
     icon,
   };
 
@@ -14,11 +14,11 @@ export default class Paragraph extends Node {
     group: 'block',
   };
 
-  type = 'paragraph';
+  type = 'sub_sub_header';
 
   isBlock = true;
 
   render(): ElementDefinition {
-    return ['p', {}, Outlet];
+    return ['h3', {}, Outlet];
   }
 }

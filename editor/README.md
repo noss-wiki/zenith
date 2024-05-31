@@ -19,3 +19,8 @@ some of these blocks can contain nodes, nodes are text-editable parts that can l
 ### Marks
 
 Marks are applied on inline (text) nodes, to define the formatting/styling of the node, e.g. bold, italic, etc.
+
+# Input strategy
+
+Always keep a document state, on input event calculate what changed compared to last state 
+and update the state to reflect input event via a `Transaction`.

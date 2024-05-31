@@ -110,7 +110,8 @@ export class ContentExpression {
   }
 }
 
-/* new ContentExpression('(paragraph | blockquote)+').parse();
+/* // Tests
+new ContentExpression('(paragraph | blockquote)+').parse();
 new ContentExpression('heading paragraph+').parse();
 new ContentExpression('text{2,231}').parse();
 new ContentExpression('text').parse();

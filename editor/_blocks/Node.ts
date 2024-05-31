@@ -12,8 +12,8 @@ export class Node extends Eventfull {
 
   id: string;
   type: string = '';
-  root?: HTMLElement;
-  outlets?: HTMLElement[];
+  root: HTMLElement;
+  outlets: HTMLElement[] = [];
 
   /**
    * This node's children
@@ -67,6 +67,63 @@ export class Node extends Eventfull {
       this.isBlock = false;
     if (this.isBlock === null) this.isBlock = true;
     if (this.isInline === null) this.isInline = false;
+
+    // render
+    const root = this._renderRoot();
+    if (!root)
+      throw new Error(`Render hook is not specified on node: ${this.type}`);
+    this.root = root;
+  }
+
+  _renderRoot() {
+    const res = this.render();
+    if (res === null) return null;
+
+    const renderPart = (part: ElementDefinition) => {
+      const ele = document.createElement(part[0]) as HTMLElement;
+
+      // Attributes
+      for (const attr in part[1]) {
+        //@ts-ignore
+        const val = part[1][attr];
+        if (val === 'children') continue;
+        else if (attr.startsWith('on')) {
+          // event listener
+          const event = attr.slice(2).toLowerCase();
+        } else if (attr === 'style') style(ele, val);
+        else ele.setAttribute(attr, val);
+      }
+
+      // Children
+      const children = part.slice(2) as ChildDefinition[];
+      for (const child of children) {
+        if (typeof child === 'string') {
+          if (child !== Outlet) ele.appendChild(document.createTextNode(child));
+          else if (!this.outlets.includes(ele)) {
+            this.outlets.push(ele);
+            ele.setAttribute(
+              'data-outlet',
+              (this.outlets.length - 1).toString()
+            );
+          }
+        } else if (
+          typeof child === 'number' ||
+          child === true ||
+          child instanceof Date ||
+          child instanceof RegExp
+        )
+          ele.appendChild(document.createTextNode(child.toString()));
+        else if (Array.isArray(child)) ele.appendChild(renderPart(child));
+      }
+
+      return ele;
+    };
+
+    const root = renderPart(res);
+    root.setAttribute('data-node', 'true');
+    if (this.isBlock) root.setAttribute('data-block', 'true');
+    else if (this.isInline) root.setAttribute('data-inline', 'true');
+    return root;
   }
 
   /**
@@ -133,5 +190,28 @@ export type ElementDefinition = [
   {
     [x: string]: any;
   },
-  ...(ElementDefinition | string | number)[]
+  ...ChildDefinition[]
 ];
+
+type ChildDefinition = ElementDefinition | string | number | boolean;
+
+export const Outlet = '<!-- _Outlet -->';
+
+// https://github.com/CodeFoxDev/honeyjs-core/blob/main/src/jsx-runtime.js#L83
+function style(element: HTMLElement, style: { [x: string]: string }) {
+  let res = {};
+  for (const property in style) {
+    let cssProp = property
+      .replace(/[A-Z][a-z]*/g, (str) => '-' + str.toLowerCase() + '-')
+      .replace('--', '-') // remove double hyphens
+      .replace(/(^-)|(-$)/g, ''); // remove hyphens at the beginning and the end
+    if (
+      typeof style[property] === 'string' ||
+      typeof style[property] === 'number'
+    ) {
+      //@ts-ignore
+      element.style[cssProp] = style[property];
+    } else console.warn('Unknown style value:', style[property]);
+  }
+  return res;
+}

@@ -2,21 +2,20 @@ import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
 import { Node, Outlet } from './Node';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 
-export default class Paragraph extends Node {
+export default class Text extends Node {
   static meta: NodeMetaData = {
-    name: 'Paragraph',
-    description: 'Simple plain text',
+    name: 'Text',
+    description: '',
     icon,
   };
 
   static schema: NodeSchema = {
-    content: 'inline*',
-    group: 'block',
+    group: 'inline',
   };
 
-  type = 'paragraph';
+  type = 'text';
 
-  isBlock = true;
+  isInline = true;
 
   render(): ElementDefinition {
     return ['p', {}, Outlet];
