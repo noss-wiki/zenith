@@ -1,6 +1,5 @@
-import type { NodeMetaData, NodeSchema } from './Node';
+import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
 import { Node } from './Node';
-import { description, BlockInstance } from '../blocks/instance';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 
 export default class Paragraph extends Node {
@@ -17,9 +16,7 @@ export default class Paragraph extends Node {
 
   isBlock = true;
 
-  render(): HTMLElement {
-    const root = this.attachRoot();
-    // add an input to the root
-    return root;
+  render(): ElementDefinition {
+    return ['p', {}, 0];
   }
 }

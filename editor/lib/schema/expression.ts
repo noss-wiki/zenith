@@ -100,8 +100,13 @@ export class ContentExpression {
     return match !== null;
   }
 
-  static from(expression: string) {
-    return new ContentExpression(expression);
+  /**
+   * Ensures that `expression` is an instance of {@link ContentExpression}
+   */
+  static from(expression: ContentExpression | string) {
+    if (typeof expression === 'string')
+      return new ContentExpression(expression);
+    else return expression;
   }
 }
 

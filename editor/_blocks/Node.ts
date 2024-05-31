@@ -13,6 +13,7 @@ export class Node extends Eventfull {
   id: string;
   type: string = '';
   root?: HTMLElement;
+  outlets?: HTMLElement[];
 
   /**
    * This node's children
@@ -72,8 +73,8 @@ export class Node extends Eventfull {
    * The result of the render hook, is what will be displayed in the DOM.
    * This hook should return the same element as `this.root`.
    */
-  render(): HTMLElement {
-    return document.createElement('div');
+  render(): ElementDefinition | null {
+    return null;
   }
 
   /**
@@ -89,6 +90,9 @@ export class Node extends Eventfull {
     return ele;
   }
 
+  /**
+   * Iterate over all childNodes, yields an array with first item the node, and second item the index.
+   */
   *iter(): Generator<[Node, number], void, unknown> {
     for (let i = 0; i < this.content.length; i++) yield [this.content[i], i];
   }
@@ -123,3 +127,11 @@ export interface NodeSchema {
    */
   group?: string;
 }
+
+export type ElementDefinition = [
+  keyof HTMLElementTagNameMap,
+  {
+    [x: string]: any;
+  },
+  ...(ElementDefinition | string | number)[]
+];
