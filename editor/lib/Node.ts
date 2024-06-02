@@ -1,7 +1,9 @@
-import type { ContentExpression } from '../lib/schema/expression';
-import type { ResolvedBlockDescription } from '../blocks';
+import type { ContentExpression } from './schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
 
+/**
+ * The base Node class
+ */
 export class Node extends Eventfull {
   // TODO: Update description to include less
   static readonly meta: NodeMetaData;
@@ -10,10 +12,13 @@ export class Node extends Eventfull {
   static readonly schema: NodeSchema;
   readonly schema: NodeSchema;
 
+  static readonly type: string = '';
+  readonly type: string;
+
   id: string;
-  type: string = '';
   root: HTMLElement;
-  outlets: HTMLElement[] = [];
+  outlet?: HTMLElement;
+  parent?: Node;
 
   /**
    * This node's children
@@ -58,6 +63,7 @@ export class Node extends Eventfull {
     super();
     const Class = <typeof Node>this.constructor;
     // TODO: error if not defined
+    this.type = Class.type ?? '';
     this.meta = Class.meta ?? {};
     this.schema = Class.schema ?? {};
     this.id = Math.random().toString(36).slice(2);
@@ -72,6 +78,7 @@ export class Node extends Eventfull {
     const root = this._renderRoot();
     if (!root)
       throw new Error(`Render hook is not specified on node: ${this.type}`);
+
     this.root = root;
   }
 
@@ -87,9 +94,12 @@ export class Node extends Eventfull {
         //@ts-ignore
         const val = part[1][attr];
         if (val === 'children') continue;
-        else if (attr.startsWith('on')) {
-          // event listener
-          const event = attr.slice(2).toLowerCase();
+        else if (attr.startsWith('on') && typeof val === 'function') {
+          // bind event listener
+          const event = attr
+            .slice(2)
+            .toLowerCase() as keyof HTMLElementEventMap;
+          this.on(`element:${event}`, (e) => val(e), ele);
         } else if (attr === 'style') style(ele, val);
         else ele.setAttribute(attr, val);
       }
@@ -99,12 +109,9 @@ export class Node extends Eventfull {
       for (const child of children) {
         if (typeof child === 'string') {
           if (child !== Outlet) ele.appendChild(document.createTextNode(child));
-          else if (!this.outlets.includes(ele)) {
-            this.outlets.push(ele);
-            ele.setAttribute(
-              'data-outlet',
-              (this.outlets.length - 1).toString()
-            );
+          else if (this.outlet !== ele) {
+            this.outlet = ele;
+            ele.setAttribute('data-outlet', 'true');
           }
         } else if (
           typeof child === 'number' ||
@@ -123,6 +130,9 @@ export class Node extends Eventfull {
     root.setAttribute('data-node', 'true');
     if (this.isBlock) root.setAttribute('data-block', 'true');
     else if (this.isInline) root.setAttribute('data-inline', 'true');
+
+    // verify outlet
+
     return root;
   }
 
@@ -132,19 +142,6 @@ export class Node extends Eventfull {
    */
   render(): ElementDefinition | null {
     return null;
-  }
-
-  /**
-   * Creates the root for this block, the result of the function is also assigned to `this.root` automatically.
-   * This root should be returned from the render hook.
-   */
-  attachRoot(): HTMLElement {
-    const ele = document.createElement('div');
-    ele.className = `noss-selectable noss-${this.type}-block`;
-    ele.setAttribute('data-block-id', this.id);
-
-    this.root = ele;
-    return ele;
   }
 
   /**

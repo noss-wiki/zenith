@@ -1,5 +1,5 @@
-import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
-import { Node, Outlet } from './Node';
+import type { NodeMetaData, NodeSchema, ElementDefinition } from '../lib/Node';
+import { Node, Outlet } from '../lib/Node';
 import icon from '@/assets/icons/blocks/task_list.svg?raw';
 
 export default class TaskList extends Node {
@@ -14,7 +14,7 @@ export default class TaskList extends Node {
     group: 'block',
   };
 
-  type = 'tast_list';
+  static type = 'tast_list';
   isInline = true;
 
   checked = false;

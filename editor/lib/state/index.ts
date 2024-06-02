@@ -1,5 +1,5 @@
 import { LoggerClass } from '@/composables/classes/logger';
-import type { Node } from '@/editor/_blocks/Node';
+import type { Node } from '../Node';
 import { Transaction } from './transaction';
 
 export class EditorState extends LoggerClass {
@@ -17,4 +17,7 @@ export class EditorState extends LoggerClass {
   tr(author?: string) {
     return new Transaction(this);
   }
+
+  // Node actions
+  // - add, remove
 }

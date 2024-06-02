@@ -1,5 +1,5 @@
-import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
-import { Node, Outlet } from './Node';
+import type { NodeMetaData, NodeSchema, ElementDefinition } from '../lib/Node';
+import { Node, Outlet } from '../lib/Node';
 import icon from '@/assets/icons/blocks/header.svg?raw';
 
 export default class Header extends Node {
@@ -14,7 +14,7 @@ export default class Header extends Node {
     group: 'block',
   };
 
-  type = 'header';
+  static type = 'header';
 
   isBlock = true;
 

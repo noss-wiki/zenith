@@ -1,5 +1,5 @@
-import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
-import { Node, Outlet } from './Node';
+import type { NodeMetaData, NodeSchema, ElementDefinition } from '../lib/Node';
+import { Node, Outlet } from '../lib/Node';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 
 export default class Text extends Node {
@@ -13,7 +13,7 @@ export default class Text extends Node {
     group: 'inline',
   };
 
-  type = 'text';
+  static type = 'text';
 
   isInline = true;
 

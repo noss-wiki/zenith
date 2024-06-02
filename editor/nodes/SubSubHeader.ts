@@ -1,5 +1,5 @@
-import type { NodeMetaData, NodeSchema, ElementDefinition } from './Node';
-import { Node, Outlet } from './Node';
+import type { NodeMetaData, NodeSchema, ElementDefinition } from '../lib/Node';
+import { Node, Outlet } from '../lib/Node';
 import icon from '@/assets/icons/blocks/sub_sub_header.svg?raw';
 
 export default class SubSubHeader extends Node {
@@ -14,7 +14,7 @@ export default class SubSubHeader extends Node {
     group: 'block',
   };
 
-  type = 'sub_sub_header';
+  static type = 'sub_sub_header';
 
   isBlock = true;
 
