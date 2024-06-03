@@ -1,7 +1,11 @@
 import type { Node } from '../Node';
 
 export class Slice {
-  constructor(content: Node[]) {}
+  content: Node[];
+
+  constructor(content: Node[]) {
+    this.content = content;
+  }
 
   // static methods
 

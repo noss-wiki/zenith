@@ -1,4 +1,4 @@
-import type { ContentExpression } from './schema/expression';
+import { ContentExpression } from './schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
 
 /**
@@ -145,6 +145,16 @@ export class Node extends Eventfull {
   }
 
   /**
+   * Check wheter the content of this node conforms to the schema
+   */
+  check() {
+    const expression =
+      this.schema.content instanceof ContentExpression
+        ? this.schema.content
+        : new ContentExpression(this.schema.content);
+  }
+
+  /**
    * Iterate over all childNodes, yields an array with first item the node, and second item the index.
    */
   *iter(): Generator<[Node, number], void, unknown> {
@@ -169,6 +179,11 @@ export interface NodeMetaData {
    * Raw html code for icon, import using `*.svg?raw`
    */
   icon: string;
+  /**
+   * If this Node is visible for selection in the UI
+   * @default true
+   */
+  visible?: boolean;
 }
 
 export interface NodeSchema {

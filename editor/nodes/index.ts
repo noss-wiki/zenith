@@ -1,5 +1,6 @@
 import type { Node } from '../lib/Node';
 // Nodes
+import Document from './Document';
 import Text from './Text';
 import Paragraph from './Paragraph';
 import Header from './Header';
@@ -8,6 +9,7 @@ import SubSubHeader from './SubSubHeader';
 import TaskList from './TaskList';
 
 export const nodes: readonly (typeof Node)[] = [
+  Document,
   Text,
   Paragraph,
   Header,

@@ -52,8 +52,8 @@ const rangeRegex = /{(?<start>[0-9]*),(?<end>[0-9]*) *}/;
 export class ContentExpression {
   expression: string;
 
-  constructor(expression: string) {
-    this.expression = expression;
+  constructor(expression: string | undefined) {
+    this.expression = expression ?? '';
   }
 
   parse(): ParsedExpression {

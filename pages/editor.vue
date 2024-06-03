@@ -35,7 +35,9 @@ const hover = ref(false);
       <Account expandable :icon-only="!open" />
     </nav>
     <main>
-      <Editor />
+      <ClientOnly>
+        <Editor />
+      </ClientOnly>
     </main>
   </div>
 </template>

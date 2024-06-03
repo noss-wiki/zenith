@@ -1,23 +1,30 @@
 <script setup lang="ts">
-import { Editor } from '@/editor';
+import { EditorView } from '@/editor/lib/view';
+import { EditorState } from '@/editor/lib/state';
+import DocumentNode from '@/editor/nodes/Document';
 
 let root: HTMLDivElement;
-let editor = new Editor();
+let contentRoot: HTMLDivElement;
 
-onMounted(() => editor.mount(root));
-onUnmounted(() => editor.unmount());
+const docNode = new DocumentNode();
+
+const state = new EditorState(docNode);
+const view = new EditorView(state);
+
+onMounted(() => view.mount(contentRoot));
+onUnmounted(() => view.unmount());
 </script>
 
 <template>
   <div class="editor" ref="root" noss-editor-root>
     <div class="inner">
       <div class="header"></div>
-      <div class="content" noss-editor-content data-content-editable-host></div>
-      <div class="components">
+      <div class="content" ref="contentRoot"></div>
+      <!-- <div class="components">
         <EditorHandle :instance="editor" />
         <EditorActions :instance="editor" />
         <EditorSelectionMenu :instance="editor" />
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
