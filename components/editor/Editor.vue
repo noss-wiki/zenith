@@ -2,11 +2,14 @@
 import { EditorView } from '@/editor/lib/view';
 import { EditorState } from '@/editor/lib/state';
 import DocumentNode from '@/editor/nodes/Document';
+import Paragraph from '@/editor/nodes/Paragraph';
 
 let root: HTMLDivElement;
 let contentRoot: HTMLDivElement;
 
 const docNode = new DocumentNode();
+docNode.content.push(new Paragraph());
+docNode.check();
 
 const state = new EditorState(docNode);
 const view = new EditorView(state);

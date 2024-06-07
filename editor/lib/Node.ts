@@ -152,6 +152,7 @@ export class Node extends Eventfull {
       this.schema.content instanceof ContentExpression
         ? this.schema.content
         : new ContentExpression(this.schema.content);
+    console.log(expression.match(this.content));
   }
 
   /**

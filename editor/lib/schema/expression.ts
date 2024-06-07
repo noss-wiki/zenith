@@ -18,6 +18,8 @@ Multiple of these structures can be repeated, if they have a non-infinite repeat
 https://prosemirror.net/docs/guide/#schema.content_expressions
 */
 
+import type { Node } from '../Node';
+
 type ExpressionGroup = string;
 type ExpressionModifier = '*' | '?' | '+' | `{${number},${number | ''}}` | '';
 
@@ -50,7 +52,7 @@ const expressionRegex =
 const rangeRegex = /{(?<start>[0-9]*),(?<end>[0-9]*) *}/;
 
 export class ContentExpression {
-  expression: string;
+  readonly expression: string;
 
   constructor(expression: string | undefined) {
     this.expression = expression ?? '';
@@ -93,6 +95,28 @@ export class ContentExpression {
     };
   }
 
+  match(content: Node[]) {
+    const parsed = this.parse();
+    let pi = 0;
+    let canMatchNext = true;
+    let currSelectorMatches = 0; // the amount of matches on the current selector
+
+    for (const node of content) {
+      const exprMatch = parsed.selectors[pi];
+
+      if (
+        !(
+          matchSelector(exprMatch.selector, node) /* ||
+          (canMatchNext === true &&
+            parsed.selectors[pi + 1] &&
+            matchSelector(parsed.selectors[pi + 1].selector, node)) second `if` for this, cause modifier of next also needs to match */
+        )
+      )
+        return false;
+      // match modifier
+    }
+  }
+
   // static methods
   static validate(expression: string) {
     // TODO: proper validation
@@ -129,4 +153,11 @@ function matchAll(expression: string, regex: RegExp) {
 
   if (res.length === 0) return null;
   return res;
+}
+
+function matchSelector(selector: string, node: Node): boolean {
+  if (node.type === selector) return true;
+  const nodeGroups = node.schema.group?.split(' ');
+  if (nodeGroups && nodeGroups.includes(selector)) return true;
+  return false;
 }
