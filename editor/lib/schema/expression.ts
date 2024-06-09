@@ -103,16 +103,11 @@ export class ContentExpression {
 
     for (const node of content) {
       const exprMatch = parsed.selectors[pi];
-
-      if (
-        !(
-          matchSelector(exprMatch.selector, node) /* ||
+      /* ||
           (canMatchNext === true &&
             parsed.selectors[pi + 1] &&
             matchSelector(parsed.selectors[pi + 1].selector, node)) second `if` for this, cause modifier of next also needs to match */
-        )
-      )
-        return false;
+      if (!matchSelector(exprMatch.selector, node)) return false;
       // match modifier
     }
   }

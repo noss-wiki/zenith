@@ -19,6 +19,6 @@ export default class Document extends Node {
   isBlock = true;
 
   render(): ElementDefinition {
-    return ['div', {}, Outlet];
+    return ['div', { contenteditable: 'true' }, Outlet];
   }
 }

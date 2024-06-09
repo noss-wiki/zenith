@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '@/editor/nodes/nodes.css';
 import { EditorView } from '@/editor/lib/view';
 import { EditorState } from '@/editor/lib/state';
 import DocumentNode from '@/editor/nodes/Document';
@@ -8,13 +9,16 @@ let root: HTMLDivElement;
 let contentRoot: HTMLDivElement;
 
 const docNode = new DocumentNode();
-docNode.content.push(new Paragraph());
-docNode.check();
+docNode.content.insert(new Paragraph());
+/* docNode.check(); */
 
 const state = new EditorState(docNode);
 const view = new EditorView(state);
 
-onMounted(() => view.mount(contentRoot));
+onMounted(() => {
+  view.mount(contentRoot);
+  view.render();
+});
 onUnmounted(() => view.unmount());
 </script>
 

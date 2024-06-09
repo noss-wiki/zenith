@@ -1,0 +1,4 @@
+.noss-paragraph-node {
+  background: var(--color-editor-active-block);
+  min-height: 1.5em;
+}

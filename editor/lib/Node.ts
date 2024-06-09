@@ -1,5 +1,6 @@
 import { ContentExpression } from './schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
+import { Fragment } from './model/fragment';
 
 /**
  * The base Node class
@@ -18,12 +19,11 @@ export class Node extends Eventfull {
   id: string;
   root: HTMLElement;
   outlet?: HTMLElement;
-  parent?: Node;
 
   /**
    * This node's children
    */
-  content: Node[] = [];
+  readonly content: Fragment;
   /**
    * The text content if this node is a text node, or `null` otherwise.
    */
@@ -39,13 +39,13 @@ export class Node extends Eventfull {
    * This is the opposite of `isInline`
    * @default true
    */
-  isBlock: boolean = null as unknown as boolean;
+  isBlock!: boolean;
   /**
    * Whether this Node is an inline node.
    * This is the opposite of `isBlock`
    * @default false
    */
-  isInline: boolean = null as unknown as boolean;
+  isInline!: boolean;
   /**
    * Wheter or not this node is a leaf, which means it can't hold any text content
    * @default false
@@ -68,24 +68,25 @@ export class Node extends Eventfull {
     this.schema = Class.schema ?? {};
     this.id = Math.random().toString(36).slice(2);
 
-    if (this.isBlock === true && this.isInline === null) this.isInline = false;
-    else if (this.isInline === true && this.isBlock === null)
+    if (this.isBlock === true && this.isInline === undefined)
+      this.isInline = false;
+    else if (this.isInline === true && this.isBlock === undefined)
       this.isBlock = false;
-    if (this.isBlock === null) this.isBlock = true;
-    if (this.isInline === null) this.isInline = false;
+    if (this.isBlock === undefined) this.isBlock = true;
+    if (this.isInline === undefined) this.isInline = false;
+
+    this.content = new Fragment([]);
 
     // render
-    const root = this._renderRoot();
-    if (!root)
-      throw new Error(`Render hook is not specified on node: ${this.type}`);
-
-    this.root = root;
+    this.root = this._renderRoot();
   }
 
   _renderRoot() {
     const res = this.render();
-    if (res === null) return null;
+    if (res === null)
+      throw new Error(`Render hook is not specified on node: ${this.type}`);
 
+    this.outlet = undefined;
     const renderPart = (part: ElementDefinition) => {
       const ele = document.createElement(part[0]) as HTMLElement;
 
@@ -109,7 +110,7 @@ export class Node extends Eventfull {
       for (const child of children) {
         if (typeof child === 'string') {
           if (child !== Outlet) ele.appendChild(document.createTextNode(child));
-          else if (this.outlet !== ele) {
+          else if (!this.outlet) {
             this.outlet = ele;
             ele.setAttribute('data-outlet', 'true');
           }
@@ -128,6 +129,7 @@ export class Node extends Eventfull {
 
     const root = renderPart(res);
     root.setAttribute('data-node', 'true');
+    root.classList.add(`noss-${this.type}-node`);
     if (this.isBlock) root.setAttribute('data-block', 'true');
     else if (this.isInline) root.setAttribute('data-inline', 'true');
 
@@ -137,8 +139,7 @@ export class Node extends Eventfull {
   }
 
   /**
-   * The result of the render hook, is what will be displayed in the DOM.
-   * This hook should return the same element as `this.root`.
+   * The result of the render hook; this is what will be displayed in the DOM.
    */
   render(): ElementDefinition | null {
     return null;
@@ -152,14 +153,7 @@ export class Node extends Eventfull {
       this.schema.content instanceof ContentExpression
         ? this.schema.content
         : new ContentExpression(this.schema.content);
-    console.log(expression.match(this.content));
-  }
-
-  /**
-   * Iterate over all childNodes, yields an array with first item the node, and second item the index.
-   */
-  *iter(): Generator<[Node, number], void, unknown> {
-    for (let i = 0; i < this.content.length; i++) yield [this.content[i], i];
+    //console.log(expression.match(this.content));
   }
 }
 
@@ -208,7 +202,7 @@ export type ElementDefinition = [
 
 type ChildDefinition = ElementDefinition | string | number | boolean;
 
-export const Outlet = '<!-- _Outlet -->';
+export const Outlet = '<!-- Outlet -->';
 
 // https://github.com/CodeFoxDev/honeyjs-core/blob/main/src/jsx-runtime.js#L83
 function style(element: HTMLElement, style: { [x: string]: string }) {
