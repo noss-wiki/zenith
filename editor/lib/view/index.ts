@@ -1,5 +1,6 @@
 import type { Node } from '../Node';
 import type { EditorState } from '../state';
+import { DOMObserver } from './observer';
 
 export class EditorView {
   root: HTMLElement = document.createElement('div');
@@ -12,12 +13,13 @@ export class EditorView {
    */
   renderedState: EditorState | null = null;
 
-  /* domObserver!: DOMObserver; */
+  domObserver: DOMObserver;
 
   mounted = false;
 
   constructor(state: EditorState) {
     this.state = state;
+    this.domObserver = new DOMObserver(this.state, (e) => this.mutation(e));
   }
 
   mount(root: HTMLElement) {
