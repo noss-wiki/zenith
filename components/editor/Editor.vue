@@ -4,16 +4,24 @@ import { EditorView } from '@/editor/lib/view';
 import { EditorState } from '@/editor/lib/state';
 import DocumentNode from '@/editor/nodes/Document';
 import Paragraph from '@/editor/nodes/Paragraph';
+import { Position } from '@/editor/lib/model/position';
+import { Transaction } from '@/editor/lib/state/transaction';
 
 let root: HTMLDivElement;
 let contentRoot: HTMLDivElement;
 
 const docNode = new DocumentNode();
 docNode.content.insert(new Paragraph());
+const p = new Paragraph();
+docNode.content.insert(p);
+p.content.insert(new Paragraph());
 /* docNode.check(); */
 
 const state = new EditorState(docNode);
 const view = new EditorView(state);
+
+const tr = new Transaction(state);
+tr.insert(Position.before(p), p);
 
 onMounted(() => {
   view.mount(contentRoot);

@@ -6,8 +6,6 @@
 - `modules`, editor modules are parts that acts as a bridge between the ui and the logic
 - `nodes`, the editor nodes
 
-# Names
-
 ### Nodes
 
 Nodes are the building blocks of the editor, a node represents a block or an inline node.

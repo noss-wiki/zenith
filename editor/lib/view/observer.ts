@@ -21,9 +21,17 @@ export class DOMObserver extends EventEmitter<ObserverEventMap> {
   cb: (e: any) => void;
 
   constructor(state: EditorState, callback: (e: any) => void) {
-    super();
+    super(false);
     this.state = state;
     this.cb = callback;
+
+    /* new MutationObserver((e) => {
+      console.log(e);
+    }).observe(this.state.document.root, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+    }); */
   }
 
   start() {}

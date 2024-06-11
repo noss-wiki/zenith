@@ -14,15 +14,21 @@ export class EventEmitter<
     callback: (e: any) => void | boolean;
   }[] = [];
 
-  constructor() {}
+  protected allowPreventingDefault: boolean;
+
+  constructor(allowPreventingDefault?: boolean) {
+    this.allowPreventingDefault = allowPreventingDefault ?? true;
+  }
 
   emit<T extends keyof EventMap>(type: T, data: EventMap[T]) {
     let stoppedImmediatePropagation = false;
     let eventData: EventData = {
       defaultPrevented: false,
-      preventDefault() {
-        //@ts-ignore
-        this.defaultPrevented = true;
+      preventDefault: () => {
+        if (this.allowPreventingDefault === true) {
+          //@ts-ignore
+          eventData.defaultPrevented = true;
+        }
       },
       stopImmediatePropagation: () => (stoppedImmediatePropagation = true),
       ...data,

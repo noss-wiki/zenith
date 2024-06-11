@@ -17,7 +17,7 @@ export class Node extends Eventfull {
   readonly type: string;
 
   id: string;
-  root: HTMLElement;
+  root: HTMLElement | Text;
   outlet?: HTMLElement;
 
   /**
@@ -50,7 +50,7 @@ export class Node extends Eventfull {
    * Wheter or not this node is a leaf, which means it can't hold any text content
    * @default false
    */
-  isLeaf = false;
+  /* isLeaf = false; */
 
   //isAtom
   /**
@@ -58,6 +58,13 @@ export class Node extends Eventfull {
    * @default false
    */
   isText = false;
+
+  get nodeSize() {
+    if (this.text !== null) return this.text.length; // the amount of characters
+    else if (this.isInline === true)
+      return 1; // non-text leaf nodes always have a length of 1
+    else return this.content.size + 2; // the size of the content + 2 (the start and end tokens)
+  }
 
   constructor() {
     super();
@@ -154,6 +161,16 @@ export class Node extends Eventfull {
         ? this.schema.content
         : new ContentExpression(this.schema.content);
     //console.log(expression.match(this.content));
+  }
+
+  /**
+   * Checks if `other` is equal to this node
+   * @param other The node to check
+   */
+  eq(other: Node): boolean {
+    if (this === other) return true;
+    // TODO: also check if markup is the same
+    return this.content.eq(other.content);
   }
 }
 

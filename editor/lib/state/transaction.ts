@@ -25,6 +25,8 @@ export class Transaction {
       node = created;
     }
 
+    console.log(pos.resolve(this.document));
+
     return this.replace(pos, pos, node);
   }
 

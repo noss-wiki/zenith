@@ -17,11 +17,11 @@ type InputTypes =
 export let editor: Editor | undefined;
 
 export class Editor extends DOMEventfull {
-  root: HTMLElement;
+  root!: HTMLElement;
   mounted: boolean = false;
   blocks: Block[] = [];
 
-  editor: HTMLElement;
+  editor!: HTMLElement;
 
   selected: Block | undefined;
 
@@ -30,9 +30,6 @@ export class Editor extends DOMEventfull {
   constructor() {
     super();
     this.logger.init('editor');
-
-    this.root = null as unknown as HTMLElement;
-    this.editor = null as unknown as HTMLElement;
 
     editor = this;
   }
