@@ -1,7 +1,14 @@
+import { EventEmitter } from '@/composables/classes/EventEmitter';
 import type { EditorState } from '../state';
 
-export interface ObserverEvent {
-  readonly type: 'insertNode';
+export type ObserverEventType = 'insertNode';
+
+export interface ObserverEventMap {
+  insertNode: ObserverEvent<'insertNode'>;
+}
+
+export interface ObserverEvent<T = ObserverEventType> {
+  readonly type: T;
   readonly targetElement: HTMLElement | Text;
   readonly composing: boolean;
 }
@@ -9,11 +16,12 @@ export interface ObserverEvent {
 // Create `on` event functions to listen to events,
 // Combine the mutationObserver and input events to simple events
 // events: `insertNode`
-export class DOMObserver {
+export class DOMObserver extends EventEmitter<ObserverEventMap> {
   state: EditorState;
   cb: (e: any) => void;
 
   constructor(state: EditorState, callback: (e: any) => void) {
+    super();
     this.state = state;
     this.cb = callback;
   }
