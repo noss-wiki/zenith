@@ -1,0 +1,10 @@
+import type { Node } from '../Node';
+
+export abstract class Step {
+  abstract id: string;
+  // TODO: Improve results maybe? to be a bit more descriptive
+  /**
+   * @returns If the Step succeeded return true, else return false
+   */
+  abstract apply(document: Node): boolean;
+}

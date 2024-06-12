@@ -23,16 +23,15 @@ interface ResolvedPosData {
 }
 
 export class Position {
-  readonly anchor: Node;
   resolved = false;
-
-  private resolvedResult: ResolvedPosData | undefined;
-  private location: RelativePosition | undefined;
+  result?: ResolvedPosData;
   private offset?: number;
 
-  constructor(anchor: Node, location?: RelativePosition, childIndex?: number) {
-    this.anchor = anchor;
-    this.location = location;
+  constructor(
+    readonly anchor: Node,
+    readonly location?: RelativePosition,
+    childIndex?: number
+  ) {
     this.offset = childIndex;
   }
 
@@ -52,7 +51,7 @@ export class Position {
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
-      this.resolvedResult = {
+      this.result = {
         ...found,
         offset,
         document,
@@ -65,7 +64,7 @@ export class Position {
         offset = Position.indexToOffset(this.anchor, this.offset);
       else offset = this.offset!;
 
-      this.resolvedResult = {
+      this.result = {
         depth: found.depth + 1,
         parent: this.anchor,
         offset,
@@ -74,7 +73,7 @@ export class Position {
     }
 
     this.resolved = true;
-    return this.resolvedResult;
+    return this.result;
   }
 
   // static methods
@@ -90,6 +89,18 @@ export class Position {
       else offset += child.nodeSize;
 
     return offset;
+  }
+
+  static offsetToIndex(parent: Node, offset: number): number | undefined {
+    if (offset === 0) return 0;
+
+    let _offset = 0; //
+    for (const [child, i] of parent.content.iter())
+      if (offset === _offset) return i;
+      else if (_offset > offset) return undefined;
+      else _offset += child.nodeSize;
+
+    if (offset === _offset) return parent.content.nodes.length;
   }
 
   // init methods

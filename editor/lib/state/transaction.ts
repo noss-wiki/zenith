@@ -1,11 +1,15 @@
 import type { EditorState } from '.';
 import type { Node } from '../Node';
+import type { Step } from './step';
 import { Position } from '../model/position';
 import { createNode } from '@/editor/nodes';
+// Steps
+import { InsertStep } from './steps/insert';
 
 export class Transaction {
   readonly document: Node;
   readonly state: EditorState;
+  readonly steps: Step[] = [];
 
   constructor(state: EditorState) {
     this.state = state;
@@ -25,14 +29,22 @@ export class Transaction {
       node = created;
     }
 
-    console.log(pos.resolve(this.document));
-
-    return this.replace(pos, pos, node);
+    this.steps.push(new InsertStep(pos, node));
+    return this;
   }
 
   replace(from: Position, to: Position, content: Node | Node[]) {
     if (!Array.isArray(content)) content = [content];
     // create step
     return this;
+  }
+
+  // TODO: Enforce no changes after applying transaction
+  /**
+   * Calls the `apply` function on the linked editor state, which adds this transaction to the editor state.
+   * After calling this or the function on the editor state, changes to this transaction are not allowed.
+   */
+  apply() {
+    this.state.apply(this);
   }
 }

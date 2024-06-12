@@ -15,10 +15,14 @@ export class Fragment {
     this.nodes = content;
   }
 
+  // TODO: Maybe make it more difficult to accidentaly use this function?
   /**
+   * NOTE: This function should not be called directly, but rather via an `InsertStep`.
+   *
    * Inserts `node` at `index` in this fragment.
    * @param node The node or nodes to insert
    * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
+   * @internal
    */
   insert(node: Node | Node[] | Fragment, index?: number) {
     if (node instanceof Fragment) node = node.nodes;

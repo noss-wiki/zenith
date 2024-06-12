@@ -13,7 +13,6 @@ let contentRoot: HTMLDivElement;
 const docNode = new DocumentNode();
 docNode.content.insert(new Paragraph());
 const p = new Paragraph();
-docNode.content.insert(p);
 p.content.insert(new Paragraph());
 /* docNode.check(); */
 
@@ -21,7 +20,7 @@ const state = new EditorState(docNode);
 const view = new EditorView(state);
 
 const tr = new Transaction(state);
-tr.insert(Position.before(p), p);
+tr.insert(Position.child(docNode), p).apply();
 
 onMounted(() => {
   view.mount(contentRoot);
