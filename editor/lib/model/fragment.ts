@@ -1,7 +1,7 @@
 import type { Node } from '../Node';
 
 export class Fragment {
-  nodes: Node[];
+  readonly nodes: Node[];
 
   get size(): number {
     if (this.nodes.length === 0) return 1;
@@ -16,10 +16,9 @@ export class Fragment {
   }
 
   /**
-   * Inserts `node` at `index` in this fragment, if a node is already inserted, and thus has a parent, it will throw an error.
+   * Inserts `node` at `index` in this fragment.
    * @param node The node or nodes to insert
-   * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end.
-   * If this value is out of bounds the value will be clamped.
+   * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
    */
   insert(node: Node | Node[] | Fragment, index?: number) {
     if (node instanceof Fragment) node = node.nodes;

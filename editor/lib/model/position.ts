@@ -1,6 +1,6 @@
 import type { Node } from '../Node';
 
-type RelativePosition = 'before' | 'after' | 'in';
+type RelativePosition = 'before' | 'after' | 'childIndex' | 'childOffset';
 
 interface ResolvedPosData {
   document: Node;
@@ -28,10 +28,12 @@ export class Position {
 
   private resolvedResult: ResolvedPosData | undefined;
   private location: RelativePosition | undefined;
+  private offset?: number;
 
   constructor(anchor: Node, location?: RelativePosition, childIndex?: number) {
     this.anchor = anchor;
     this.location = location;
+    this.offset = childIndex;
   }
 
   resolve(document: Node): ResolvedPosData | undefined {
@@ -49,19 +51,48 @@ export class Position {
           else offset += child.nodeSize;
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
+
+      this.resolvedResult = {
+        ...found,
+        offset,
+        document,
+      };
+    } else if (
+      this.location === 'childIndex' ||
+      this.location === 'childOffset'
+    ) {
+      if (this.location === 'childIndex')
+        offset = Position.indexToOffset(this.anchor, this.offset);
+      else offset = this.offset!;
+
+      this.resolvedResult = {
+        depth: found.depth + 1,
+        parent: this.anchor,
+        offset,
+        document,
+      };
     }
 
     this.resolved = true;
-    this.resolvedResult = {
-      ...found,
-      offset,
-      document,
-    };
-
     return this.resolvedResult;
   }
 
   // static methods
+  static indexToOffset(parent: Node, index?: number) {
+    if (!index) index = parent.content.nodes.length;
+    else if (index < 0) index = parent.content.nodes.length + index;
+
+    if (index === 0) return 0;
+
+    let offset = 0;
+    for (const [child, i] of parent.content.iter())
+      if (i === index) break;
+      else offset += child.nodeSize;
+
+    return offset;
+  }
+
+  // init methods
   /**
    * Creates a position that resolves before `anchor`
    */
@@ -75,13 +106,15 @@ export class Position {
     return new Position(anchor, 'after');
   }
   /**
-   * Creates a position that resolves as a child of `anchor`, at index `childIndex`
-   * @param childIndex The index where to resolve, leave empty for last item, and negative index to start from the last child
+   * Creates a position that resolves as a child of `anchor`, at index `childIndex`, this is guaranteed to resolve as a direct child of the `anchor` (it cannot cut an existing node in half)
+   * @param index The index where to resolve, leave empty for last item, and negative index to start from the last child
    */
-  static child(anchor: Node, childIndex?: number) {
-    return new Position(anchor, 'in', childIndex);
+  static child(anchor: Node, index?: number) {
+    return new Position(anchor, 'childIndex', index);
   }
-  static offset(anchor: Node, offset: number) {}
+  static offset(anchor: Node, offset: number) {
+    return new Position(anchor, 'childOffset', offset);
+  }
 }
 
 function locateAnchor(
