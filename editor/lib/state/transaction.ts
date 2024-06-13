@@ -5,6 +5,7 @@ import { Position } from '../model/position';
 import { createNode } from '@/editor/nodes';
 // Steps
 import { InsertStep } from './steps/insert';
+import { RemoveStep } from './steps/remove';
 
 export class Transaction {
   readonly document: Node;
@@ -30,6 +31,11 @@ export class Transaction {
     }
 
     this.steps.push(new InsertStep(pos, node));
+    return this;
+  }
+
+  remove(node: Node) {
+    this.steps.push(new RemoveStep(node));
     return this;
   }
 

@@ -17,14 +17,15 @@ export class Fragment {
 
   // TODO: Maybe make it more difficult to accidentaly use this function?
   /**
-   * NOTE: This function should not be called directly, but rather via an `InsertStep`.
+   * NOTE: This function should not be called directly, but rather via a transaction.
    *
    * Inserts `node` at `index` in this fragment.
    * @param node The node or nodes to insert
    * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
+   * @returns A boolean indicating if the node has been inserted.
    * @internal
    */
-  insert(node: Node | Node[] | Fragment, index?: number) {
+  insert(node: Node | Node[] | Fragment, index?: number): boolean {
     if (node instanceof Fragment) node = node.nodes;
     const nodes: readonly Node[] = Array.isArray(node) ? node : [node];
 
@@ -40,6 +41,20 @@ export class Fragment {
     else if (i < -this.nodes.length) i = -this.nodes.length;
 
     this.nodes.splice(i, 0, ...nodes);
+    return true;
+  }
+
+  /**
+   * NOTE: This function should not be called directly, but rather via a transaction.
+   *
+   * @param node The node to remove
+   * @returns A boolean indicating if the node has been removed.
+   */
+  remove(node: Node): boolean {
+    const index = this.nodes.indexOf(node);
+    if (index === -1) return false;
+    this.nodes.splice(index, 1);
+    return true;
   }
 
   /**

@@ -1,6 +1,7 @@
 import { LoggerClass } from '@/composables/classes/logger';
 import type { Node } from '../Node';
 import { Transaction } from './transaction';
+import type { Step } from './step';
 
 export class EditorState extends LoggerClass {
   readonly transactions: Transaction[] = [];
@@ -11,19 +12,70 @@ export class EditorState extends LoggerClass {
 
   /**
    * Create a new transaction in the editor
-   * @param author Used to author changes, currently unused
    */
-  tr(author?: string) {
+  get tr() {
     return new Transaction(this);
   }
 
   // Keep track of all transactions in the state, a transation should have the steps required to undo and (re)do a transaction,
   // all document changes should go via a transaction
   apply(tr: Transaction) {
-    this.transactions.push(tr);
-    tr.steps[0].apply(this.document);
+    const applied: Step[] = [];
+    let failed = false;
+
+    for (const s of tr.steps)
+      if (s.apply(this.document)) applied.push(s);
+      else {
+        failed = true;
+        break;
+      }
+
+    if (!failed) {
+      this.transactions.push(tr);
+      return true;
+    }
+
+    // try to undo previous steps in this transaction
+    let undoFailed = false;
+    for (const s of applied) if (!s.undo(this.document)) undoFailed = true;
+
+    if (undoFailed) {
+    } // TODO: trow special error
+    return false;
+  }
+
+  undo(tr: Transaction) {
+    const index = this.transactions.indexOf(tr);
+    if (index === -1 || index !== this.transactions.length - 1) return false;
+
+    const applied: Step[] = [];
+    let failed = false;
+
+    for (const s of invert(tr.steps))
+      if (s.undo(this.document)) applied.push(s);
+      else {
+        failed = true;
+        break;
+      }
+
+    if (!failed) {
+      this.transactions.splice(index, 1);
+      return true;
+    }
+
+    // try to undo previous steps in this transaction
+    let undoFailed = false;
+    for (const s of applied) if (!s.apply(this.document)) undoFailed = true;
+
+    if (undoFailed) {
+    } // TODO: trow special error
+    return false;
   }
 
   // Node actions
   // - add, remove
+}
+
+function* invert<T extends any>(arr: T[]): Generator<T, void, unknown> {
+  for (let i = 0; i < arr.length; i++) yield arr[arr.length - 1 - i];
 }

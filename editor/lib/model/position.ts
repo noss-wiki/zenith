@@ -2,6 +2,22 @@ import type { Node } from '../Node';
 
 type RelativePosition = 'before' | 'after' | 'childIndex' | 'childOffset';
 
+export interface FoundPosData {
+  document: Node;
+  /**
+   * The parent node of this position
+   */
+  parent: Node;
+  /**
+   * The depth the parent is relative to the document root
+   */
+  depth: number;
+  /**
+   * The index of the node in the parent's content
+   */
+  index: number;
+}
+
 interface ResolvedPosData {
   document: Node;
   /**
@@ -25,18 +41,19 @@ interface ResolvedPosData {
 export class Position {
   resolved = false;
   result?: ResolvedPosData;
-  private offset?: number;
+  private offset: number;
 
   constructor(
     readonly anchor: Node,
     readonly location?: RelativePosition,
     childIndex?: number
   ) {
-    this.offset = childIndex;
+    if (childIndex) this.offset = childIndex;
+    else this.offset = anchor.content.nodes.length;
   }
 
   resolve(document: Node): ResolvedPosData | undefined {
-    const found = locateAnchor(document, this.anchor);
+    const found = locateNode(document, this.anchor);
     if (!found) return;
 
     // calculate offset
@@ -77,6 +94,11 @@ export class Position {
   }
 
   // static methods
+  /**
+   * Converts an index to an offset in a node
+   * @param parent The node to use as parent
+   * @param index The index to convert to an offset
+   */
   static indexToOffset(parent: Node, index?: number) {
     if (!index) index = parent.content.nodes.length;
     else if (index < 0) index = parent.content.nodes.length + index;
@@ -91,6 +113,11 @@ export class Position {
     return offset;
   }
 
+  /**
+   * Tries to convert an offset to an index, this can only happen in the offset is between two nodes. Else it will return undefined
+   * @param parent The node to use as parent
+   * @param offset The offset to convert to an index
+   */
   static offsetToIndex(parent: Node, offset: number): number | undefined {
     if (offset === 0) return 0;
 
@@ -103,44 +130,59 @@ export class Position {
     if (offset === _offset) return parent.content.nodes.length;
   }
 
-  // init methods
+  // static init methods
   /**
    * Creates a position that resolves before `anchor`
    */
   static before(anchor: Node) {
     return new Position(anchor, 'before');
   }
+
   /**
    * Creates a position that resolves after `anchor`
    */
   static after(anchor: Node) {
     return new Position(anchor, 'after');
   }
+
   /**
-   * Creates a position that resolves as a child of `anchor`, at index `childIndex`, this is guaranteed to resolve as a direct child of the `anchor` (it cannot cut an existing node in half)
+   * Creates a position that resolves as a child of `anchor` at index `index`, this is guaranteed to resolve as a direct child of the `anchor` (it cannot cut an existing node in half)
    * @param index The index where to resolve, leave empty for last item, and negative index to start from the last child
    */
   static child(anchor: Node, index?: number) {
     return new Position(anchor, 'childIndex', index);
   }
+
+  /**
+   * Creates a position that resolves as a child of `anchor` at offset `offset`
+   * @param offset The offset into the parent
+   */
   static offset(anchor: Node, offset: number) {
     return new Position(anchor, 'childOffset', offset);
   }
 }
 
-function locateAnchor(
+/**
+ * Performs a breath-first search on the document to try to find the provided node
+ * @param document The document node to search in
+ * @param node The node to search for
+ * @returns Info about the node if found, else it returns undefined
+ */
+export function locateNode(
   document: Node,
-  anchor: Node
-): { parent: Node; depth: number; index: number } | undefined {
-  if (document === anchor) return { depth: 0, parent: document, index: 0 };
-  else return bfs(document, anchor, 1);
+  node: Node
+): FoundPosData | undefined {
+  if (document === node)
+    return { document, depth: 0, parent: document, index: 0 };
+  const res = bfs(document, node, 1);
+  if (res) return { document, ...res };
 }
 
 function bfs(
   node: Node,
   search: Node,
   depth: number
-): { parent: Node; depth: number; index: number } | undefined {
+): Omit<FoundPosData, 'document'> | undefined {
   let a = [];
 
   for (const [child, i] of node.content.iter())

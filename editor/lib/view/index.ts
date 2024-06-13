@@ -29,6 +29,7 @@ export class EditorView {
     this.mounted = true;
 
     this.root.appendChild(this.state.document.root);
+    return this;
   }
 
   unmount() {}

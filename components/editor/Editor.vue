@@ -4,6 +4,7 @@ import { EditorView } from '@/editor/lib/view';
 import { EditorState } from '@/editor/lib/state';
 import DocumentNode from '@/editor/nodes/Document';
 import Paragraph from '@/editor/nodes/Paragraph';
+import HeaderNode from '@/editor/nodes/Header';
 import { Position } from '@/editor/lib/model/position';
 import { Transaction } from '@/editor/lib/state/transaction';
 
@@ -13,7 +14,6 @@ let contentRoot: HTMLDivElement;
 const docNode = new DocumentNode();
 docNode.content.insert(new Paragraph());
 const p = new Paragraph();
-p.content.insert(new Paragraph());
 /* docNode.check(); */
 
 const state = new EditorState(docNode);
@@ -22,10 +22,7 @@ const view = new EditorView(state);
 const tr = new Transaction(state);
 tr.insert(Position.child(docNode), p).apply();
 
-onMounted(() => {
-  view.mount(contentRoot);
-  view.render();
-});
+onMounted(() => view.mount(contentRoot).render());
 onUnmounted(() => view.unmount());
 </script>
 

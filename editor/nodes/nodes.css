@@ -2,3 +2,7 @@
   background: var(--color-editor-active-block);
   min-height: 1.5em;
 }
+
+.noss-header-node {
+  min-height: 1.5em;
+}
