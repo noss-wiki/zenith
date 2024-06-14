@@ -1,4 +1,5 @@
 import type { Node } from '../Node';
+import type { Position, ResolvedPosData } from './position';
 import type { DOMSelection } from './types';
 
 export class Selection {
@@ -15,5 +16,20 @@ export class Selection {
    */
   //collapse(node?: Node, offset?: number) {}
 
+  /**
+   * Creates a Selection from two positions
+   * @param from The position of the anchor
+   * @param to The position of the focus
+   */
+  static from(from: Position, to: Position) {
+    return new Selection();
+  }
+
+  static select(node: Node) {}
+
+  /**
+   * Creates a Selection from a DOMSelection
+   * @param selection The DOMSelection to convert
+   */
   static fromDOMSelection(selection: DOMSelection) {}
 }

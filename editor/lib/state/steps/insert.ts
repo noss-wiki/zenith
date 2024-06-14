@@ -1,6 +1,6 @@
 import type { Node } from '../../Node';
 import { Position } from '../../model/position';
-import { Step } from '../step';
+import { Step, type StepJSON } from '../step';
 
 export class InsertStep extends Step {
   id = 'insert';

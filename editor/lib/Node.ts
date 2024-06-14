@@ -1,6 +1,7 @@
 import { ContentExpression } from './schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
 import { Fragment } from './model/fragment';
+import type { FragmentJSON } from './model/fragment';
 
 /**
  * The base Node class
@@ -172,7 +173,21 @@ export class Node extends Eventfull {
     // TODO: also check if markup is the same
     return this.content.eq(other.content);
   }
+
+  toJSON(): NodeJSON {
+    return {
+      id: this.id,
+      type: this.type,
+      content: this.content.toJSON(),
+    };
+  }
 }
+
+export type NodeJSON = {
+  id: string;
+  type: string;
+  content: FragmentJSON;
+};
 
 /**
  * Meta data is data that is displayed (or used to display) info about this node in the ui.

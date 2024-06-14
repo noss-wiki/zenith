@@ -20,7 +20,7 @@ const state = new EditorState(docNode);
 const view = new EditorView(state);
 
 const tr = new Transaction(state);
-tr.insert(Position.child(docNode), p).apply();
+tr.insert(p, Position.child(docNode)).apply();
 
 onMounted(() => view.mount(contentRoot).render());
 onUnmounted(() => view.unmount());

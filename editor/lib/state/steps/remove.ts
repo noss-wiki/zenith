@@ -1,12 +1,12 @@
 import type { Node } from '../../Node';
-import type { FoundPosData } from '../../model/position';
+import type { IndexPosData } from '../../model/position';
 import { locateNode } from '../../model/position';
 import { Step } from '../step';
 
 export class RemoveStep extends Step {
-  id = 'insert';
+  id = 'remove';
 
-  private pos?: FoundPosData;
+  private pos?: IndexPosData;
 
   constructor(readonly node: Node) {
     super();

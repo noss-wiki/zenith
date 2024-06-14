@@ -2,7 +2,7 @@ import type { Node } from '../Node';
 
 type RelativePosition = 'before' | 'after' | 'childIndex' | 'childOffset';
 
-export interface FoundPosData {
+export interface IndexPosData {
   document: Node;
   /**
    * The parent node of this position
@@ -18,7 +18,7 @@ export interface FoundPosData {
   index: number;
 }
 
-interface ResolvedPosData {
+export interface ResolvedPosData {
   document: Node;
   /**
    * The depth the parent is relative to the document root
@@ -32,10 +32,6 @@ interface ResolvedPosData {
    * The offset this position has into its parent node.
    */
   offset: number;
-  /**
-   * The index of the anchor node in the parent's content
-   */
-  /* index: number; */
 }
 
 export class Position {
@@ -160,6 +156,8 @@ export class Position {
   static offset(anchor: Node, offset: number) {
     return new Position(anchor, 'childOffset', offset);
   }
+
+  // TODO: Figure out how to implement to and from json, as we need a reference to the document node (probably via the id, and create a function that creates or finds a node with same id in document)
 }
 
 /**
@@ -171,7 +169,7 @@ export class Position {
 export function locateNode(
   document: Node,
   node: Node
-): FoundPosData | undefined {
+): IndexPosData | undefined {
   if (document === node)
     return { document, depth: 0, parent: document, index: 0 };
   const res = bfs(document, node, 1);
@@ -182,7 +180,7 @@ function bfs(
   node: Node,
   search: Node,
   depth: number
-): Omit<FoundPosData, 'document'> | undefined {
+): Omit<IndexPosData, 'document'> | undefined {
   let a = [];
 
   for (const [child, i] of node.content.iter())

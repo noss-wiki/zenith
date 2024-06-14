@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node, NodeJSON } from '../Node';
 
 export class Fragment {
   readonly nodes: Node[];
@@ -77,4 +77,14 @@ export class Fragment {
   *iter(): Generator<[Node, number], void, unknown> {
     for (let i = 0; i < this.nodes.length; i++) yield [this.nodes[i], i];
   }
+
+  toJSON(): FragmentJSON {
+    return {
+      nodes: this.nodes.map((e) => e.toJSON()),
+    };
+  }
 }
+
+export type FragmentJSON = {
+  nodes: NodeJSON[];
+};

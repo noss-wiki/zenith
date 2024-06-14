@@ -1,5 +1,10 @@
 import type { Node } from '../Node';
 
+export type StepJSON = {
+  stepId: string;
+  [x: string]: any;
+};
+
 export abstract class Step {
   abstract id: string;
   // TODO: Improve results maybe? to be a bit more descriptive
@@ -14,4 +19,6 @@ export abstract class Step {
    * For example the inserted node needs to be at the same position to undo succesfully.
    */
   abstract undo(document: Node): boolean;
+
+  /* abstract toJSON(): StepJSON; */
 }
