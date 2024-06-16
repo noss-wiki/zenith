@@ -67,7 +67,8 @@ export class Node extends Eventfull {
     else return this.content.size + 2; // the size of the content + 2 (the start and end tokens)
   }
 
-  constructor() {
+  // also add marks later
+  constructor(content?: Fragment) {
     super();
     const Class = <typeof Node>this.constructor;
     // TODO: error if not defined
@@ -83,7 +84,7 @@ export class Node extends Eventfull {
     if (this.isBlock === undefined) this.isBlock = true;
     if (this.isInline === undefined) this.isInline = false;
 
-    this.content = new Fragment([]);
+    this.content = content || new Fragment([]);
 
     // render
     this.root = this._renderRoot();

@@ -2,7 +2,7 @@ import type { EditorState } from '.';
 import type { Node } from '../Node';
 import type { Step } from './step';
 import { Position } from '../model/position';
-import { createNode } from '@/editor/nodes';
+import { createNode, createTextNode } from '@/editor/nodes';
 // Steps
 import { InsertStep } from './steps/insert';
 import { RemoveStep } from './steps/remove';
@@ -35,7 +35,22 @@ export class Transaction {
     return this;
   }
 
-  insertText(text: string, pos: Position) {}
+  insertText(text: string, pos: Position) {
+    const resolvedPos = pos.resolve(this.document);
+    if (!resolvedPos)
+      throw new Error('Position is not resolvable in the current document');
+    const index = Position.offsetToIndex(
+      resolvedPos.parent,
+      resolvedPos.offset
+    );
+
+    if (index !== undefined) {
+      // New node needs to be created
+      const node = createTextNode(text);
+    } else {
+      // content needs to be inserted in existing node
+    }
+  }
 
   /**
    * Adds an {@link RemoveStep} to this transaction, which removes a node from the document.

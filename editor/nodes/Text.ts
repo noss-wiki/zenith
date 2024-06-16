@@ -15,8 +15,18 @@ export default class Text extends Node {
 
   static type = 'text';
 
+  text: string;
+
   isInline = true;
 
+  constructor(content?: string) {
+    super(undefined);
+    if (!content) throw new Error('Empty text nodes are not allowed');
+    this.text = content;
+  }
+
+  // this needs to change, as it doesn't support doms `Text` and it needs to rerender everytime content is changed
+  // maybe via a setter?
   render(): ElementDefinition {
     return ['p', {}, Outlet];
   }

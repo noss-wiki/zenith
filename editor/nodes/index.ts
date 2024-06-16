@@ -8,7 +8,7 @@ import SubHeader from './SubHeader';
 import SubSubHeader from './SubSubHeader';
 import TaskList from './TaskList';
 
-export const nodes: readonly (typeof Node)[] = [
+export const nodes: readonly (typeof Node | typeof Text)[] = [
   Document,
   Text,
   Paragraph,
@@ -18,8 +18,14 @@ export const nodes: readonly (typeof Node)[] = [
   TaskList,
 ];
 
-export function createNode<T extends string>(type: T) {
+export function createNode<T extends string>(
+  type: T
+): null | (T extends 'text' ? Text : Node) {
   const block = nodes.find((e) => e.type === type);
   if (!block) return null;
-  return new block();
+  return new block() as T extends 'text' ? Text : Node;
+}
+
+export function createTextNode(content: string) {
+  return new Text(content);
 }
