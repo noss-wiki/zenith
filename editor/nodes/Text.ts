@@ -25,7 +25,7 @@ export default class Text extends Node {
     this.text = content;
   }
 
-  // this needs to change, as it doesn't support doms `Text` and it needs to rerender everytime content is changed
+  // this needs to change, as it doesn't support dom's `Text` and it needs to rerender everytime content is changed
   // maybe via a setter?
   render(): ElementDefinition {
     return ['p', {}, Outlet];

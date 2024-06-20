@@ -1,22 +1,12 @@
 import type { Node } from '../Node';
 
-type RelativePosition = 'before' | 'after' | 'childIndex' | 'childOffset';
+export type PositionLike = number | RelativePosition | Position;
 
-export interface IndexPosData {
-  document: Node;
-  /**
-   * The parent node of this position
-   */
-  parent: Node;
-  /**
-   * The depth the parent is relative to the document root
-   */
-  depth: number;
-  /**
-   * The index of the node in the parent's content
-   */
-  index: number;
-}
+type RelativePositionLocation =
+  | 'before'
+  | 'after'
+  | 'childIndex'
+  | 'childOffset';
 
 export interface ResolvedPosData {
   document: Node;
@@ -34,21 +24,21 @@ export interface ResolvedPosData {
   offset: number;
 }
 
-export class Position {
-  resolved = false;
-  result?: ResolvedPosData;
-  private offset: number;
+export class RelativePosition {
+  private offset: number = 0;
 
   constructor(
     readonly anchor: Node,
-    readonly location?: RelativePosition,
-    childIndex?: number
+    private readonly location: RelativePositionLocation,
+    offset?: number
   ) {
-    if (childIndex) this.offset = childIndex;
-    else this.offset = anchor.content.nodes.length;
+    if (offset) this.offset = offset;
+    else if (location === 'childIndex')
+      this.offset = anchor.content.nodes.length;
+    else if (location === 'childOffset') this.offset = anchor.content.size;
   }
 
-  resolve(document: Node): ResolvedPosData | undefined {
+  resolve(document: Node): Position | undefined {
     const found = locateNode(document, this.anchor);
     if (!found) return;
 
@@ -64,11 +54,7 @@ export class Position {
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
-      this.result = {
-        ...found,
-        offset,
-        document,
-      };
+      return new Position(document, found.depth, found.parent, offset);
     } else if (
       this.location === 'childIndex' ||
       this.location === 'childOffset'
@@ -77,19 +63,27 @@ export class Position {
         offset = Position.indexToOffset(this.anchor, this.offset);
       else offset = this.offset!;
 
-      this.result = {
-        depth: found.depth + 1,
-        parent: this.anchor,
-        offset,
-        document,
-      };
+      return new Position(document, found.depth + 1, this.anchor, offset);
     }
-
-    this.resolved = true;
-    return this.result;
   }
+}
+
+export class Position {
+  constructor(
+    readonly document: Node,
+    readonly depth: number,
+    readonly parent: Node,
+    readonly offset: number
+  ) {}
 
   // static methods
+  static resolve(document: Node, pos: PositionLike): Position | undefined {
+    if (pos instanceof Position) return pos;
+    else if (pos instanceof RelativePosition) return pos.resolve(document);
+
+    // resolve absolute position (number) to document
+  }
+
   /**
    * Converts an index to an offset in a node
    * @param parent The node to use as parent
@@ -131,14 +125,14 @@ export class Position {
    * Creates a position that resolves before `anchor`
    */
   static before(anchor: Node) {
-    return new Position(anchor, 'before');
+    return new RelativePosition(anchor, 'before');
   }
 
   /**
    * Creates a position that resolves after `anchor`
    */
   static after(anchor: Node) {
-    return new Position(anchor, 'after');
+    return new RelativePosition(anchor, 'after');
   }
 
   /**
@@ -146,7 +140,7 @@ export class Position {
    * @param index The index where to resolve, leave empty for last item, and negative index to start from the last child
    */
   static child(anchor: Node, index?: number) {
-    return new Position(anchor, 'childIndex', index);
+    return new RelativePosition(anchor, 'childIndex', index);
   }
 
   /**
@@ -154,10 +148,26 @@ export class Position {
    * @param offset The offset into the parent
    */
   static offset(anchor: Node, offset: number) {
-    return new Position(anchor, 'childOffset', offset);
+    return new RelativePosition(anchor, 'childOffset', offset);
   }
 
   // TODO: Figure out how to implement to and from json, as we need a reference to the document node (probably via the id, and create a function that creates or finds a node with same id in document)
+}
+
+export interface IndexPosData {
+  document: Node;
+  /**
+   * The parent node of this position
+   */
+  parent: Node;
+  /**
+   * The depth the parent is relative to the document root
+   */
+  depth: number;
+  /**
+   * The index of the node in the parent's content
+   */
+  index: number;
 }
 
 /**

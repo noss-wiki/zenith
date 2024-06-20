@@ -14,7 +14,6 @@ let contentRoot: HTMLDivElement;
 const docNode = new DocumentNode();
 docNode.content.insert(new Paragraph());
 const p = new Paragraph();
-/* docNode.check(); */
 
 const state = new EditorState(docNode);
 const view = new EditorView(state);

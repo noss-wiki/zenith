@@ -1,6 +1,7 @@
 import type { EditorState } from '.';
 import type { Node } from '../Node';
 import type { Step } from './step';
+import type { PositionLike } from '../model/position';
 import { Position } from '../model/position';
 import { createNode, createTextNode } from '@/editor/nodes';
 // Steps
@@ -23,7 +24,7 @@ export class Transaction {
    * @param node The node to add, or the node type (node will be created automatically).
    * @param pos The position where to insert the node, see {@link Position}.
    */
-  insert<T extends string>(node: T | Node, pos: Position) {
+  insert<T extends string>(node: T | Node, pos: PositionLike) {
     if (typeof node === 'string') {
       const created = createNode(node);
       if (created === null)
@@ -35,10 +36,11 @@ export class Transaction {
     return this;
   }
 
-  insertText(text: string, pos: Position) {
-    const resolvedPos = pos.resolve(this.document);
+  insertText(text: string, pos: PositionLike) {
+    const resolvedPos = Position.resolve(this.document, pos);
     if (!resolvedPos)
       throw new Error('Position is not resolvable in the current document');
+
     const index = Position.offsetToIndex(
       resolvedPos.parent,
       resolvedPos.offset
@@ -47,9 +49,13 @@ export class Transaction {
     if (index !== undefined) {
       // New node needs to be created
       const node = createTextNode(text);
+      this.steps.push(new InsertStep(resolvedPos, node));
     } else {
       // content needs to be inserted in existing node
+      // -> use replace step with collapsed selection
     }
+
+    return this;
   }
 
   /**
@@ -82,7 +88,7 @@ export class Transaction {
     return this;
   } */
 
-  // TODO: Enforce no changes after applying transaction
+  // Maybe enforce no changes after applying transaction
   /**
    * Calls the `apply` function on the linked editor state, which adds this transaction to the editor state.
    * After calling this or the function on the editor state, changes to this transaction are not allowed.
