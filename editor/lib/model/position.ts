@@ -8,22 +8,6 @@ type RelativePositionLocation =
   | 'childIndex'
   | 'childOffset';
 
-export interface ResolvedPosData {
-  document: Node;
-  /**
-   * The depth the parent is relative to the document root
-   */
-  depth: number;
-  /**
-   * The parent node of this position
-   */
-  parent: Node;
-  /**
-   * The offset this position has into its parent node.
-   */
-  offset: number;
-}
-
 export class RelativePosition {
   private offset: number = 0;
 
@@ -39,22 +23,27 @@ export class RelativePosition {
   }
 
   resolve(document: Node): Position | undefined {
-    const found = locateNode(document, this.anchor);
-    if (!found) return;
+    const locate = locateNode(document, this.anchor);
+    if (!locate) return;
 
-    // calculate offset
+    const parent = locate.steps[locate.steps.length - 2];
+    const found = locate.steps[locate.steps.length - 1];
     let offset = 0;
 
     if (this.location === 'after' || this.location === 'before') {
-      // initial offset
+      if (found.node === locate.document)
+        throw new Error(
+          "Can't resolve a position before or after the document node"
+        );
+
       if (found.index > 0)
-        for (const [child, i] of found.parent.content.iter())
+        for (const [child, i] of parent.node.content.iter())
           if (i === found.index) break;
           else offset += child.nodeSize;
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
-      return new Position(document, found.depth, found.parent, offset);
+      return new Position(document, found.depth, parent.node, offset);
     } else if (
       this.location === 'childIndex' ||
       this.location === 'childOffset'
@@ -70,9 +59,21 @@ export class RelativePosition {
 
 export class Position {
   constructor(
+    /**
+     * The document this position was resolved in
+     */
     readonly document: Node,
+    /**
+     * The depth the position is relative to the document, 0 means it is the document, 1 means it is a direct chid of the document, etc.
+     */
     readonly depth: number,
+    /**
+     * The parent node of this position
+     */
     readonly parent: Node,
+    /**
+     * The offset this position has into its parent node
+     */
     readonly offset: number
   ) {}
 
@@ -176,7 +177,7 @@ export interface IndexPosData {
  * @param node The node to search for
  * @returns Info about the node if found, else it returns undefined
  */
-export function locateNode(
+/* export function locateNode(
   document: Node,
   node: Node
 ): IndexPosData | undefined {
@@ -200,5 +201,74 @@ function bfs(
   for (const c of a) {
     const res = bfs(c, search, depth + 1);
     if (res) return res;
+  }
+} */
+
+export interface LocateData {
+  document: Node;
+  steps: LocateStep[];
+}
+
+export interface LocateStep {
+  node: Node;
+  /**
+   * The depth this node is at, 0 means it is the document, 1 means it is a direct child of the document, etc.
+   */
+  depth: number;
+  /**
+   * The index this node has in its parents content
+   */
+  index: number;
+}
+
+/**
+ * Performs a breath-first search on the document to try to find the provided node
+ * @param document The document node to search in
+ * @param node The node to search for
+ * @returns Info about the node if found, else it returns undefined
+ */
+export function locateNode(document: Node, node: Node): LocateData | undefined {
+  if (document === node) {
+    const step = {
+      depth: 0,
+      index: 0,
+      node: document,
+    };
+    return {
+      document,
+      steps: [step],
+    };
+  }
+  const res = bfsSteps(document, 0, 0, node);
+  if (res) return { document, steps: res };
+}
+
+function bfsSteps(
+  node: Node,
+  nodeIndex: number,
+  depth: number,
+  search: Node
+): LocateStep[] | undefined {
+  let a: [Node, number][] = [];
+
+  for (const [child, i] of node.content.iter()) {
+    if (search === child)
+      return [
+        { depth, node, index: nodeIndex },
+        { depth: depth + 1, node: child, index: i },
+      ];
+    else a.push([child, i]);
+  }
+
+  for (const [c, i] of a) {
+    const res = bfsSteps(c, i, depth + 1, search);
+    if (res) {
+      res.unshift({
+        depth: depth,
+        node,
+        index: nodeIndex,
+      });
+      return res;
+    }
   }
 }

@@ -154,6 +154,9 @@ export class Node extends Eventfull {
     return null;
   }
 
+  // TODO: getParent method, that can be called to get the parent of this node, document args is required
+  // also save result as getting the parent can be quite expensive, depending on the document size
+
   /**
    * Check wheter the content of this node conforms to the schema
    */

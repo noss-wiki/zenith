@@ -1,11 +1,9 @@
 import type { Node } from '../Node';
+import { Fragment } from './fragment';
 
+// Document Range
 export class Slice {
-  content: Node[];
-
-  constructor(content: Node[]) {
-    this.content = content;
-  }
+  constructor(readonly content: Fragment) {}
 
   // static methods
 
@@ -13,6 +11,6 @@ export class Slice {
    * An empty slice
    */
   static get empty(): Slice {
-    return new Slice([]);
+    return new Slice(new Fragment([]));
   }
 }
