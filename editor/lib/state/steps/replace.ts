@@ -1,7 +1,6 @@
-import type { Node } from '../../Node';
+import type { Node } from '../../model/node';
 import { Selection } from '../../model/selection';
-import { Position } from '../../model/position';
-import { Step, type StepJSON } from '../step';
+import { Step } from '../step';
 
 export class InsertStep extends Step {
   id = 'replace';

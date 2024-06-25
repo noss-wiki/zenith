@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node } from '../model/node';
 
 export type StepJSON = {
   stepId: string;

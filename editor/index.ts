@@ -6,7 +6,7 @@ import { createComponent } from './components';
 import { createBlock } from './blocks';
 
 import './lib/schema/expression';
-import './lib/Node';
+import './lib/model/node';
 
 type InputTypes =
   | 'insertParagraph'

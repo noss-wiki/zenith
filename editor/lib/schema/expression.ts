@@ -18,7 +18,7 @@ Multiple of these structures can be repeated, if they have a non-infinite repeat
 https://prosemirror.net/docs/guide/#schema.content_expressions
 */
 
-import type { Node } from '../Node';
+import type { Node } from '../model/node';
 
 type ExpressionGroup = string;
 type ExpressionModifier = '*' | '?' | '+' | `{${number},${number | ''}}` | '';

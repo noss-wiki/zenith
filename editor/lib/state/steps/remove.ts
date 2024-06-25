@@ -1,4 +1,4 @@
-import type { Node } from '../../Node';
+import type { Node } from '../../model/node';
 import type { LocateData } from '../../model/position';
 import { locateNode } from '../../model/position';
 import { Step } from '../step';

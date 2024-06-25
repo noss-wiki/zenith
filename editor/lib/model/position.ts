@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node } from './node';
 
 export type PositionLike = number | RelativePosition | Position;
 
@@ -170,39 +170,6 @@ export interface IndexPosData {
    */
   index: number;
 }
-
-/**
- * Performs a breath-first search on the document to try to find the provided node
- * @param document The document node to search in
- * @param node The node to search for
- * @returns Info about the node if found, else it returns undefined
- */
-/* export function locateNode(
-  document: Node,
-  node: Node
-): IndexPosData | undefined {
-  if (document === node)
-    return { document, depth: 0, parent: document, index: 0 };
-  const res = bfs(document, node, 1);
-  if (res) return { document, ...res };
-}
-
-function bfs(
-  node: Node,
-  search: Node,
-  depth: number
-): Omit<IndexPosData, 'document'> | undefined {
-  let a = [];
-
-  for (const [child, i] of node.content.iter())
-    if (search === child) return { depth, parent: node, index: i };
-    else a.push(child);
-
-  for (const c of a) {
-    const res = bfs(c, search, depth + 1);
-    if (res) return res;
-  }
-} */
 
 export interface LocateData {
   document: Node;

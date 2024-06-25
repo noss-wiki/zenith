@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node } from '../model/node';
 import type { EditorState } from '../state';
 import { DOMObserver } from './observer';
 

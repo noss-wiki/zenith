@@ -1,5 +1,9 @@
-import type { NodeMetaData, NodeSchema, ElementDefinition } from '../lib/Node';
-import { Node, Outlet } from '../lib/Node';
+import type {
+  NodeMetaData,
+  NodeSchema,
+  ElementDefinition,
+} from '../lib/model/node';
+import { Node, Outlet } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/header.svg?raw';
 
 export default class Header extends Node {

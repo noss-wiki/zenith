@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node } from './node';
 import { Fragment } from './fragment';
 
 // Document Range

@@ -1,4 +1,4 @@
-import type { Node } from '../lib/Node';
+import type { Node } from '../lib/model/node';
 // Nodes
 import Document from './Document';
 import Text from './Text';

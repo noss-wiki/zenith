@@ -1,4 +1,4 @@
-import type { Node } from '../Node';
+import type { Node } from './node';
 import { Position } from './position';
 import type { DOMSelection } from './types';
 

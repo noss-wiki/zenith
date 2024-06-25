@@ -1,7 +1,7 @@
-import { ContentExpression } from './schema/expression';
+import { ContentExpression } from '../schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
-import { Fragment } from './model/fragment';
-import type { FragmentJSON } from './model/fragment';
+import { Fragment } from './fragment';
+import type { FragmentJSON } from './fragment';
 
 /**
  * The base Node class

@@ -1,5 +1,5 @@
 import { LoggerClass } from '@/composables/classes/logger';
-import type { Node } from '../Node';
+import type { Node } from '../model/node';
 import { Transaction } from './transaction';
 import type { Step } from './step';
 

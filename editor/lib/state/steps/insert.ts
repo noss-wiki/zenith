@@ -1,4 +1,4 @@
-import type { Node } from '../../Node';
+import type { Node } from '../../model/node';
 import type { PositionLike } from '../../model/position';
 import { Position } from '../../model/position';
 import { Step, type StepJSON } from '../step';

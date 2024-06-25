@@ -1,4 +1,4 @@
-import type { Node, NodeJSON } from '../Node';
+import type { Node, NodeJSON } from './node';
 
 export class Fragment {
   readonly nodes: Node[];

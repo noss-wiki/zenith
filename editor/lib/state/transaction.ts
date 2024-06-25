@@ -1,5 +1,5 @@
 import type { EditorState } from '.';
-import type { Node } from '../Node';
+import type { Node } from '../model/node';
 import type { Step } from './step';
 import type { PositionLike } from '../model/position';
 import { Position } from '../model/position';
