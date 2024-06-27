@@ -1,6 +1,7 @@
 import type { Node } from './node';
-import { Position } from './position';
 import type { DOMSelection } from './types';
+import { Position, calculateSteps } from './position';
+import { Slice } from './slice';
 
 export class Selection {
   constructor(

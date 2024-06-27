@@ -22,3 +22,7 @@ Marks are applied on inline (text) nodes, to define the formatting/styling of th
 
 Always keep a document state, on input event calculate what changed compared to last state 
 and update the state to reflect input event via a `Transaction`.
+
+# TODO
+
+- Change the editor to be platform agnostic (aka don't rely on dom methods)?

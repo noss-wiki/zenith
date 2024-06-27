@@ -43,7 +43,7 @@ export class RelativePosition {
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
-      return new Position(document, found.depth, parent.node, offset);
+      return new Position(document, found.depth, parent.node, offset, locate);
     } else if (
       this.location === 'childIndex' ||
       this.location === 'childOffset'
@@ -52,7 +52,13 @@ export class RelativePosition {
         offset = Position.indexToOffset(this.anchor, this.offset);
       else offset = this.offset!;
 
-      return new Position(document, found.depth + 1, this.anchor, offset);
+      return new Position(
+        document,
+        found.depth + 1,
+        this.anchor,
+        offset,
+        locate
+      );
     }
   }
 }
@@ -74,7 +80,12 @@ export class Position {
     /**
      * The offset this position has into its parent node
      */
-    readonly offset: number
+    readonly offset: number,
+    /**
+     * Optionally the result from the `locateNode` function, if used.
+     * This reduces overhead when trying to get more info about the node tree.
+     */
+    readonly steps?: LocateData
   ) {}
 
   // static methods
@@ -186,6 +197,19 @@ export interface LocateStep {
    * The index this node has in its parents content
    */
   index: number;
+}
+
+/**
+ * Returns the positions `LocateData` or recalculates if not available.
+ * May still return undefined if recalculation failed
+ */
+export function calculateSteps(pos: Position) {
+  if (pos.steps) return pos.steps;
+  const locate = locateNode(pos.document, pos.parent);
+  // To reduce overhead if calling multiple times on same position
+  // @ts-ignore
+  pos.steps = locate;
+  return locate;
 }
 
 /**
