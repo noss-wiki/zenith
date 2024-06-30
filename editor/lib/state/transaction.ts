@@ -2,12 +2,13 @@ import type { EditorState } from '.';
 import type { Node } from '../model/node';
 import type { Step } from './step';
 import type { PositionLike } from '../model/position';
-import { Position } from '../model/position';
 import { createNode, createTextNode } from '@/editor/nodes';
+import { Position } from '../model/position';
+import { Selection } from '../model/selection';
+import { Slice } from '../model/slice';
 // Steps
 import { InsertStep } from './steps/insert';
 import { RemoveStep } from './steps/remove';
-import { Selection } from '../model/selection';
 
 export class Transaction {
   readonly document: Node;

@@ -2,6 +2,8 @@ import type { Node } from './node';
 
 export type PositionLike = number | RelativePosition | Position;
 
+export type IsPosition<T> = T extends Position ? true : false;
+
 type RelativePositionLocation =
   | 'before'
   | 'after'
@@ -43,7 +45,13 @@ export class RelativePosition {
 
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
-      return new Position(document, found.depth, parent.node, offset, locate);
+      return new Position(
+        document,
+        found.depth,
+        parent.node,
+        offset,
+        popSteps(locate)
+      );
     } else if (
       this.location === 'childIndex' ||
       this.location === 'childOffset'
@@ -163,6 +171,11 @@ export class Position {
     return new RelativePosition(anchor, 'childOffset', offset);
   }
 
+  static is(pos: PositionLike): boolean {
+    if (pos instanceof Position) return true;
+    else return false;
+  }
+
   // TODO: Figure out how to implement to and from json, as we need a reference to the document node (probably via the id, and create a function that creates or finds a node with same id in document)
 }
 
@@ -171,7 +184,7 @@ export interface IndexPosData {
   /**
    * The parent node of this position
    */
-  parent: Node;
+  node: Node;
   /**
    * The depth the parent is relative to the document root
    */
@@ -210,6 +223,14 @@ export function calculateSteps(pos: Position) {
   // @ts-ignore
   pos.steps = locate;
   return locate;
+}
+
+/**
+ * Removes the last step from the result of the `locateNode` function.
+ */
+function popSteps(data: LocateData) {
+  data.steps = data.steps.slice(0, -1);
+  return data;
 }
 
 /**
