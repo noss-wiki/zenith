@@ -57,6 +57,25 @@ export class Fragment {
     return true;
   }
 
+  // TODO: dfs or bfs?
+
+  /**
+   * Checks if this fragment contains `node`.
+   * It does this by performing a breath-first search in the descending nodes.
+   * This function may be quite expensive on large nodes.
+   */
+  contains(node: Node): boolean {
+    let queue: Node[] = [];
+
+    for (const [c] of this.iter())
+      if (c === node) return true;
+      else queue.push(c);
+
+    for (const c of queue) if (c.content.contains(node) === true) return true;
+
+    return false;
+  }
+
   /**
    * Checks if `other` is equal to this fragment
    * @param other The fragment to check

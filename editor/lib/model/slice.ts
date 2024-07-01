@@ -3,7 +3,6 @@ import type { PositionLike, IndexPosData, LocateStep } from './position';
 import { Position, locateNode, calculateSteps } from './position';
 import { Fragment } from './fragment';
 
-// Editor representation of the document Range
 export class Slice {
   /**
    * @param content The content of this slice

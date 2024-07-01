@@ -96,12 +96,43 @@ export class Position {
     readonly steps?: LocateData
   ) {}
 
+  /**
+   * Converts this position to an absolute position in the Position's document.
+   * @returns The absolute position, or undefined if it failed.
+   */
+  toAbsolute(): number | undefined {
+    const steps = calculateSteps(this);
+    if (!steps) return undefined;
+
+    let pos = 0;
+
+    for (let i = 1; i < steps.steps.length; i++) {
+      const parent = steps.steps[i - 1];
+      const step = steps.steps[i];
+      if (i > 1) pos += 1; // start tag
+      pos += Position.indexToOffset(parent.node, step.index);
+    }
+
+    return pos + 1 + this.offset;
+  }
+
   // static methods
   static resolve(document: Node, pos: PositionLike): Position | undefined {
     if (pos instanceof Position) return pos;
     else if (pos instanceof RelativePosition) return pos.resolve(document);
+    else return Position.absoluteToPosition(document, pos);
+  }
 
-    // resolve absolute position (number) to document
+  static absoluteToPosition(document: Node, pos: number): Position | undefined {
+    return;
+  }
+
+  /**
+   * Converts a position to an absolute position in the Position's document.
+   * @returns The absolute position, or undefined if it failed.
+   */
+  static positionToAbsolute(pos: Position) {
+    return pos.toAbsolute();
   }
 
   /**
@@ -140,6 +171,14 @@ export class Position {
     if (offset === _offset) return parent.content.nodes.length;
   }
 
+  /**
+   * Returns a boolean indicating wheter or not `pos` is a Position
+   */
+  static is(pos: PositionLike): boolean {
+    if (pos instanceof Position) return true;
+    else return false;
+  }
+
   // static init methods
   /**
    * Creates a position that resolves before `anchor`
@@ -169,11 +208,6 @@ export class Position {
    */
   static offset(anchor: Node, offset: number) {
     return new RelativePosition(anchor, 'childOffset', offset);
-  }
-
-  static is(pos: PositionLike): boolean {
-    if (pos instanceof Position) return true;
-    else return false;
   }
 
   // TODO: Figure out how to implement to and from json, as we need a reference to the document node (probably via the id, and create a function that creates or finds a node with same id in document)
