@@ -90,6 +90,7 @@ export class Fragment {
     return true;
   }
 
+  // TODO: Maybe also just implement [Symbol.iterator] to avoid having to call iter()
   /**
    * Iterate over all nodes, yields an array with first item the node, and second item the index.
    */

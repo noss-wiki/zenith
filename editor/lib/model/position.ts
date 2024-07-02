@@ -102,8 +102,7 @@ export class Position {
    */
   toAbsolute(): number | undefined {
     const steps = calculateSteps(this);
-    if (!steps) return undefined;
-
+    if (!steps) return;
     let pos = 0;
 
     for (let i = 1; i < steps.steps.length; i++) {
@@ -113,7 +112,8 @@ export class Position {
       pos += Position.indexToOffset(parent.node, step.index);
     }
 
-    return pos + 1 + this.offset;
+    if (pos === 0) return pos + this.offset;
+    else return pos + 1 + this.offset;
   }
 
   // static methods
@@ -123,8 +123,63 @@ export class Position {
     else return Position.absoluteToPosition(document, pos);
   }
 
+  /**
+   * Converts an absolute position to a resolved `Position`
+   * @param document The document where to resolve the absolute position
+   * @param pos The absolute position to resolve
+   * @returns The resolved position, or undefined if it failed.
+   */
   static absoluteToPosition(document: Node, pos: number): Position | undefined {
-    return;
+    if (pos < 0 || pos > document.nodeSize) return;
+    else if (pos === 0) return new Position(document, 0, document, 0);
+
+    const steps: LocateStep[] = [];
+
+    interface DeepestFound {
+      depth: number;
+      parent: Node;
+      offset: number;
+    }
+
+    const deepestOffset = (
+      node: Node,
+      index: number,
+      depth: number,
+      offset: number
+    ): DeepestFound | undefined => {
+      if (offset === 0) return { depth, parent: node, offset: 0 };
+
+      let nodeOffset = 0;
+      // TODO: Check if node can hold content before trying to loop over children
+      // aka, when a text node is found just subtract the content length, instead of looping over the (non-existent) content
+      for (const [c, i] of node.content.iter()) {
+        if (offset > c.nodeSize) {
+          offset -= c.nodeSize;
+          nodeOffset += offset;
+          continue;
+        } else if (offset === 0)
+          return { depth, parent: node, offset: nodeOffset };
+        else if (offset === c.nodeSize)
+          return { depth, parent: node, offset: nodeOffset + c.nodeSize };
+
+        // this node is a parent of the position, so push it to the stack
+        steps.push({ node: c, index: i, depth });
+
+        return deepestOffset(c, i, depth + 1, offset - 1);
+      }
+
+      if (node.content.nodes.length === 0 && offset === 1)
+        return { depth, parent: node, offset: 1 };
+
+      return;
+    };
+
+    steps.push({ node: document, index: 0, depth: 0 });
+    const res = deepestOffset(document, 0, 1, pos);
+    if (!res) return;
+
+    const locate: LocateData = { document, steps };
+    return new Position(document, res.depth, res.parent, res.offset, locate);
   }
 
   /**
