@@ -1,6 +1,5 @@
 import type { Node } from './node';
-import type { PositionLike, IndexPosData, LocateStep } from './position';
-import { Position, locateNode, calculateSteps } from './position';
+import { Position } from './position';
 import { Fragment } from './fragment';
 
 export class Slice {
@@ -17,51 +16,47 @@ export class Slice {
     readonly document?: Node
   ) {}
 
+  get size() {
+    return this.content.size - this.openStart - this.openEnd;
+  }
+
+  eq(other: Slice) {
+    return (
+      this.content.eq(other.content) &&
+      this.openStart === other.openStart &&
+      this.openEnd === other.openEnd
+    );
+  }
+
   // static methods
+  static between(from: Position, to: Position) {
+    // TODO: Improve performance here (get depth of common parent and use .start and .end methods on position to get offsets)
+    const common = from.commonParent(to);
+    const doc = from.document;
 
-  /**
-   * An empty slice
-   */
-  static get empty(): Slice {
-    return new Slice(new Fragment([]), 0, 0);
+    const fromOffset = from.toAbsolute();
+    const startOffset = Position.child(common, 0).resolve(doc)?.toAbsolute();
+    if (
+      fromOffset === undefined ||
+      startOffset === undefined ||
+      fromOffset < startOffset
+    )
+      return;
+
+    const toOffset = to.toAbsolute();
+    const endOffset = Position.child(common).resolve(doc)?.toAbsolute();
+    if (
+      toOffset === undefined ||
+      endOffset === undefined ||
+      toOffset > endOffset
+    )
+      return;
+
+    return new Slice(
+      common.content,
+      fromOffset - startOffset,
+      endOffset - toOffset,
+      doc
+    );
   }
-}
-
-// TODO: Returns something else instead of throwing, but include the reason why it failed
-
-/**
- * Tries to find the deepest possible common parent between two positions, throws if it can't for whatever reason.
- */
-export function findCommonParent(from: Position, to: Position) {
-  if (from.document !== to.document)
-    throw new Error('Linked positions are in two different documents');
-
-  if (!calculateSteps(from) || !calculateSteps(to))
-    throw new Error('Failed to calculate steps on Position');
-
-  // can probably skip depth 0, as it is always the document node
-  const depth = findDeepestCommonParent(from, to, 0);
-  if (!depth) throw new Error('Failed to find a common parent');
-
-  console.log(from.steps, to.steps);
-
-  return {
-    ...depth,
-    document: from.document,
-  } as IndexPosData;
-}
-
-function findDeepestCommonParent(
-  from: Position,
-  to: Position,
-  depth: number
-): LocateStep | undefined {
-  if (!from.steps!.steps[depth] || !to.steps!.steps[depth]) return undefined;
-  else if (from.steps!.steps[depth].node === to.steps!.steps[depth].node) {
-    const res = findDeepestCommonParent(from, to, depth + 1);
-    if (res) return res;
-    else return from.steps!.steps[depth];
-  }
-
-  return undefined;
 }

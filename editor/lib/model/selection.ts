@@ -1,6 +1,6 @@
 import type { Node } from './node';
 import type { DOMSelection } from './types';
-import { Position, calculateSteps } from './position';
+import { Position } from './position';
 import { Slice } from './slice';
 
 export class Selection {
@@ -21,6 +21,13 @@ export class Selection {
         this.anchor.offset === this.head.offset &&
         this.anchor.parent === this.head.parent)
     );
+  }
+
+  /**
+   * Tries to get the content in this selection
+   */
+  content() {
+    return Slice.between(this.anchor, this.head);
   }
 
   /**

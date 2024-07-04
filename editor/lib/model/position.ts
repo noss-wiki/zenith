@@ -18,7 +18,7 @@ export class RelativePosition {
     private readonly location: RelativePositionLocation,
     offset?: number
   ) {
-    if (offset) this.offset = offset;
+    if (typeof offset === 'number') this.offset = offset;
     else if (location === 'childIndex')
       this.offset = anchor.content.nodes.length;
     else if (location === 'childOffset') this.offset = anchor.content.size;
@@ -93,21 +93,66 @@ export class Position {
      * Optionally the result from the `locateNode` function, if used.
      * This reduces overhead when trying to get more info about the node tree.
      */
-    readonly steps?: LocateData
+    readonly steps: LocateData
   ) {}
 
   /**
-   * Converts this position to an absolute position in the Position's document.
-   * @returns The absolute position, or undefined if it failed.
+   * Returns the parent node at `depth`.
    */
-  toAbsolute(): number | undefined {
-    const steps = calculateSteps(this);
-    if (!steps) return;
+  node(depth: number) {
+    return this.steps.steps[depth].node;
+  }
+
+  /**
+   * Returns the absolute position, where the parent node at `depth` starts.
+   */
+  start(depth: number) {
+    if (this.steps.steps[depth].pos !== undefined)
+      return this.steps.steps[depth].pos!;
+
+    const res = this.document.content.offset(this.node(depth));
+    if (!res)
+      throw new Error('Failed to get the absolute position of parent node');
+    return res;
+  }
+
+  /**
+   * Returns the absolute position, where the parent node at `depth` ends.
+   */
+  end(depth: number) {
+    return this.start(depth) + this.node(depth).content.size;
+  }
+
+  /**
+   * Gets the depth of the deepest common parent between two positions.
+   * @returns The depth of the deepest common parent.
+   * @throws If the two positions are in different documents.
+   */
+  commonDepth(pos: Position) {
+    const common = findCommonParent(this, pos);
+    return common.depth;
+  }
+
+  /**
+   * Gets the deepest common parent between two positions.
+   * @returns The common parent node, or undefind if it failed.
+   * @throws If the two positions are in different documents.
+   */
+  commonParent(pos: Position) {
+    const d = this.commonDepth(pos);
+    return d === undefined ? d : this.node(d);
+  }
+
+  /**
+   * Converts this position to an absolute position in the Position's document.
+   * @returns The absolute position
+   */
+  toAbsolute(): number {
     let pos = 0;
 
-    for (let i = 1; i < steps.steps.length; i++) {
-      const parent = steps.steps[i - 1];
-      const step = steps.steps[i];
+    for (let i = 1; i < this.steps.steps.length; i++) {
+      const parent = this.steps.steps[i - 1];
+      const step = this.steps.steps[i];
       if (i > 1) pos += 1; // start tag
       pos += Position.indexToOffset(parent.node, step.index);
     }
@@ -131,7 +176,11 @@ export class Position {
    */
   static absoluteToPosition(document: Node, pos: number): Position | undefined {
     if (pos < 0 || pos > document.nodeSize) return;
-    else if (pos === 0) return new Position(document, 0, document, 0);
+    else if (pos === 0)
+      return new Position(document, 0, document, 0, {
+        document,
+        steps: [{ node: document, depth: 0, index: 0 }],
+      });
 
     const steps: LocateStep[] = [];
 
@@ -143,11 +192,12 @@ export class Position {
 
     const deepestOffset = (
       node: Node,
-      index: number,
       depth: number,
       offset: number
     ): DeepestFound | undefined => {
       if (offset === 0) return { depth, parent: node, offset: 0 };
+      else if (node.content.nodes.length === 0 && offset === 1)
+        return { depth, parent: node, offset: 1 };
 
       let nodeOffset = 0;
       // TODO: Check if node can hold content before trying to loop over children
@@ -163,19 +213,15 @@ export class Position {
           return { depth, parent: node, offset: nodeOffset + c.nodeSize };
 
         // this node is a parent of the position, so push it to the stack
-        steps.push({ node: c, index: i, depth });
-
-        return deepestOffset(c, i, depth + 1, offset - 1);
+        steps.push({ node: c, index: i, depth, pos: pos - offset });
+        return deepestOffset(c, depth + 1, offset - 1);
       }
-
-      if (node.content.nodes.length === 0 && offset === 1)
-        return { depth, parent: node, offset: 1 };
 
       return;
     };
 
-    steps.push({ node: document, index: 0, depth: 0 });
-    const res = deepestOffset(document, 0, 1, pos);
+    steps.push({ node: document, index: 0, depth: 0, pos: 0 });
+    const res = deepestOffset(document, 1, pos);
     if (!res) return;
 
     const locate: LocateData = { document, steps };
@@ -186,8 +232,8 @@ export class Position {
    * Converts a position to an absolute position in the Position's document.
    * @returns The absolute position, or undefined if it failed.
    */
-  static positionToAbsolute(pos: Position) {
-    return pos.toAbsolute();
+  static positionToAbsolute(pos: Position | number) {
+    return typeof pos === 'number' ? pos : pos.toAbsolute();
   }
 
   /**
@@ -196,7 +242,7 @@ export class Position {
    * @param index The index to convert to an offset
    */
   static indexToOffset(parent: Node, index?: number) {
-    if (!index) index = parent.content.nodes.length;
+    if (index === undefined) index = parent.content.nodes.length;
     else if (index < 0) index = parent.content.nodes.length + index;
 
     if (index === 0) return 0;
@@ -227,7 +273,7 @@ export class Position {
   }
 
   /**
-   * Returns a boolean indicating wheter or not `pos` is a Position
+   * Returns a boolean indicating wheter or not `pos` is a resolved Position
    */
   static is(pos: PositionLike): boolean {
     if (pos instanceof Position) return true;
@@ -296,22 +342,13 @@ export interface LocateStep {
    */
   depth: number;
   /**
-   * The index this node has in its parents content
+   * The index this node has in its parents content.
    */
   index: number;
-}
-
-/**
- * Returns the positions `LocateData` or recalculates if not available.
- * May still return undefined if recalculation failed
- */
-export function calculateSteps(pos: Position) {
-  if (pos.steps) return pos.steps;
-  const locate = locateNode(pos.document, pos.parent);
-  // To reduce overhead if calling multiple times on same position
-  // @ts-ignore
-  pos.steps = locate;
-  return locate;
+  /**
+   * The absolute position of the node of this step.
+   */
+  pos?: number;
 }
 
 /**
@@ -372,4 +409,44 @@ function bfsSteps(
       return res;
     }
   }
+}
+
+// TODO: Returns something else instead of throwing, but include the reason why it failed
+
+/**
+ * Tries to find the deepest possible common parent between two positions.
+ * @returns The common parent between the two positions, or undefined it failed
+ */
+function findCommonParent(from: Position, to: Position) {
+  if (from.document !== to.document)
+    throw new Error(
+      'Cannot find common parent between two nodes with different documents'
+    );
+
+  // can probably skip depth 0, as it is always the document node
+  const depth = findDeepestCommonParent(from, to, 0);
+  if (!depth)
+    throw new Error(
+      'Cannot find common parent between two nodes with different documents'
+    );
+
+  return {
+    ...depth,
+    document: from.document,
+  } as IndexPosData;
+}
+
+function findDeepestCommonParent(
+  from: Position,
+  to: Position,
+  depth: number
+): LocateStep | undefined {
+  if (!from.steps!.steps[depth] || !to.steps!.steps[depth]) return undefined;
+  else if (from.steps!.steps[depth].node === to.steps!.steps[depth].node) {
+    const res = findDeepestCommonParent(from, to, depth + 1);
+    if (res) return res;
+    else return from.steps!.steps[depth];
+  }
+
+  return undefined;
 }

@@ -154,9 +154,6 @@ export class Node extends Eventfull {
     return null;
   }
 
-  // TODO: getParent method, that can be called to get the parent of this node, document args is required
-  // also save result as getting the parent can be quite expensive, depending on the document size
-
   /**
    * Check wheter the content of this node conforms to the schema
    */
@@ -168,6 +165,11 @@ export class Node extends Eventfull {
     //console.log(expression.match(this.content));
   }
 
+  cut(from: number, to: number = this.content.size) {
+    if (from === 0 && to === this.content.size) return;
+    this.content.cut(from, to);
+  }
+
   /**
    * Checks if `other` is equal to this node
    * @param other The node to check
@@ -176,6 +178,25 @@ export class Node extends Eventfull {
     if (this === other) return true;
     // TODO: also check if markup is the same
     return this.content.eq(other.content);
+  }
+
+  /**
+   * Creates a deep copy of this node.
+   * It does this by calling the copy method on the content fragment,
+   * if this node has differnt behaviour it should override this function.
+   */
+  copy() {
+    const content = this.content.copy();
+    return this.new(content);
+  }
+
+  /**
+   * Creates a new instance of this node type.
+   * E.g when calling this on a Paragraph, it creates a new Paragraph node.
+   */
+  new(content?: Fragment) {
+    const Class = <typeof Node>this.constructor;
+    return new Class(content);
   }
 
   toJSON(): NodeJSON {

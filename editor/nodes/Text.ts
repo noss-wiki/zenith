@@ -22,6 +22,7 @@ export default class Text extends Node {
   text: string;
 
   isInline = true;
+  isText = true;
 
   constructor(content?: string) {
     super(undefined);
@@ -33,5 +34,14 @@ export default class Text extends Node {
   // maybe via a setter?
   render(): ElementDefinition {
     return ['p', {}, Outlet];
+  }
+
+  cut(from: number, to?: number) {
+    this.text = this.text.slice(from, to);
+  }
+
+  copy(): Node {
+    // @ts-ignore
+    return this.new(this.text);
   }
 }
