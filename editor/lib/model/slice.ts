@@ -5,8 +5,8 @@ import { Fragment } from './fragment';
 export class Slice {
   /**
    * @param content The content of this slice
-   * @param openStart The offset in the content at the start where the slice starts
-   * @param openEnd The offset in the content at the end where the slice ends
+   * @param openStart The depth in the content at the start where the slice starts
+   * @param openEnd The depth in the content at the end where the slice ends
    * @param document The document the content originated from, leave empty if this slice is not part of a document
    */
   constructor(
@@ -31,32 +31,12 @@ export class Slice {
   // static methods
   static between(from: Position, to: Position) {
     // TODO: Improve performance here (get depth of common parent and use .start and .end methods on position to get offsets)
-    const common = from.commonParent(to);
-    const doc = from.document;
+    const cDepth = from.commonDepth(to);
 
-    const fromOffset = from.toAbsolute();
-    const startOffset = Position.child(common, 0).resolve(doc)?.toAbsolute();
-    if (
-      fromOffset === undefined ||
-      startOffset === undefined ||
-      fromOffset < startOffset
-    )
+    const cut = from.node(cDepth).copy();
+    if (!cut.content.cut(from.relative(cDepth) + 1, to.relative(cDepth) - 1))
       return;
 
-    const toOffset = to.toAbsolute();
-    const endOffset = Position.child(common).resolve(doc)?.toAbsolute();
-    if (
-      toOffset === undefined ||
-      endOffset === undefined ||
-      toOffset > endOffset
-    )
-      return;
-
-    return new Slice(
-      common.content,
-      fromOffset - startOffset,
-      endOffset - toOffset,
-      doc
-    );
+    return new Slice(cut.content, from.depth, to.depth, from.document);
   }
 }

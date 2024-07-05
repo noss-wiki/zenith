@@ -124,6 +124,19 @@ export class Position {
   }
 
   /**
+   * Returns the relative offset to `node`.
+   * @param node The index of a parent node of this position, or a node in this document.
+   * @returns The relative position to node, will be undefined if this position is before `node`. Or undefined if node cannot be resolved in the same document as this position.
+   */
+  relative(node: Node | number) {
+    let pos;
+    if (typeof node === 'number') pos = this.start(node);
+    else pos = this.document.content.offset(node);
+    if (!pos) throw new Error('Failed to resolve node in this document');
+    return this.toAbsolute() - pos;
+  }
+
+  /**
    * Gets the depth of the deepest common parent between two positions.
    * @returns The depth of the deepest common parent.
    * @throws If the two positions are in different documents.
@@ -148,6 +161,11 @@ export class Position {
    * @returns The absolute position
    */
   toAbsolute(): number {
+    if (this.steps.steps[this.steps.steps.length - 1]?.pos)
+      return (
+        this.steps.steps[this.steps.steps.length - 1].pos! + this.offset + 1
+      );
+
     let pos = 0;
 
     for (let i = 1; i < this.steps.steps.length; i++) {

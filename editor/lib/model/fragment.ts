@@ -64,12 +64,10 @@ export class Fragment {
    * @param from The starting position where to cut.
    * @param to The end position, leave empty to cut until the end.
    */
-  cut(from: number, to: number = this.size) {
-    if (from === 0 && to === this.size) return;
-    else if (from > to) {
-      this.nodes = [];
-      return;
-    }
+  cut(from: number, to: number = this.size): boolean {
+    if (from === 0 && to === this.size) return true;
+    else if (from > to) return false;
+    else if (from < 0 || to < 0 || to > this.size) return false;
 
     const res: Node[] = [];
     let pos = 0;
@@ -92,6 +90,7 @@ export class Fragment {
       }
 
     this.nodes = res;
+    return true;
   }
 
   // TODO: dfs or bfs?
