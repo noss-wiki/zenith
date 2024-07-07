@@ -165,6 +165,7 @@ export class Node extends Eventfull {
     //console.log(expression.match(this.content));
   }
 
+  // TODO: Put all fragment methods in the node class, to allow behaviour on text nodes
   cut(from: number, to: number = this.content.size) {
     if (from === 0 && to === this.content.size) return;
     this.content.cut(from, to);

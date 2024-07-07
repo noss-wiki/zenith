@@ -24,9 +24,9 @@ export class Fragment {
    * @param node The node or nodes to insert
    * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
    * @returns A boolean indicating if the node has been inserted.
-   * @internal
    */
   insert(node: Node | Node[] | Fragment, index?: number): boolean {
+    // TODO: Verify if content is allowed before inserting
     if (node instanceof Fragment) node = node.nodes;
     const nodes: readonly Node[] = Array.isArray(node) ? node : [node];
 
@@ -52,6 +52,7 @@ export class Fragment {
    * @returns A boolean indicating if the node has been removed.
    */
   remove(node: Node): boolean {
+    // TODO: Verify if content is allowed before removing
     const index = this.nodes.indexOf(node);
     if (index === -1) return false;
     this.nodes.splice(index, 1);
@@ -94,6 +95,24 @@ export class Fragment {
   }
 
   // TODO: dfs or bfs?
+
+  /**
+   * Converts an offset to an index in this fragment
+   */
+  offsetToIndex(offset: number) {
+    let pos = 0;
+
+    for (const [c, i] of this.iter()) {
+      pos += c.nodeSize;
+      if (pos >= offset) return { node: c, index: i, offset: pos - offset };
+    }
+
+    return {
+      node: this.nodes[this.nodes.length - 1],
+      index: this.nodes.length - 1,
+      offset: pos - offset,
+    };
+  }
 
   /**
    * Checks if this fragment contains `node`.

@@ -1,4 +1,5 @@
 import type { Node } from './node';
+import type { PositionLike } from './position';
 import { Position } from './position';
 import { Fragment } from './fragment';
 
@@ -28,6 +29,14 @@ export class Slice {
     );
   }
 
+  insert(pos: number, insert: Fragment /*, parent?: Node */) {
+    return insertFragment(this.content, pos, insert);
+  }
+
+  remove(from: number, to: number) {
+    // TODO: Verify if content is allowed before removing
+  }
+
   // static methods
   static between(from: Position, to: Position) {
     // TODO: Improve performance here (get depth of common parent and use .start and .end methods on position to get offsets)
@@ -39,4 +48,19 @@ export class Slice {
 
     return new Slice(cut.content, from.depth, to.depth, from.document);
   }
+}
+
+function insertFragment(
+  parent: Fragment,
+  pos: number,
+  insert: Fragment
+  /*, parent?: Node */
+): boolean {
+  // TODO: Verify if content is allowed before inserting
+  const { node, index, offset } = parent.offsetToIndex(pos);
+  if (offset === 0) return parent.insert(insert, index);
+  else if (node.isText === true) {
+    // TODO: implement general node.insert function
+    return false;
+  } else return insertFragment(node.content, offset, insert);
 }

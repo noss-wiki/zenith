@@ -1,4 +1,5 @@
-import type { Node } from './node';
+import type { Fragment } from './fragment';
+import { Node } from './node';
 
 export type PositionLike = number | RelativePosition | Position;
 
@@ -259,14 +260,16 @@ export class Position {
    * @param parent The node to use as parent
    * @param index The index to convert to an offset
    */
-  static indexToOffset(parent: Node, index?: number) {
-    if (index === undefined) index = parent.content.nodes.length;
-    else if (index < 0) index = parent.content.nodes.length + index;
+  static indexToOffset(parent: Node | Fragment, index?: number) {
+    const content = parent instanceof Node ? parent.content : parent;
+
+    if (index === undefined) index = content.nodes.length;
+    else if (index < 0) index = content.nodes.length + index;
 
     if (index === 0) return 0;
 
     let offset = 0;
-    for (const [child, i] of parent.content.iter())
+    for (const [child, i] of content.iter())
       if (i === index) break;
       else offset += child.nodeSize;
 
@@ -278,16 +281,35 @@ export class Position {
    * @param parent The node to use as parent
    * @param offset The offset to convert to an index
    */
-  static offsetToIndex(parent: Node, offset: number): number | undefined {
+  // prettier-ignore
+  static offsetToIndex(parent: Node | Fragment, offset: number, round?: false): number | undefined;
+  // prettier-ignore
+  static offsetToIndex(parent: Node | Fragment, offset: number, round: true): { index: number, offset: number };
+  static offsetToIndex(
+    parent: Node | Fragment,
+    offset: number,
+    round?: boolean
+  ): any {
     if (offset === 0) return 0;
 
-    let _offset = 0; //
-    for (const [child, i] of parent.content.iter())
-      if (offset === _offset) return i;
-      else if (_offset > offset) return undefined;
+    const content = parent instanceof Node ? parent.content : parent;
+    let _offset = 0;
+    for (const [child, i] of content.iter()) {
+      if (offset === _offset)
+        if (round === true) return { index: i, offset: 0 };
+        else return i;
       else _offset += child.nodeSize;
 
-    if (offset === _offset) return parent.content.nodes.length;
+      if (offset < _offset)
+        if (round === true) return { index: i, offset: _offset - offset };
+        else return undefined;
+    }
+
+    if (offset > _offset)
+      throw new Error("Provided offset exceeds parent's content length");
+    else if (offset === _offset)
+      if (round === true) return { index: content.nodes.length, offset: 0 };
+      else return content.nodes.length;
   }
 
   /**
