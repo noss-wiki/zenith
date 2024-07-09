@@ -1,26 +1,17 @@
-import type {
-  NodeMetaData,
-  NodeSchema,
-  ElementDefinition,
-} from '../lib/model/node';
+import type { ElementDefinition } from '../lib/model/node';
 import { Node, Outlet } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/sub_sub_header.svg?raw';
+import { NodeType } from '../lib/model/nodeType';
 
 export default class SubSubHeader extends Node {
-  static meta: NodeMetaData = {
-    name: 'Heading 3',
-    description: 'The smallest heading',
-    icon,
-  };
-
-  static schema: NodeSchema = {
-    content: 'inline*',
-    group: 'block',
-  };
-
-  static type = 'sub_sub_header';
-
-  isBlock = true;
+  static type = NodeType.extend('paragraph', {
+    name: 'sub_sub_header',
+    meta: {
+      name: 'Heading 3',
+      description: 'The smallest heading',
+      icon,
+    },
+  });
 
   render(): ElementDefinition {
     return ['h3', {}, Outlet];

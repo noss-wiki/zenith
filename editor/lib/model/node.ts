@@ -1,25 +1,18 @@
+import type { FragmentJSON } from './fragment';
 import { ContentExpression } from '../schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
+import { NodeType } from './nodeType';
 import { Fragment } from './fragment';
-import type { FragmentJSON } from './fragment';
 
+// TODO: Automatically register node that is extended from this class upon creation
 /**
  * The base Node class
  */
 export class Node extends Eventfull {
-  // TODO: Update description to include less
-  static readonly meta: NodeMetaData;
-  readonly meta: NodeMetaData;
-
-  static readonly schema: NodeSchema;
-  readonly schema: NodeSchema;
-
-  static readonly type: string = '';
-  readonly type: string;
+  static readonly type: NodeType;
+  readonly type: NodeType;
 
   id: string;
-  root: HTMLElement | Text;
-  outlet?: HTMLElement;
 
   /**
    * This node's children
@@ -34,35 +27,9 @@ export class Node extends Eventfull {
    */
   textContent: string = '';
 
-  // state props
-  /**
-   * Whether this Node is a block.
-   * This is the opposite of `isInline`
-   * @default true
-   */
-  isBlock!: boolean;
-  /**
-   * Whether this Node is an inline node.
-   * This is the opposite of `isBlock`
-   * @default false
-   */
-  isInline!: boolean;
-  /**
-   * Wheter or not this node is a leaf, which means it can't hold any text content
-   * @default false
-   */
-  /* isLeaf = false; */
-
-  //isAtom
-  /**
-   * Wheter or not this node is a text node
-   * @default false
-   */
-  isText = false;
-
   get nodeSize() {
     if (this.text !== null) return this.text.length; // the amount of characters
-    else if (this.isInline === true)
+    else if (this.type.schema.inline === true)
       return 1; // non-text leaf nodes always have a length of 1
     else return this.content.size + 2; // the size of the content + 2 (the start and end tokens)
   }
@@ -70,81 +37,10 @@ export class Node extends Eventfull {
   // also add marks later
   constructor(content?: Fragment) {
     super();
-    const Class = <typeof Node>this.constructor;
-    // TODO: error if not defined
-    this.type = Class.type ?? '';
-    this.meta = Class.meta ?? {};
-    this.schema = Class.schema ?? {};
+    this.type = (<typeof Node>this.constructor).type;
     this.id = Math.random().toString(36).slice(2);
 
-    if (this.isBlock === true && this.isInline === undefined)
-      this.isInline = false;
-    else if (this.isInline === true && this.isBlock === undefined)
-      this.isBlock = false;
-    if (this.isBlock === undefined) this.isBlock = true;
-    if (this.isInline === undefined) this.isInline = false;
-
     this.content = content || new Fragment([]);
-
-    // render
-    this.root = this._renderRoot();
-  }
-
-  _renderRoot() {
-    const res = this.render();
-    if (res === null)
-      throw new Error(`Render hook is not specified on node: ${this.type}`);
-
-    this.outlet = undefined;
-    const renderPart = (part: ElementDefinition) => {
-      const ele = document.createElement(part[0]) as HTMLElement;
-
-      // Attributes
-      for (const attr in part[1]) {
-        //@ts-ignore
-        const val = part[1][attr];
-        if (val === 'children') continue;
-        else if (attr.startsWith('on') && typeof val === 'function') {
-          // bind event listener
-          const event = attr
-            .slice(2)
-            .toLowerCase() as keyof HTMLElementEventMap;
-          this.on(`element:${event}`, (e) => val(e), ele);
-        } else if (attr === 'style') style(ele, val);
-        else ele.setAttribute(attr, val);
-      }
-
-      // Children
-      const children = part.slice(2) as ChildDefinition[];
-      for (const child of children) {
-        if (typeof child === 'string') {
-          if (child !== Outlet) ele.appendChild(document.createTextNode(child));
-          else if (!this.outlet) {
-            this.outlet = ele;
-            ele.setAttribute('data-outlet', 'true');
-          }
-        } else if (
-          typeof child === 'number' ||
-          child === true ||
-          child instanceof Date ||
-          child instanceof RegExp
-        )
-          ele.appendChild(document.createTextNode(child.toString()));
-        else if (Array.isArray(child)) ele.appendChild(renderPart(child));
-      }
-
-      return ele;
-    };
-
-    const root = renderPart(res);
-    root.setAttribute('data-node', 'true');
-    root.classList.add(`noss-${this.type}-node`);
-    if (this.isBlock) root.setAttribute('data-block', 'true');
-    else if (this.isInline) root.setAttribute('data-inline', 'true');
-
-    // verify outlet
-
-    return root;
   }
 
   /**
@@ -154,18 +50,6 @@ export class Node extends Eventfull {
     return null;
   }
 
-  /**
-   * Check wheter the content of this node conforms to the schema
-   */
-  check() {
-    const expression =
-      this.schema.content instanceof ContentExpression
-        ? this.schema.content
-        : new ContentExpression(this.schema.content);
-    //console.log(expression.match(this.content));
-  }
-
-  // TODO: Put all fragment methods in the node class, to allow behaviour on text nodes
   cut(from: number, to: number = this.content.size) {
     if (from === 0 && to === this.content.size) return;
     this.content.cut(from, to);
@@ -203,7 +87,7 @@ export class Node extends Eventfull {
   toJSON(): NodeJSON {
     return {
       id: this.id,
-      type: this.type,
+      type: this.type.name,
       content: this.content.toJSON(),
     };
   }

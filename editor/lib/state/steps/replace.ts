@@ -12,11 +12,11 @@ export class InsertStep extends Step {
     super();
   }
 
-  apply(document: Node): boolean {
+  apply(boundary: Node): boolean {
     return false;
   }
 
-  undo(document: Node): boolean {
+  undo(boundary: Node): boolean {
     return false;
   }
 }

@@ -13,8 +13,8 @@ export class InsertStep extends Step {
     super();
   }
 
-  apply(document: Node): boolean {
-    const pos = Position.resolve(document, this.pos);
+  apply(boundary: Node): boolean {
+    const pos = Position.resolve(boundary, this.pos);
     if (pos === undefined) return false;
     this.pos = pos;
 
@@ -24,8 +24,8 @@ export class InsertStep extends Step {
     return pos.parent.content.insert(this.node, index);
   }
 
-  undo(document: Node): boolean {
-    const pos = Position.resolve(document, this.pos);
+  undo(boundary: Node): boolean {
+    const pos = Position.resolve(boundary, this.pos);
     if (pos === undefined) return false;
     this.pos = pos;
 

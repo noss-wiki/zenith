@@ -11,14 +11,9 @@ import { InsertStep } from './steps/insert';
 import { RemoveStep } from './steps/remove';
 
 export class Transaction {
-  readonly document: Node;
-  readonly state: EditorState;
   readonly steps: Step[] = [];
 
-  constructor(state: EditorState) {
-    this.state = state;
-    this.document = state.document;
-  }
+  constructor(readonly state: EditorState, readonly boundary: Node) {}
 
   /**
    * Adds an {@link InsertStep} to this transaction, which inserts a node into the current document.
@@ -28,7 +23,7 @@ export class Transaction {
   insert<T extends string>(node: T | Node, pos: PositionLike) {
     if (typeof node === 'string') {
       const created = createNode(node);
-      if (created === null)
+      if (created === undefined)
         throw new Error(`Failed to create node of type: ${node}`);
       node = created;
     }
@@ -38,9 +33,9 @@ export class Transaction {
   }
 
   insertText(text: string, pos: PositionLike) {
-    const resolvedPos = Position.resolve(this.document, pos);
+    const resolvedPos = Position.resolve(this.boundary, pos);
     if (!resolvedPos)
-      throw new Error('Position is not resolvable in the current document');
+      throw new Error('Position is not resolvable in the current boundary');
 
     const index = Position.offsetToIndex(
       resolvedPos.parent,

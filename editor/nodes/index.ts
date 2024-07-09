@@ -21,12 +21,12 @@ export const nodes: readonly (typeof Node | typeof Text)[] = [
 export function createNode<T extends string>(
   type: T,
   content?: string
-): null | (T extends 'text' ? Text : Node) {
+): undefined | (T extends 'text' ? Text : Node) {
   if (type === 'text') return createTextNode(content!);
 
-  const block = nodes.find((e) => e.type === type);
+  /* const block = nodes.find((e) => e.type === type);
   if (!block) return null;
-  return new block() as T extends 'text' ? Text : Node;
+  return new block() as T extends 'text' ? Text : Node; */
 }
 
 export function createTextNode(content: string) {

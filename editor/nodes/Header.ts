@@ -1,26 +1,17 @@
-import type {
-  NodeMetaData,
-  NodeSchema,
-  ElementDefinition,
-} from '../lib/model/node';
+import type { ElementDefinition } from '../lib/model/node';
 import { Node, Outlet } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/header.svg?raw';
+import { NodeType } from '../lib/model/nodeType';
 
 export default class Header extends Node {
-  static meta: NodeMetaData = {
-    name: 'Heading 1',
-    description: 'The largest heading',
-    icon,
-  };
-
-  static schema: NodeSchema = {
-    content: 'inline*',
-    group: 'block',
-  };
-
-  static type = 'header';
-
-  isBlock = true;
+  static type = NodeType.extend('paragraph', {
+    name: 'header',
+    meta: {
+      name: 'Heading 1',
+      description: 'The largest heading',
+      icon,
+    },
+  });
 
   render(): ElementDefinition {
     return ['h1', {}, Outlet];

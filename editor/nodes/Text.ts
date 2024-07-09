@@ -1,28 +1,23 @@
-import type {
-  NodeMetaData,
-  NodeSchema,
-  ElementDefinition,
-} from '../lib/model/node';
+import type { ElementDefinition } from '../lib/model/node';
 import { Node, Outlet } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
+import { NodeType } from '../lib/model/nodeType';
 
 export default class Text extends Node {
-  static meta: NodeMetaData = {
-    name: 'Text',
-    description: '',
-    icon,
-  };
-
-  static schema: NodeSchema = {
-    group: 'inline',
-  };
-
-  static type = 'text';
+  static type = NodeType.from({
+    name: 'text',
+    meta: {
+      name: 'Text',
+      description: '',
+      icon,
+    },
+    schema: {
+      group: 'inline',
+      inline: true,
+    },
+  });
 
   text: string;
-
-  isInline = true;
-  isText = true;
 
   constructor(content?: string) {
     super(undefined);

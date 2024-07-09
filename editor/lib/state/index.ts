@@ -14,7 +14,7 @@ export class EditorState extends LoggerClass {
    * Create a new transaction in the editor
    */
   get tr() {
-    return new Transaction(this);
+    return new Transaction(this, this.document);
   }
 
   // Keep track of all transactions in the state, a transation should have the steps required to undo and (re)do a transaction,
@@ -24,7 +24,7 @@ export class EditorState extends LoggerClass {
     let failed = false;
 
     for (const s of tr.steps)
-      if (s.apply(this.document)) applied.push(s);
+      if (s.apply(tr.boundary)) applied.push(s);
       else {
         failed = true;
         break;
@@ -37,7 +37,7 @@ export class EditorState extends LoggerClass {
 
     // try to undo previous steps in this transaction
     let undoFailed = false;
-    for (const s of applied) if (!s.undo(this.document)) undoFailed = true;
+    for (const s of applied) if (!s.undo(tr.boundary)) undoFailed = true;
 
     if (undoFailed) {
     } // TODO: trow special error
@@ -52,7 +52,7 @@ export class EditorState extends LoggerClass {
     let failed = false;
 
     for (const s of invert(tr.steps))
-      if (s.undo(this.document)) applied.push(s);
+      if (s.undo(tr.boundary)) applied.push(s);
       else {
         failed = true;
         break;
@@ -65,7 +65,7 @@ export class EditorState extends LoggerClass {
 
     // try to undo previous steps in this transaction
     let undoFailed = false;
-    for (const s of applied) if (!s.apply(this.document)) undoFailed = true;
+    for (const s of applied) if (!s.apply(tr.boundary)) undoFailed = true;
 
     if (undoFailed) {
     } // TODO: trow special error

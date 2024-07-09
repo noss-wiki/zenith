@@ -12,8 +12,8 @@ export class RemoveStep extends Step {
     super();
   }
 
-  apply(document: Node): boolean {
-    this.locate = locateNode(document, this.node);
+  apply(boundary: Node): boolean {
+    this.locate = locateNode(boundary, this.node);
     if (!this.locate) return false;
 
     const parent = this.locate.steps[this.locate.steps.length - 2].node;
@@ -21,8 +21,8 @@ export class RemoveStep extends Step {
     return parent.content.remove(this.node);
   }
 
-  undo(document: Node): boolean {
-    if (!this.locate || this.locate.document !== document) return false;
+  undo(boundary: Node): boolean {
+    if (!this.locate || this.locate.boundary !== boundary) return false;
 
     const parent = this.locate.steps[this.locate.steps.length - 2].node;
 

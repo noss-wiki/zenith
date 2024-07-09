@@ -11,14 +11,14 @@ export abstract class Step {
   /**
    * @returns If the Step succeeded return true, else return false
    */
-  abstract apply(document: Node): boolean;
+  abstract apply(boundary: Node): boolean;
 
   /**
    * Tries to undo the step done by the `apply` hook,
    * the current state needs to be the same as the state created by the `apply` hook.
    * For example the inserted node needs to be at the same position to undo succesfully.
    */
-  abstract undo(document: Node): boolean;
+  abstract undo(boundary: Node): boolean;
 
   /* abstract toJSON(): StepJSON; */
 }

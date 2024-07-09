@@ -28,7 +28,7 @@ export class EditorView {
     this.root = root;
     this.mounted = true;
 
-    this.root.appendChild(this.state.document.root);
+    //this.root.appendChild(this.state.document.root);
     return this;
   }
 
@@ -39,22 +39,7 @@ export class EditorView {
    * use `update` to only rerender changed nodes
    * @param forceNodeRoots If true, force nodes to rerender their root
    */
-  render(forceNodeRoots?: boolean) {
-    const renderNode = (node: Node) => {
-      if (forceNodeRoots) node.root = node._renderRoot();
-      if (node.outlet === undefined) return node;
-
-      // Render children
-      node.outlet.innerHTML = '';
-      for (const [n, i] of node.content.iter())
-        node.outlet.appendChild(renderNode(n).root);
-
-      return node;
-    };
-
-    const doc = renderNode(this.state.document);
-    this.renderedState = this.state;
-  }
+  render(forceNodeRoots?: boolean) {}
 
   /**
    * Updates the DOM to represent the current state

@@ -4,23 +4,16 @@ import type {
   ElementDefinition,
 } from '../lib/model/node';
 import { Node, Outlet } from '../lib/model/node';
+import { NodeType } from '../lib/model/nodeType';
 
 export default class Document extends Node {
-  static meta: NodeMetaData = {
-    name: 'Document',
-    description: 'The document base node',
-    icon: '',
-    visible: false,
-  };
-
-  static schema: NodeSchema = {
-    content: 'block+',
-    group: 'document',
-  };
-
-  static type = 'document';
-
-  isBlock = true;
+  static type = NodeType.from({
+    name: 'document',
+    schema: {
+      content: 'block+',
+      group: 'document',
+    },
+  });
 
   get nodeSize() {
     return this.content.size; // document start and end brackets don't count, as you can't focus outside of document

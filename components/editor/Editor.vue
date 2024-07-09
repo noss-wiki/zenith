@@ -18,10 +18,10 @@ const p = new Paragraph();
 const state = new EditorState(docNode);
 const view = new EditorView(state);
 
-const tr = new Transaction(state);
+const tr = state.tr;
 tr.insert(p, Position.child(docNode)).apply();
 
-onMounted(() => view.mount(contentRoot).render());
+onMounted(() => view.mount(contentRoot));
 onUnmounted(() => view.unmount());
 </script>
 

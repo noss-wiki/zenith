@@ -8,13 +8,13 @@ export class Slice {
    * @param content The content of this slice
    * @param openStart The depth in the content at the start where the slice starts
    * @param openEnd The depth in the content at the end where the slice ends
-   * @param document The document the content originated from, leave empty if this slice is not part of a document
+   * @param boundary The boundary the content originated from, leave empty if this slice is not part of a boundary
    */
   constructor(
     readonly content: Fragment,
     readonly openStart: number,
     readonly openEnd: number,
-    readonly document?: Node
+    readonly boundary?: Node
   ) {}
 
   get size() {
@@ -46,7 +46,7 @@ export class Slice {
     if (!cut.content.cut(from.relative(cDepth) + 1, to.relative(cDepth) - 1))
       return;
 
-    return new Slice(cut.content, from.depth, to.depth, from.document);
+    return new Slice(cut.content, from.depth, to.depth, from.boundary);
   }
 }
 
@@ -59,7 +59,7 @@ function insertFragment(
   // TODO: Verify if content is allowed before inserting
   const { node, index, offset } = parent.offsetToIndex(pos);
   if (offset === 0) return parent.insert(insert, index);
-  else if (node.isText === true) {
+  else if (node.text !== null) {
     // TODO: implement general node.insert function
     return false;
   } else return insertFragment(node.content, offset, insert);

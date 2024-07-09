@@ -25,8 +25,8 @@ export class RelativePosition {
     else if (location === 'childOffset') this.offset = anchor.content.size;
   }
 
-  resolve(document: Node): Position | undefined {
-    const locate = locateNode(document, this.anchor);
+  resolve(boundary: Node): Position | undefined {
+    const locate = locateNode(boundary, this.anchor);
     if (!locate) return;
 
     const parent = locate.steps[locate.steps.length - 2];
@@ -34,9 +34,9 @@ export class RelativePosition {
     let offset = 0;
 
     if (this.location === 'after' || this.location === 'before') {
-      if (found.node === locate.document)
+      if (found.node === locate.boundary)
         throw new Error(
-          "Can't resolve a position before or after the document node"
+          "Can't resolve a position before or after the boundary node"
         );
 
       if (found.index > 0)
@@ -47,7 +47,7 @@ export class RelativePosition {
       if (this.location === 'after') offset += this.anchor.nodeSize;
 
       return new Position(
-        document,
+        boundary,
         found.depth,
         parent.node,
         offset,
@@ -62,7 +62,7 @@ export class RelativePosition {
       else offset = this.offset!;
 
       return new Position(
-        document,
+        boundary,
         found.depth + 1,
         this.anchor,
         offset,
@@ -75,11 +75,11 @@ export class RelativePosition {
 export class Position {
   constructor(
     /**
-     * The document this position was resolved in
+     * The boundary this position was resolved in
      */
-    readonly document: Node,
+    readonly boundary: Node,
     /**
-     * The depth the position is relative to the document, 0 means it is the document, 1 means it is a direct chid of the document, etc.
+     * The depth the position is relative to the boundary, 0 means it is the boundary, 1 means it is a direct chid of the boundary, etc.
      */
     readonly depth: number,
     /**
@@ -111,7 +111,7 @@ export class Position {
     if (this.steps.steps[depth].pos !== undefined)
       return this.steps.steps[depth].pos!;
 
-    const res = this.document.content.offset(this.node(depth));
+    const res = this.boundary.content.offset(this.node(depth));
     if (!res)
       throw new Error('Failed to get the absolute position of parent node');
     return res;
@@ -126,21 +126,21 @@ export class Position {
 
   /**
    * Returns the relative offset to `node`.
-   * @param node The index of a parent node of this position, or a node in this document.
+   * @param node The index of a parent node of this position, or a node in this boundary.
    * @returns The relative position to node, will be undefined if this position is before `node`. Or undefined if node cannot be resolved in the same document as this position.
    */
   relative(node: Node | number) {
     let pos;
     if (typeof node === 'number') pos = this.start(node);
-    else pos = this.document.content.offset(node);
-    if (!pos) throw new Error('Failed to resolve node in this document');
+    else pos = this.boundary.content.offset(node);
+    if (!pos) throw new Error('Failed to resolve node in this boundary');
     return this.toAbsolute() - pos;
   }
 
   /**
    * Gets the depth of the deepest common parent between two positions.
    * @returns The depth of the deepest common parent.
-   * @throws If the two positions are in different documents.
+   * @throws If the two positions are in different boundaries.
    */
   commonDepth(pos: Position) {
     const common = findCommonParent(this, pos);
@@ -150,7 +150,7 @@ export class Position {
   /**
    * Gets the deepest common parent between two positions.
    * @returns The common parent node, or undefind if it failed.
-   * @throws If the two positions are in different documents.
+   * @throws If the two positions are in different boundaries.
    */
   commonParent(pos: Position) {
     const d = this.commonDepth(pos);
@@ -158,7 +158,7 @@ export class Position {
   }
 
   /**
-   * Converts this position to an absolute position in the Position's document.
+   * Converts this position to an absolute position in the Position's boundary.
    * @returns The absolute position
    */
   toAbsolute(): number {
@@ -181,24 +181,24 @@ export class Position {
   }
 
   // static methods
-  static resolve(document: Node, pos: PositionLike): Position | undefined {
+  static resolve(boundary: Node, pos: PositionLike): Position | undefined {
     if (pos instanceof Position) return pos;
-    else if (pos instanceof RelativePosition) return pos.resolve(document);
-    else return Position.absoluteToPosition(document, pos);
+    else if (pos instanceof RelativePosition) return pos.resolve(boundary);
+    else return Position.absoluteToPosition(boundary, pos);
   }
 
   /**
    * Converts an absolute position to a resolved `Position`
-   * @param document The document where to resolve the absolute position
+   * @param boundary The boundary where to resolve the absolute position
    * @param pos The absolute position to resolve
    * @returns The resolved position, or undefined if it failed.
    */
-  static absoluteToPosition(document: Node, pos: number): Position | undefined {
-    if (pos < 0 || pos > document.nodeSize) return;
+  static absoluteToPosition(boundary: Node, pos: number): Position | undefined {
+    if (pos < 0 || pos > boundary.nodeSize) return;
     else if (pos === 0)
-      return new Position(document, 0, document, 0, {
-        document,
-        steps: [{ node: document, depth: 0, index: 0 }],
+      return new Position(boundary, 0, boundary, 0, {
+        boundary,
+        steps: [{ node: boundary, depth: 0, index: 0 }],
       });
 
     const steps: LocateStep[] = [];
@@ -239,16 +239,16 @@ export class Position {
       return;
     };
 
-    steps.push({ node: document, index: 0, depth: 0, pos: 0 });
-    const res = deepestOffset(document, 1, pos);
+    steps.push({ node: boundary, index: 0, depth: 0, pos: 0 });
+    const res = deepestOffset(boundary, 1, pos);
     if (!res) return;
 
-    const locate: LocateData = { document, steps };
-    return new Position(document, res.depth, res.parent, res.offset, locate);
+    const locate: LocateData = { boundary, steps };
+    return new Position(boundary, res.depth, res.parent, res.offset, locate);
   }
 
   /**
-   * Converts a position to an absolute position in the Position's document.
+   * Converts a position to an absolute position in the Position's boundary.
    * @returns The absolute position, or undefined if it failed.
    */
   static positionToAbsolute(pos: Position | number) {
@@ -351,17 +351,17 @@ export class Position {
     return new RelativePosition(anchor, 'childOffset', offset);
   }
 
-  // TODO: Figure out how to implement to and from json, as we need a reference to the document node (probably via the id, and create a function that creates or finds a node with same id in document)
+  // TODO: Figure out how to implement to and from json, as we need a reference to the boundary node (probably via the id, and create a function that creates or finds a node with same id in document)
 }
 
 export interface IndexPosData {
-  document: Node;
+  boundary: Node;
   /**
    * The parent node of this position
    */
   node: Node;
   /**
-   * The depth the parent is relative to the document root
+   * The depth the parent is relative to the boundary root
    */
   depth: number;
   /**
@@ -371,14 +371,14 @@ export interface IndexPosData {
 }
 
 export interface LocateData {
-  document: Node;
+  boundary: Node;
   steps: LocateStep[];
 }
 
 export interface LocateStep {
   node: Node;
   /**
-   * The depth this node is at, 0 means it is the document, 1 means it is a direct child of the document, etc.
+   * The depth this node is at, 0 means it is the boundary, 1 means it is a direct child of the document, etc.
    */
   depth: number;
   /**
@@ -400,25 +400,25 @@ function popSteps(data: LocateData) {
 }
 
 /**
- * Performs a breath-first search on the document to try to find the provided node
- * @param document The document node to search in
+ * Performs a breath-first search on the boundary to try to find the provided node
+ * @param boundary The boundary node to search in
  * @param node The node to search for
  * @returns Info about the node if found, else it returns undefined
  */
-export function locateNode(document: Node, node: Node): LocateData | undefined {
-  if (document === node) {
+export function locateNode(boundary: Node, node: Node): LocateData | undefined {
+  if (boundary === node) {
     const step = {
       depth: 0,
       index: 0,
-      node: document,
+      node: boundary,
     };
     return {
-      document,
+      boundary,
       steps: [step],
     };
   }
-  const res = bfsSteps(document, 0, 0, node);
-  if (res) return { document, steps: res };
+  const res = bfsSteps(boundary, 0, 0, node);
+  if (res) return { boundary, steps: res };
 }
 
 function bfsSteps(
@@ -458,7 +458,7 @@ function bfsSteps(
  * @returns The common parent between the two positions, or undefined it failed
  */
 function findCommonParent(from: Position, to: Position) {
-  if (from.document !== to.document)
+  if (from.boundary !== to.boundary)
     throw new Error(
       'Cannot find common parent between two nodes with different documents'
     );
@@ -472,7 +472,7 @@ function findCommonParent(from: Position, to: Position) {
 
   return {
     ...depth,
-    document: from.document,
+    boundary: from.boundary,
   } as IndexPosData;
 }
 
