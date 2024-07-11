@@ -24,9 +24,9 @@ export function createNode<T extends string>(
 ): undefined | (T extends 'text' ? Text : Node) {
   if (type === 'text') return createTextNode(content!);
 
-  /* const block = nodes.find((e) => e.type === type);
-  if (!block) return null;
-  return new block() as T extends 'text' ? Text : Node; */
+  const block = nodes.find((e) => e.type.name === type);
+  if (!block) return;
+  return new block() as T extends 'text' ? Text : Node;
 }
 
 export function createTextNode(content: string) {

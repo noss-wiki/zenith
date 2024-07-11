@@ -282,13 +282,13 @@ export class Position {
    * @param offset The offset to convert to an index
    */
   // prettier-ignore
-  static offsetToIndex(parent: Node | Fragment, offset: number, round?: false): number | undefined;
+  static offsetToIndex(parent: Node | Fragment, offset: number, advanced?: false): number | undefined;
   // prettier-ignore
-  static offsetToIndex(parent: Node | Fragment, offset: number, round: true): { index: number, offset: number };
+  static offsetToIndex(parent: Node | Fragment, offset: number, advanced: true): { index: number, offset: number };
   static offsetToIndex(
     parent: Node | Fragment,
     offset: number,
-    round?: boolean
+    advanced?: boolean
   ): any {
     if (offset === 0) return 0;
 
@@ -296,19 +296,19 @@ export class Position {
     let _offset = 0;
     for (const [child, i] of content.iter()) {
       if (offset === _offset)
-        if (round === true) return { index: i, offset: 0 };
+        if (advanced === true) return { index: i, offset: 0 };
         else return i;
       else _offset += child.nodeSize;
 
       if (offset < _offset)
-        if (round === true) return { index: i, offset: _offset - offset };
+        if (advanced === true) return { index: i, offset: _offset - offset };
         else return undefined;
     }
 
     if (offset > _offset)
       throw new Error("Provided offset exceeds parent's content length");
     else if (offset === _offset)
-      if (round === true) return { index: content.nodes.length, offset: 0 };
+      if (advanced === true) return { index: content.nodes.length, offset: 0 };
       else return content.nodes.length;
   }
 
