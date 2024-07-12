@@ -1,7 +1,14 @@
 import type { Fragment } from './fragment';
 import { Node } from './node';
 
+/**
+ * A position or a resolvable position in a boundary.
+ */
 export type PositionLike = number | RelativePosition | Position;
+/**
+ * An absolute position or a position that can be resolved to an absolute position.
+ */
+export type AbsoluteLike = number | Position;
 
 export type IsPosition<T> = T extends Position ? true : false;
 
@@ -97,17 +104,29 @@ export class Position {
     readonly steps: LocateData
   ) {}
 
+  private resolveDepth(depth?: number) {
+    if (depth === undefined) return this.depth;
+    else if (depth < 0) return this.depth + depth;
+    else return depth;
+  }
+
   /**
    * Returns the parent node at `depth`.
+   *
+   * @param depth The depth where to search, leave empty for the current depth, or a negative number to count back from the current depth.
    */
-  node(depth: number) {
-    return this.steps.steps[depth].node;
+  node(depth?: number) {
+    return this.steps.steps[this.resolveDepth(depth)].node;
   }
 
   /**
    * Returns the absolute position, where the parent node at `depth` starts.
+   *
+   * @param depth The depth where to search, leave empty for the current depth, or a negative number to count back from the current depth.
    */
-  start(depth: number) {
+  start(depth?: number) {
+    depth = this.resolveDepth(depth);
+
     if (this.steps.steps[depth].pos !== undefined)
       return this.steps.steps[depth].pos!;
 
@@ -119,8 +138,10 @@ export class Position {
 
   /**
    * Returns the absolute position, where the parent node at `depth` ends.
+   *
+   * @param depth The depth where to search, leave empty for the current depth, or a negative number to count back from the current depth.
    */
-  end(depth: number) {
+  end(depth?: number) {
     return this.start(depth) + this.node(depth).content.size;
   }
 

@@ -1,8 +1,10 @@
 import type { FragmentJSON } from './fragment';
+import type { Slice } from './slice';
 import { ContentExpression } from '../schema/expression';
 import { Eventfull } from '@/composables/classes/eventfull';
 import { NodeType } from './nodeType';
 import { Fragment } from './fragment';
+import { Position } from './position';
 
 // TODO: Automatically register node that is extended from this class upon creation
 /**
@@ -50,9 +52,31 @@ export class Node extends Eventfull {
     return null;
   }
 
+  /**
+   * Changes this nodes content to only include the content between the given positions.
+   * This does not cut non-text nodes in half, meaning if the starting position is inside of a node, that entire node is included.
+   */
   cut(from: number, to: number = this.content.size) {
     if (from === 0 && to === this.content.size) return;
     this.content.cut(from, to);
+  }
+
+  /**
+   * Replaces the selection with the provided slice, if it fits.
+   *
+   * @param slice The slice to replace the selection with, or a string if this node is a text node.
+   */
+  replace(from: number, to: number, slice: Slice | string) {
+    if (typeof slice === 'string') return;
+    if (slice.size === 0 && from === to) return;
+    else this.content.replace(from, to, slice, this);
+  }
+
+  resolve(pos: number) {
+    if (pos < 0 || pos > this.nodeSize)
+      throw new Error(`Position: ${pos}, is outside the allowed range`);
+
+    return Position.resolve(this, pos);
   }
 
   /**

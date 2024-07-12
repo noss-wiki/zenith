@@ -48,6 +48,10 @@ export class Slice {
 
     return new Slice(cut.content, from.depth, to.depth, from.boundary);
   }
+
+  static get empty() {
+    return new Slice(new Fragment([]), 0, 0);
+  }
 }
 
 function insertFragment(

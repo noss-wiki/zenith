@@ -1,15 +1,10 @@
 import { Node } from '../lib/model/node';
-import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 import { NodeType } from '../lib/model/nodeType';
 
+// TODO: move this to the node file
 export default class Text extends Node {
   static type = NodeType.from({
     name: 'text',
-    meta: {
-      name: 'Text',
-      description: '',
-      icon,
-    },
     schema: {
       group: 'inline',
       inline: true,
@@ -26,6 +21,18 @@ export default class Text extends Node {
 
   cut(from: number, to?: number) {
     this.text = this.text.slice(from, to);
+  }
+
+  replace(from: number, to: number, slice: string) {
+    this.text =
+      this.text.slice(0, from) + slice + this.text.slice(from + slice.length);
+  }
+
+  resolve(pos: number) {
+    if (pos < 0 || pos > this.nodeSize)
+      throw new Error(`Position: ${pos}, is outside the allowed range`);
+
+    return undefined;
   }
 
   copy(): Node {

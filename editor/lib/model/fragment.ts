@@ -1,5 +1,6 @@
 import type { Node, NodeJSON } from './node';
 import { Position } from './position';
+import type { Slice } from './slice';
 
 export class Fragment {
   nodes: Node[];
@@ -62,6 +63,9 @@ export class Fragment {
   /**
    * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
    *
+   * Changes this fragment's content to only include the content between the given positions.
+   * This does not cut non-text nodes in half, meaning if the starting position is inside of a node, that entire node is included.
+   *
    * @param from The starting position where to cut.
    * @param to The end position, leave empty to cut until the end.
    */
@@ -78,7 +82,7 @@ export class Fragment {
         continue;
       } else if (pos > to) break;
       else {
-        if (c.isText)
+        if (c.text !== null)
           c.cut(Math.max(0, from - pos), Math.min(c.text!.length, to - pos));
         else
           c.cut(
@@ -92,6 +96,31 @@ export class Fragment {
 
     this.nodes = res;
     return true;
+  }
+
+  /**
+   * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
+   *
+   * @param parent The parent node of this fragment, this is used to check if the slice's content conforms to the parent's schema.
+   */
+  replace(from: number, to: number, slice: Slice, parent: Node): boolean {
+    // TODO: Verify if content of slice conforms to this parent node's content
+    const $from = parent.resolve(from);
+    const $to = parent.resolve(to);
+
+    if (!$from || !$to) return false;
+    else if (
+      slice.openStart > $from.depth ||
+      slice.openEnd > $to.depth ||
+      $from.depth - $to.depth !== slice.openStart - slice.openEnd ||
+      $from.depth - slice.openStart < 0
+    )
+      return false;
+
+    // The node where to insert the slice, accounting for the depths
+    const sliceDepthNode = $from.node(-slice.openStart);
+
+    return false;
   }
 
   // TODO: dfs or bfs?
