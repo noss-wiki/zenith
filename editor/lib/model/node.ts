@@ -61,6 +61,14 @@ export class Node extends Eventfull {
     this.content.cut(from, to);
   }
 
+  remove(from: number, to: number = this.content.size) {
+    if (from < 0 || to > this.content.size)
+      throw new Error("Positions are outside of the node's range");
+    if (from === to) return;
+
+    this.content.remove(from, to);
+  }
+
   /**
    * Replaces the selection with the provided slice, if it fits.
    *

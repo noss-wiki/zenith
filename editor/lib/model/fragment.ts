@@ -6,6 +6,7 @@ export class Fragment {
   nodes: Node[];
 
   get size(): number {
+    // TODO: Shouldn't this be 0?
     if (this.nodes.length === 0) return 1;
 
     let size = 0;
@@ -49,15 +50,31 @@ export class Fragment {
   /**
    * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
    *
+   * Removes a single node from this content.
+   *
    * @param node The node to remove
    * @returns A boolean indicating if the node has been removed.
    */
-  remove(node: Node): boolean {
+  remove(node: Node): boolean;
+  /**
+   * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
+   *
+   * Removes the content between the given positions.
+   *
+   * @param from The start, from where to start removing
+   * @param to The end, to where to remove
+   */
+  remove(from: number, to: number): boolean;
+  remove(node: Node | number, to?: number): boolean {
     // TODO: Verify if content is allowed before removing
-    const index = this.nodes.indexOf(node);
-    if (index === -1) return false;
-    this.nodes.splice(index, 1);
-    return true;
+    if (typeof node !== 'number') {
+      const index = this.nodes.indexOf(node);
+      if (index === -1) return false;
+      this.nodes.splice(index, 1);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -94,7 +111,8 @@ export class Fragment {
         pos += c.nodeSize;
       }
 
-    this.nodes = res;
+    this.nodes.length = 0;
+    this.nodes.push(...res);
     return true;
   }
 
@@ -119,6 +137,19 @@ export class Fragment {
 
     // The node where to insert the slice, accounting for the depths
     const sliceDepthNode = $from.node(-slice.openStart);
+
+    // cases:
+    // - [ ] slice is empty
+    // - [ ] slice is flat (no openStart and openEnd)
+    // - [ ] slice
+
+    if (slice.size === 0) {
+      // slice is empty, so only remove the content between from and to
+      //sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
+      parent.remove(from, to);
+    } else if (slice.openStart === 0 && slice.openEnd === 0) {
+      // slice is flat
+    }
 
     return false;
   }
