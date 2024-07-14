@@ -14,7 +14,7 @@ export class Node extends Eventfull {
   static readonly type: NodeType;
   readonly type: NodeType;
 
-  id: string;
+  readonly id: string;
 
   /**
    * This node's children
@@ -52,21 +52,32 @@ export class Node extends Eventfull {
     return null;
   }
 
+  child(index: number): Node {
+    return this.content.child(index);
+  }
+
+  insert(offset: number, content: string | Node) {
+    if (typeof content === 'string')
+      throw new Error('Cannot insert a string into a non-text node');
+  }
+
   /**
    * Changes this nodes content to only include the content between the given positions.
    * This does not cut non-text nodes in half, meaning if the starting position is inside of a node, that entire node is included.
    */
   cut(from: number, to: number = this.content.size) {
-    if (from === 0 && to === this.content.size) return;
+    if (from === 0 && to === this.content.size) return this;
     this.content.cut(from, to);
+    return this;
   }
 
   remove(from: number, to: number = this.content.size) {
     if (from < 0 || to > this.content.size)
       throw new Error("Positions are outside of the node's range");
-    if (from === to) return;
+    if (from === to) return this;
 
     this.content.remove(from, to);
+    return this;
   }
 
   /**
@@ -75,9 +86,12 @@ export class Node extends Eventfull {
    * @param slice The slice to replace the selection with, or a string if this node is a text node.
    */
   replace(from: number, to: number, slice: Slice | string) {
-    if (typeof slice === 'string') return;
-    if (slice.size === 0 && from === to) return;
+    if (typeof slice === 'string')
+      throw new Error('Cannot insert a string into a non-text node');
+
+    if (slice.size === 0 && from === to) return this;
     else this.content.replace(from, to, slice, this);
+    return this;
   }
 
   resolve(pos: number) {

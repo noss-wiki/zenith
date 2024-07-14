@@ -18,6 +18,20 @@ export class Fragment {
     this.nodes = content;
   }
 
+  private resolveIndex(index?: number): number {
+    if (!index) return this.nodes.length - 1;
+    else if (index < 0) return this.nodes.length + index;
+    else return index;
+  }
+
+  private validIndex(index: number): boolean {
+    return index >= 0 && index < this.nodes.length;
+  }
+
+  child(index: number): Node {
+    return this.nodes[index];
+  }
+
   // TODO: Maybe make it more difficult to accidentaly use this function?
   /**
    * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
@@ -32,16 +46,8 @@ export class Fragment {
     if (node instanceof Fragment) node = node.nodes;
     const nodes: readonly Node[] = Array.isArray(node) ? node : [node];
 
-    let i =
-      index === undefined
-        ? this.nodes.length
-        : index >= 0
-        ? index
-        : this.nodes.length + index;
-
-    // Clamp value
-    if (i > this.nodes.length) i = this.nodes.length;
-    else if (i < -this.nodes.length) i = -this.nodes.length;
+    let i = this.resolveIndex(index);
+    if (!this.validIndex(i)) return false;
 
     this.nodes.splice(i, 0, ...nodes);
     return true;
@@ -136,22 +142,51 @@ export class Fragment {
       return false;
 
     // The node where to insert the slice, accounting for the depths
-    const sliceDepthNode = $from.node(-slice.openStart);
+    const fromDepthParent = $from.node(-slice.openStart);
+    const toDepthParent = $to.node(-slice.openEnd);
 
     // cases:
-    // - [ ] slice is empty
-    // - [ ] slice is flat (no openStart and openEnd)
+    // - [x] slice is empty
+    // - [x] slice is flat (no openStart and openEnd) and parent is the same
     // - [ ] slice
 
     if (slice.size === 0) {
       // slice is empty, so only remove the content between from and to
-      //sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
+      // sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
       parent.remove(from, to);
-    } else if (slice.openStart === 0 && slice.openEnd === 0) {
-      // slice is flat
+      // TODO: check for success
+      return true;
+    } else if (
+      slice.openStart === 0 &&
+      slice.openEnd === 0 &&
+      fromDepthParent === toDepthParent
+    ) {
+      // slice is flat and the parent is the same
+      const posParent = $from.parent;
+      const outer = posParent.copy().cut($to.offset);
+      posParent.cut(0, $from.offset).content.insert(slice.content);
+      posParent.content.insert(outer);
+      // TODO: check for success
+      return true;
     }
 
     return false;
+  }
+
+  /**
+   * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
+   *
+   * Much simpler version of replace, only replaces a single child.
+   * Always use this method over the more complex replace function, because this method is far more efficient.
+   *
+   * @param node The node to replace the child with.
+   * @param index The index where to replace the child. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end.
+   */
+  replaceChild(node: Node, index?: number): boolean {
+    const i = this.resolveIndex(index);
+    if (!this.validIndex(i)) return false;
+    this.nodes[i] = node;
+    return true;
   }
 
   // TODO: dfs or bfs?

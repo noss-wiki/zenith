@@ -21,16 +21,19 @@ export default class Text extends Node {
 
   cut(from: number, to?: number) {
     this.text = this.text.slice(from, to);
+    return this;
   }
 
   remove(from: number, to: number = this.text.length) {
     if (from < 0 || to > this.text.length)
       throw new Error("Positions are outside of the node's range");
     this.text = this.text.slice(0, from) + this.text.slice(to);
+    return this;
   }
 
   replace(from: number, to: number, slice: string) {
     this.text = this.text.slice(0, from) + slice + this.text.slice(to);
+    return this;
   }
 
   resolve(pos: number) {
