@@ -23,6 +23,10 @@ export default class Text extends Node {
     throw new Error("Can't call the Node.child method on a text node");
   }
 
+  insert(offset: number, content: string) {
+    return this.replace(offset, offset, content);
+  }
+
   cut(from: number, to?: number) {
     return this.copy(this.text.slice(from, to));
   }

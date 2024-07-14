@@ -56,9 +56,13 @@ export class Node {
     return this.content.child(index);
   }
 
-  insert(offset: number, content: string | Node) {
+  insert(offset: number, content: string | Node | Node[] | Fragment) {
     if (typeof content === 'string')
-      throw new Error('Cannot insert a string into a non-text node');
+      throw new Error('Cannot insert a string into a non-text node'); // This node needs to override this method to support text content
+
+    const { index, offset: o } = Position.offsetToIndex(this, offset, true);
+    if (o === 0) return this.copy(this.content.insert(content, index));
+    else return undefined!;
   }
 
   /**
@@ -85,7 +89,7 @@ export class Node {
    */
   replace(from: number, to: number, slice: Slice | string) {
     if (typeof slice === 'string')
-      throw new Error('Cannot insert a string into a non-text node');
+      throw new Error('Cannot insert a string into a non-text node'); // This node needs to override this method to support text content
 
     if (slice.size === 0 && from === to) return this;
     else return this.copy(this.content.replace(from, to, slice, this));

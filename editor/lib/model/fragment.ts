@@ -1,21 +1,20 @@
 import type { Node, NodeJSON } from './node';
-import { Position } from './position';
 import type { Slice } from './slice';
 
 export class Fragment {
   readonly nodes: Node[];
+  readonly size: number;
 
-  get size(): number {
-    // TODO: Shouldn't this be 0?
-    if (this.nodes.length === 0) return 1;
-
-    let size = 0;
-    for (const [child, i] of this.iter()) size += child.nodeSize;
-    return size;
-  }
-
-  constructor(content: Node[]) {
+  /**
+   * @param content The content of this fragment
+   * @param size Optionally the size of this fragment, this prevents having to calculate it again.
+   */
+  constructor(content: Node[], size?: number) {
     this.nodes = content;
+
+    this.size = size || 0;
+    if (size == undefined)
+      for (const [child, i] of this.iter()) this.size += child.nodeSize;
   }
 
   private resolveIndex(index?: number): number {
@@ -49,7 +48,10 @@ export class Fragment {
 
     const content = this.nodes.slice();
     content.splice(i, 0, ...nodes);
-    return new Fragment(content);
+    return new Fragment(
+      content,
+      nodes.reduce((a, b) => a + b.nodeSize, this.size)
+    );
   }
 
   /**
@@ -81,7 +83,7 @@ export class Fragment {
         throw new Error('The node to remove is not in the fragment');
 
       content.splice(index, 1);
-      return new Fragment(content);
+      return new Fragment(content, this.size - this.child(index).nodeSize);
     } else {
       return undefined!;
     }
@@ -104,7 +106,8 @@ export class Fragment {
       throw new Error('Positions are outside of the fragment range');
 
     const res: Node[] = [];
-    let pos = 0;
+    let pos = 0,
+      size = 0;
     for (const [c] of this.iter())
       if (c.nodeSize < from - pos) {
         pos += c.nodeSize;
@@ -120,10 +123,11 @@ export class Fragment {
           );
 
         res.push(c);
+        size += c.nodeSize;
         pos += c.nodeSize;
       }
 
-    return new Fragment(res);
+    return new Fragment(res, size);
   }
 
   // TODO: Figure out what to return
@@ -193,7 +197,10 @@ export class Fragment {
 
     const content = this.nodes.slice();
     content[i] = node;
-    return new Fragment(content);
+    return new Fragment(
+      content,
+      this.size - this.child(i).nodeSize + node.nodeSize
+    );
   }
 
   /**
@@ -254,11 +261,11 @@ export class Fragment {
    * Creates a deep copy of this fragment, so child node references will be lost, as they will also get copied.
    * It does this by recursively calling this method on every child node.
    */
-  copy(): Fragment {
+  /* copy(): Fragment {
     const children: Node[] = [];
     for (const [c] of this.iter()) children.push(c.copy());
     return new Fragment(children);
-  }
+  } */
 
   // TODO: Maybe also just implement [Symbol.iterator] to avoid having to call iter()
   /**
@@ -272,6 +279,12 @@ export class Fragment {
     return {
       nodes: this.nodes.map((e) => e.toJSON()),
     };
+  }
+
+  static from(content: Node | Node[] | Fragment) {
+    if (content instanceof Fragment) return content;
+    else if (Array.isArray(content)) return new Fragment(content);
+    else return new Fragment([content]);
   }
 }
 

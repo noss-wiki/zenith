@@ -21,7 +21,8 @@ export class InsertStep extends Step {
     const index = Position.offsetToIndex(pos.parent, pos.offset);
     if (index === undefined) return false; // insert needs to not cut into nodes, TODO: allow this or create seperate step?
 
-    return pos.parent.content.insert(this.node, index);
+    //return pos.parent.content.insert(this.node, index);
+    return false;
   }
 
   undo(boundary: Node): boolean {
@@ -33,6 +34,7 @@ export class InsertStep extends Step {
     if (index === undefined) return false;
     else if (pos.parent.content.nodes[index] !== this.node) return false;
 
-    return pos.parent.content.remove(this.node);
+    //return pos.parent.content.remove(this.node);
+    return false;
   }
 }
