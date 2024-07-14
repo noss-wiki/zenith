@@ -3,7 +3,7 @@ import { Position } from './position';
 import type { Slice } from './slice';
 
 export class Fragment {
-  nodes: Node[];
+  readonly nodes: Node[];
 
   get size(): number {
     // TODO: Shouldn't this be 0?
@@ -19,38 +19,37 @@ export class Fragment {
   }
 
   private resolveIndex(index?: number): number {
-    if (!index) return this.nodes.length - 1;
+    if (!index) return this.nodes.length === 0 ? 0 : this.nodes.length - 1;
     else if (index < 0) return this.nodes.length + index;
     else return index;
   }
 
-  private validIndex(index: number): boolean {
-    return index >= 0 && index < this.nodes.length;
+  private isValidIndex(index: number): boolean {
+    return index >= 0 && index <= this.nodes.length;
   }
 
   child(index: number): Node {
     return this.nodes[index];
   }
 
-  // TODO: Maybe make it more difficult to accidentaly use this function?
   /**
-   * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
-   *
    * Inserts `node` at `index` in this fragment.
+   *
    * @param node The node or nodes to insert
    * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
-   * @returns A boolean indicating if the node has been inserted.
+   * @returns The modified fragment.
    */
-  insert(node: Node | Node[] | Fragment, index?: number): boolean {
+  insert(node: Node | Node[] | Fragment, index?: number): Fragment {
     // TODO: Verify if content is allowed before inserting
     if (node instanceof Fragment) node = node.nodes;
     const nodes: readonly Node[] = Array.isArray(node) ? node : [node];
 
     let i = this.resolveIndex(index);
-    if (!this.validIndex(i)) return false;
+    if (!this.isValidIndex(i)) throw new Error('Index is not valid');
 
-    this.nodes.splice(i, 0, ...nodes);
-    return true;
+    const content = this.nodes.slice();
+    content.splice(i, 0, ...nodes);
+    return new Fragment(content);
   }
 
   /**
@@ -59,9 +58,9 @@ export class Fragment {
    * Removes a single node from this content.
    *
    * @param node The node to remove
-   * @returns A boolean indicating if the node has been removed.
+   * @returns The modified fragment.
    */
-  remove(node: Node): boolean;
+  remove(node: Node): Fragment;
   /**
    * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
    *
@@ -69,17 +68,22 @@ export class Fragment {
    *
    * @param from The start, from where to start removing
    * @param to The end, to where to remove
+   * @returns The modified fragment.
    */
-  remove(from: number, to: number): boolean;
-  remove(node: Node | number, to?: number): boolean {
+  remove(from: number, to: number): Fragment;
+  remove(node: Node | number, to?: number): Fragment {
     // TODO: Verify if content is allowed before removing
+    const content = this.nodes.slice();
+
     if (typeof node !== 'number') {
-      const index = this.nodes.indexOf(node);
-      if (index === -1) return false;
-      this.nodes.splice(index, 1);
-      return true;
+      const index = content.indexOf(node);
+      if (index === -1)
+        throw new Error('The node to remove is not in the fragment');
+
+      content.splice(index, 1);
+      return new Fragment(content);
     } else {
-      return false;
+      return undefined!;
     }
   }
 
@@ -92,10 +96,12 @@ export class Fragment {
    * @param from The starting position where to cut.
    * @param to The end position, leave empty to cut until the end.
    */
-  cut(from: number, to: number = this.size): boolean {
-    if (from === 0 && to === this.size) return true;
-    else if (from > to) return false;
-    else if (from < 0 || to < 0 || to > this.size) return false;
+  cut(from: number, to: number = this.size): Fragment {
+    if (from === 0 && to === this.size) return this;
+    else if (from > to)
+      throw new Error('The starting position is after the end position');
+    else if (from < 0 || to < 0 || to > this.size)
+      throw new Error('Positions are outside of the fragment range');
 
     const res: Node[] = [];
     let pos = 0;
@@ -117,29 +123,28 @@ export class Fragment {
         pos += c.nodeSize;
       }
 
-    this.nodes.length = 0;
-    this.nodes.push(...res);
-    return true;
+    return new Fragment(res);
   }
 
+  // TODO: Figure out what to return
   /**
    * **NOTE**: This modifies this node's content, it should not be called directly on a node that is in a document, but rather via a transaction to preserve history.
    *
    * @param parent The parent node of this fragment, this is used to check if the slice's content conforms to the parent's schema.
    */
-  replace(from: number, to: number, slice: Slice, parent: Node): boolean {
+  replace(from: number, to: number, slice: Slice, parent: Node) {
     // TODO: Verify if content of slice conforms to this parent node's content
     const $from = parent.resolve(from);
     const $to = parent.resolve(to);
 
-    if (!$from || !$to) return false;
+    if (!$from || !$to) throw new Error('Positions could not be resolved');
     else if (
       slice.openStart > $from.depth ||
       slice.openEnd > $to.depth ||
       $from.depth - $to.depth !== slice.openStart - slice.openEnd ||
       $from.depth - slice.openStart < 0
     )
-      return false;
+      throw new Error('The slice does not fit in this node');
 
     // The node where to insert the slice, accounting for the depths
     const fromDepthParent = $from.node(-slice.openStart);
@@ -153,9 +158,8 @@ export class Fragment {
     if (slice.size === 0) {
       // slice is empty, so only remove the content between from and to
       // sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
-      parent.remove(from, to);
       // TODO: check for success
-      return true;
+      return parent.content.remove(from, to);
     } else if (
       slice.openStart === 0 &&
       slice.openEnd === 0 &&
@@ -163,14 +167,15 @@ export class Fragment {
     ) {
       // slice is flat and the parent is the same
       const posParent = $from.parent;
-      const outer = posParent.copy().cut($to.offset);
-      posParent.cut(0, $from.offset).content.insert(slice.content);
-      posParent.content.insert(outer);
+      const last = posParent.cut($to.offset);
       // TODO: check for success
-      return true;
+      return posParent.content
+        .cut(0, $from.offset)
+        .insert(slice.content)
+        .insert(last);
     }
 
-    return false;
+    return undefined!;
   }
 
   /**
@@ -182,31 +187,13 @@ export class Fragment {
    * @param node The node to replace the child with.
    * @param index The index where to replace the child. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end.
    */
-  replaceChild(node: Node, index?: number): boolean {
+  replaceChild(node: Node, index?: number) {
     const i = this.resolveIndex(index);
-    if (!this.validIndex(i)) return false;
-    this.nodes[i] = node;
-    return true;
-  }
+    if (!this.isValidIndex(i)) throw new Error('Index is not valid');
 
-  // TODO: dfs or bfs?
-
-  /**
-   * Converts an offset to an index in this fragment
-   */
-  offsetToIndex(offset: number) {
-    let pos = 0;
-
-    for (const [c, i] of this.iter()) {
-      pos += c.nodeSize;
-      if (pos >= offset) return { node: c, index: i, offset: pos - offset };
-    }
-
-    return {
-      node: this.nodes[this.nodes.length - 1],
-      index: this.nodes.length - 1,
-      offset: pos - offset,
-    };
+    const content = this.nodes.slice();
+    content[i] = node;
+    return new Fragment(content);
   }
 
   /**
@@ -264,7 +251,7 @@ export class Fragment {
   }
 
   /**
-   * Creates a deep copy of this fragment.
+   * Creates a deep copy of this fragment, so child node references will be lost, as they will also get copied.
    * It does this by recursively calling this method on every child node.
    */
   copy(): Fragment {

@@ -11,7 +11,7 @@ export default class Text extends Node {
     },
   });
 
-  text: string;
+  readonly text: string;
 
   constructor(content?: string) {
     super(undefined);
@@ -19,21 +19,22 @@ export default class Text extends Node {
     this.text = content;
   }
 
+  child(index: number): Node {
+    throw new Error("Can't call the Node.child method on a text node");
+  }
+
   cut(from: number, to?: number) {
-    this.text = this.text.slice(from, to);
-    return this;
+    return this.copy(this.text.slice(from, to));
   }
 
   remove(from: number, to: number = this.text.length) {
     if (from < 0 || to > this.text.length)
       throw new Error("Positions are outside of the node's range");
-    this.text = this.text.slice(0, from) + this.text.slice(to);
-    return this;
+    return this.copy(this.text.slice(0, from) + this.text.slice(to));
   }
 
   replace(from: number, to: number, slice: string) {
-    this.text = this.text.slice(0, from) + slice + this.text.slice(to);
-    return this;
+    return this.copy(this.text.slice(0, from) + slice + this.text.slice(to));
   }
 
   resolve(pos: number) {
@@ -43,8 +44,7 @@ export default class Text extends Node {
     return undefined;
   }
 
-  copy(): Node {
-    // @ts-ignore
-    return this.new(this.text);
+  copy(content?: string): Node {
+    return this.new(content, true);
   }
 }

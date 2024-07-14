@@ -7,10 +7,11 @@ import { Fragment } from './fragment';
 import { Position } from './position';
 
 // TODO: Automatically register node that is extended from this class upon creation
+// so the node type can be created automatically
 /**
  * The base Node class
  */
-export class Node extends Eventfull {
+export class Node {
   static readonly type: NodeType;
   readonly type: NodeType;
 
@@ -23,7 +24,7 @@ export class Node extends Eventfull {
   /**
    * The text content if this node is a text node, or `null` otherwise.
    */
-  text: string | null = null;
+  readonly text: string | null = null;
   /**
    * The string representation of the content
    */
@@ -38,7 +39,6 @@ export class Node extends Eventfull {
 
   // also add marks later
   constructor(content?: Fragment) {
-    super();
     this.type = (<typeof Node>this.constructor).type;
     this.id = Math.random().toString(36).slice(2);
 
@@ -67,8 +67,7 @@ export class Node extends Eventfull {
    */
   cut(from: number, to: number = this.content.size) {
     if (from === 0 && to === this.content.size) return this;
-    this.content.cut(from, to);
-    return this;
+    return this.copy(this.content.cut(from, to));
   }
 
   remove(from: number, to: number = this.content.size) {
@@ -76,8 +75,7 @@ export class Node extends Eventfull {
       throw new Error("Positions are outside of the node's range");
     if (from === to) return this;
 
-    this.content.remove(from, to);
-    return this;
+    return this.copy(this.content.remove(from, to));
   }
 
   /**
@@ -90,14 +88,14 @@ export class Node extends Eventfull {
       throw new Error('Cannot insert a string into a non-text node');
 
     if (slice.size === 0 && from === to) return this;
-    else this.content.replace(from, to, slice, this);
-    return this;
+    else return this.copy(this.content.replace(from, to, slice, this));
   }
 
   resolve(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
       throw new Error(`Position: ${pos}, is outside the allowed range`);
 
+    // TODO: Cache results
     return Position.resolve(this, pos);
   }
 
@@ -116,18 +114,28 @@ export class Node extends Eventfull {
    * It does this by calling the copy method on the content fragment,
    * if this node has differnt behaviour it should override this function.
    */
-  copy() {
-    const content = this.content.copy();
-    return this.new(content);
+  copy(content?: Fragment | string) {
+    if (content === this.content) return this;
+    return this.new(content, true);
   }
 
   /**
    * Creates a new instance of this node type.
    * E.g when calling this on a Paragraph, it creates a new Paragraph node.
    */
-  new(content?: Fragment) {
+  new(content?: Fragment | string, keepId?: boolean) {
+    if (typeof content === 'string' && this.type.name !== 'text')
+      throw new Error(
+        'Content of type string is not allowed for non-text nodes'
+      );
+
     const Class = <typeof Node>this.constructor;
-    return new Class(content);
+    // TODO: Also include other things, like marks, etc.
+    // @ts-ignore
+    const inst = new Class(content);
+    // @ts-ignore
+    if (keepId) inst.id = this.id;
+    return inst;
   }
 
   toJSON(): NodeJSON {

@@ -298,12 +298,25 @@ export class Position {
   }
 
   /**
-   * Tries to convert an offset to an index, this can only happen in the offset is between two nodes. Else it will return undefined
+   * Tries to convert an offset to an index.
+   *
    * @param parent The node to use as parent
    * @param offset The offset to convert to an index
+   * @returns
+   *    The index or undefined if it doesn't resolve as a direct child.
+   *    The index may also be the length of the content, this means the offset directly after the last child.
    */
   // prettier-ignore
   static offsetToIndex(parent: Node | Fragment, offset: number, advanced?: false): number | undefined;
+  /**
+   * Tries to convert an offset to an index.
+   *
+   * @param parent The node to use as parent
+   * @param offset The offset to convert to an index
+   * @returns
+   *    An object with the index and the offset into the node.
+   *    The index may also be the length of the content, this means the offset directly after the last child.
+   */
   // prettier-ignore
   static offsetToIndex(parent: Node | Fragment, offset: number, advanced: true): { index: number, offset: number };
   static offsetToIndex(
@@ -311,26 +324,30 @@ export class Position {
     offset: number,
     advanced?: boolean
   ): any {
-    if (offset === 0) return 0;
+    const decide = (
+      a: number | undefined,
+      b: { index: number; offset: number }
+    ) => (advanced === true ? b : a);
+
+    if (offset === 0) return decide(0, { index: 0, offset: 0 });
 
     const content = parent instanceof Node ? parent.content : parent;
-    let _offset = 0;
+    let pos = 0;
     for (const [child, i] of content.iter()) {
-      if (offset === _offset)
-        if (advanced === true) return { index: i, offset: 0 };
-        else return i;
-      else _offset += child.nodeSize;
+      if (offset === pos) return decide(i, { index: i, offset: 0 });
+      pos += child.nodeSize;
 
-      if (offset < _offset)
-        if (advanced === true) return { index: i, offset: _offset - offset };
-        else return undefined;
+      if (pos > offset)
+        return decide(undefined, { index: i, offset: pos - offset });
     }
 
-    if (offset > _offset)
-      throw new Error("Provided offset exceeds parent's content length");
-    else if (offset === _offset)
-      if (advanced === true) return { index: content.nodes.length, offset: 0 };
-      else return content.nodes.length;
+    if (offset === pos)
+      return decide(content.nodes.length, {
+        index: content.nodes.length,
+        offset: 0,
+      });
+
+    throw new Error("Provided offset exceeds parent's content length");
   }
 
   /**

@@ -29,7 +29,7 @@ export class Slice {
     );
   }
 
-  insert(pos: number, insert: Fragment /*, parent?: Node */) {
+  insert(pos: number, insert: Fragment | Node[] | Node /*, parent?: Node */) {
     return insertFragment(this.content, pos, insert);
   }
 
@@ -57,12 +57,16 @@ export class Slice {
 function insertFragment(
   parent: Fragment,
   pos: number,
-  insert: Fragment
+  insert: Fragment | Node[] | Node
   /*, parent?: Node */
-): boolean {
+): Fragment {
   // TODO: Verify if content is allowed before inserting
-  const { node, index, offset } = parent.offsetToIndex(pos);
+  // TODO: Re-implement this method
+  const { index, offset } = Position.offsetToIndex(parent, pos, true);
+  const node = parent.child(index);
+  //if (empty) return parent;
   if (offset === 0) return parent.insert(insert, index);
-  else if (node.text !== null) return false;
+  else if (node.text !== null)
+    throw new Error("Can't insert a fragment into a text node");
   else return insertFragment(node.content, offset, insert);
 }
