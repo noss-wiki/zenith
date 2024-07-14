@@ -9,6 +9,7 @@ import { Slice } from '../model/slice';
 // Steps
 import { InsertStep } from './steps/insert';
 import { RemoveStep } from './steps/remove';
+import { MethodError } from '../error';
 
 export class Transaction {
   readonly steps: Step[] = [];
@@ -24,7 +25,10 @@ export class Transaction {
     if (typeof node === 'string') {
       const created = createNode(node);
       if (created === undefined)
-        throw new Error(`Failed to create node of type: ${node}`);
+        throw new MethodError(
+          `Failed to create node of type ${node}`,
+          'Transaction.insert'
+        );
       node = created;
     }
 
@@ -35,7 +39,10 @@ export class Transaction {
   insertText(text: string, pos: PositionLike) {
     const resolvedPos = Position.resolve(this.boundary, pos);
     if (!resolvedPos)
-      throw new Error('Position is not resolvable in the current boundary');
+      throw new MethodError(
+        'Position is not resolvable in the current boundary',
+        'Transaction.insertText'
+      );
 
     const index = Position.offsetToIndex(
       resolvedPos.parent,

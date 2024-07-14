@@ -1,3 +1,4 @@
+import { MethodError, NotImplementedError } from '../error';
 import type { Node, NodeJSON } from './node';
 import type { Slice } from './slice';
 
@@ -44,7 +45,11 @@ export class Fragment {
     const nodes: readonly Node[] = Array.isArray(node) ? node : [node];
 
     let i = this.resolveIndex(index);
-    if (!this.isValidIndex(i)) throw new Error('Index is not valid');
+    if (!this.isValidIndex(i))
+      throw new MethodError(
+        `Index ${index} is not in the allowed range`,
+        'Fragment.insert'
+      );
 
     const content = this.nodes.slice();
     content.splice(i, 0, ...nodes);
@@ -80,12 +85,15 @@ export class Fragment {
     if (typeof node !== 'number') {
       const index = content.indexOf(node);
       if (index === -1)
-        throw new Error('The node to remove is not in the fragment');
+        throw new MethodError(
+          'The provided node to be removed is not part of this fragment',
+          'Fragment.remove'
+        );
 
       content.splice(index, 1);
       return new Fragment(content, this.size - this.child(index).nodeSize);
     } else {
-      return undefined!;
+      throw new NotImplementedError('Fragment.remove', true);
     }
   }
 
@@ -101,9 +109,15 @@ export class Fragment {
   cut(from: number, to: number = this.size): Fragment {
     if (from === 0 && to === this.size) return this;
     else if (from > to)
-      throw new Error('The starting position is after the end position');
+      throw new MethodError(
+        'The starting position is greater than the end position',
+        'Fragment.cut'
+      );
     else if (from < 0 || to < 0 || to > this.size)
-      throw new Error('Positions are outside of the fragment range');
+      throw new MethodError(
+        `One or more of the positions ${from} and ${to} are outside of the allowed range`,
+        'Fragment.cut'
+      );
 
     const res: Node[] = [];
     let pos = 0,
@@ -141,14 +155,21 @@ export class Fragment {
     const $from = parent.resolve(from);
     const $to = parent.resolve(to);
 
-    if (!$from || !$to) throw new Error('Positions could not be resolved');
-    else if (
-      slice.openStart > $from.depth ||
-      slice.openEnd > $to.depth ||
-      $from.depth - $to.depth !== slice.openStart - slice.openEnd ||
-      $from.depth - slice.openStart < 0
-    )
-      throw new Error('The slice does not fit in this node');
+    if (!$from || !$to)
+      throw new MethodError(
+        `Positions couldn't be resolved`,
+        'Fragment.replace'
+      );
+    else if (slice.openStart > $from.depth || slice.openEnd > $to.depth)
+      throw new MethodError(
+        "The insert slice's depth is greater than the depth of the position it is inserted at",
+        'Fragment.replace'
+      );
+    else if ($from.depth - $to.depth !== slice.openStart - slice.openEnd)
+      throw new MethodError(
+        'The slice and insertion position have inconsistent depths',
+        'Fragment.replace'
+      );
 
     // The node where to insert the slice, accounting for the depths
     const fromDepthParent = $from.node(-slice.openStart);
@@ -179,7 +200,7 @@ export class Fragment {
         .insert(last);
     }
 
-    return undefined!;
+    throw new NotImplementedError('Fragment.replace', true);
   }
 
   /**
@@ -193,7 +214,11 @@ export class Fragment {
    */
   replaceChild(node: Node, index?: number) {
     const i = this.resolveIndex(index);
-    if (!this.isValidIndex(i)) throw new Error('Index is not valid');
+    if (!this.isValidIndex(i)!)
+      throw new MethodError(
+        `Index ${index} is not in the allowed range`,
+        'Fragment.replaceChild'
+      );
 
     const content = this.nodes.slice();
     content[i] = node;

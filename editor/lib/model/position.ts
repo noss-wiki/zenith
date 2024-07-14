@@ -1,3 +1,4 @@
+import { MethodError } from '../error';
 import type { Fragment } from './fragment';
 import { Node } from './node';
 
@@ -42,8 +43,9 @@ export class RelativePosition {
 
     if (this.location === 'after' || this.location === 'before') {
       if (found.node === locate.boundary)
-        throw new Error(
-          "Can't resolve a position before or after the boundary node"
+        throw new MethodError(
+          "Can't resolve a position before or after the boundary node",
+          'RelativePosition.resolve'
         );
 
       if (found.index > 0)
@@ -132,7 +134,10 @@ export class Position {
 
     const res = this.boundary.content.offset(this.node(depth));
     if (!res)
-      throw new Error('Failed to get the absolute position of parent node');
+      throw new MethodError(
+        `Failed to get the absolute position of node at depth ${depth}`,
+        'Position.start'
+      );
     return res;
   }
 
@@ -154,7 +159,11 @@ export class Position {
     let pos;
     if (typeof node === 'number') pos = this.start(node);
     else pos = this.boundary.content.offset(node);
-    if (!pos) throw new Error('Failed to resolve node in this boundary');
+    if (!pos)
+      throw new MethodError(
+        'Failed to get the absolute position of node in the current boundary',
+        'Position.relative'
+      );
     return this.toAbsolute() - pos;
   }
 
@@ -165,6 +174,12 @@ export class Position {
    */
   commonDepth(pos: Position) {
     const common = findCommonParent(this, pos);
+    if (!common)
+      throw new MethodError(
+        'Failed to find a common parent between the two positions',
+        'Position.commonDepth'
+      );
+
     return common.depth;
   }
 
@@ -332,6 +347,12 @@ export class Position {
     if (offset === 0) return decide(0, { index: 0, offset: 0 });
 
     const content = parent instanceof Node ? parent.content : parent;
+    if (offset < 0 || offset > content.size)
+      throw new MethodError(
+        `The offset ${offset}, is outside of the allowed range`,
+        'Position.offsetToIndex'
+      );
+
     let pos = 0;
     for (const [child, i] of content.iter()) {
       if (offset === pos) return decide(i, { index: i, offset: 0 });
@@ -346,8 +367,6 @@ export class Position {
         index: content.nodes.length,
         offset: 0,
       });
-
-    throw new Error("Provided offset exceeds parent's content length");
   }
 
   /**
@@ -496,17 +515,11 @@ function bfsSteps(
  * @returns The common parent between the two positions, or undefined it failed
  */
 function findCommonParent(from: Position, to: Position) {
-  if (from.boundary !== to.boundary)
-    throw new Error(
-      'Cannot find common parent between two nodes with different documents'
-    );
+  if (from.boundary !== to.boundary) return;
 
   // can probably skip depth 0, as it is always the document node
   const depth = findDeepestCommonParent(from, to, 0);
-  if (!depth)
-    throw new Error(
-      'Cannot find common parent between two nodes with different documents'
-    );
+  if (!depth) return;
 
   return {
     ...depth,

@@ -1,3 +1,4 @@
+import { MethodError } from '../lib/error';
 import { Node } from '../lib/model/node';
 import { NodeType } from '../lib/model/nodeType';
 
@@ -15,12 +16,16 @@ export default class Text extends Node {
 
   constructor(content?: string) {
     super(undefined);
-    if (!content) throw new Error('Empty text nodes are not allowed');
+    if (!content)
+      throw new MethodError('Empty text nodes are not allowed', 'new Text()');
     this.text = content;
   }
 
   child(index: number): Node {
-    throw new Error("Can't call the Node.child method on a text node");
+    throw new MethodError(
+      "Can't call the Node.child method on a text node",
+      'Text.child'
+    );
   }
 
   insert(offset: number, content: string) {
@@ -33,7 +38,11 @@ export default class Text extends Node {
 
   remove(from: number, to: number = this.text.length) {
     if (from < 0 || to > this.text.length)
-      throw new Error("Positions are outside of the node's range");
+      throw new MethodError(
+        `One or more of the positions ${from} and ${to} are outside of the allowed range`,
+        'Text.remove'
+      );
+
     return this.copy(this.text.slice(0, from) + this.text.slice(to));
   }
 
@@ -43,7 +52,10 @@ export default class Text extends Node {
 
   resolve(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
-      throw new Error(`Position: ${pos}, is outside the allowed range`);
+      throw new MethodError(
+        `The position ${pos}, is outside of the allowed range`,
+        'Text.resolve'
+      );
 
     return undefined;
   }

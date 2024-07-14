@@ -1,3 +1,4 @@
+import { MethodError } from '../error';
 import type { ContentExpression } from '../schema/expression';
 
 // TODO: Add dom representation, probably same as ProseMirror (via schema.toDom)
@@ -101,7 +102,10 @@ export class NodeType {
     readonly extend?: string
   ) {
     if (definitions[name] !== undefined)
-      throw new Error(`NodeType with name: ${name}, already exists.`);
+      throw new MethodError(
+        `NodeType with name ${name}, already exists.`,
+        'new NodeType'
+      );
 
     this.visible = meta === undefined || meta.visible !== true;
     definitions[name] = this;
@@ -126,8 +130,9 @@ export class NodeType {
     if (typeof other === 'string') {
       const found = definitions[other];
       if (!found)
-        throw new Error(
-          `Tried extending NodeType with name: ${other}, but it doesn't exist or has not been created yet`
+        throw new MethodError(
+          `Tried extending the NodeType ${other}, but it doesn't exist or has not been created yet, make sure the types are created in the correct order`,
+          'NodeType.extend'
         );
 
       other = found;

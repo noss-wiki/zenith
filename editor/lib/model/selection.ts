@@ -2,6 +2,7 @@ import type { Node } from './node';
 import type { DOMSelection } from './types';
 import { Position } from './position';
 import { Slice } from './slice';
+import { MethodError } from '../error';
 
 export class Selection {
   constructor(
@@ -9,8 +10,9 @@ export class Selection {
     public head: Position
   ) {
     if (anchor.boundary !== head.boundary)
-      throw new Error(
-        'boundary of the head position is different from the boundary of the anchor position'
+      throw new MethodError(
+        'The anchor and head positions are in two different boundaries',
+        'new Selection'
       );
   }
 
@@ -45,8 +47,9 @@ export class Selection {
     boundary ??= this.anchor.boundary;
     const pos = Position.offset(node, offset).resolve(boundary);
     if (!pos)
-      throw new Error(
-        'Failed to resolve node in the current boundary of the selection'
+      throw new MethodError(
+        'Failed to resolve node in the current boundary of the selection',
+        'Selection.collapse'
       );
 
     this.head = this.anchor = pos;

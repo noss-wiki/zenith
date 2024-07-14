@@ -5,6 +5,7 @@ import { Eventfull } from '@/composables/classes/eventfull';
 import { NodeType } from './nodeType';
 import { Fragment } from './fragment';
 import { Position } from './position';
+import { MethodError, NotImplementedError } from '../error';
 
 // TODO: Automatically register node that is extended from this class upon creation
 // so the node type can be created automatically
@@ -58,11 +59,14 @@ export class Node {
 
   insert(offset: number, content: string | Node | Node[] | Fragment) {
     if (typeof content === 'string')
-      throw new Error('Cannot insert a string into a non-text node'); // This node needs to override this method to support text content
+      throw new MethodError(
+        `The node type ${this.type.name}, needs to override the insert method to support inserting text content, as the default implementation does not support it`,
+        'Node.insert'
+      );
 
     const { index, offset: o } = Position.offsetToIndex(this, offset, true);
     if (o === 0) return this.copy(this.content.insert(content, index));
-    else return undefined!;
+    throw new NotImplementedError('Node.insert', true);
   }
 
   /**
@@ -76,7 +80,10 @@ export class Node {
 
   remove(from: number, to: number = this.content.size) {
     if (from < 0 || to > this.content.size)
-      throw new Error("Positions are outside of the node's range");
+      throw new MethodError(
+        `One or more of the positions ${from} and ${to} are outside of the allowed range`,
+        'Node.remove'
+      );
     if (from === to) return this;
 
     return this.copy(this.content.remove(from, to));
@@ -89,7 +96,10 @@ export class Node {
    */
   replace(from: number, to: number, slice: Slice | string) {
     if (typeof slice === 'string')
-      throw new Error('Cannot insert a string into a non-text node'); // This node needs to override this method to support text content
+      throw new MethodError(
+        `The node type ${this.type.name}, needs to override the replace method to support inserting text content, as the default implementation does not support it`,
+        'Node.replace'
+      );
 
     if (slice.size === 0 && from === to) return this;
     else return this.copy(this.content.replace(from, to, slice, this));
@@ -97,7 +107,10 @@ export class Node {
 
   resolve(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
-      throw new Error(`Position: ${pos}, is outside the allowed range`);
+      throw new MethodError(
+        `The position ${pos}, is outside of the allowed range`,
+        'Fragment.cut'
+      );
 
     // TODO: Cache results
     return Position.resolve(this, pos);
@@ -128,9 +141,10 @@ export class Node {
    * E.g when calling this on a Paragraph, it creates a new Paragraph node.
    */
   new(content?: Fragment | string, keepId?: boolean) {
-    if (typeof content === 'string' && this.type.name !== 'text')
-      throw new Error(
-        'Content of type string is not allowed for non-text nodes'
+    if (typeof content === 'string' && this.text === null)
+      throw new MethodError(
+        `The node type ${this.type.name}, doesn't support text content`,
+        'Node.new'
       );
 
     const Class = <typeof Node>this.constructor;
