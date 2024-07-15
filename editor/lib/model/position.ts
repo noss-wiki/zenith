@@ -122,6 +122,15 @@ export class Position {
   }
 
   /**
+   * The index in the parent node at `depth`.
+   *
+   * @param depth The depth where to search, leave empty for the current depth, or a negative number to count back from the current depth.
+   */
+  index(depth?: number) {
+    return this.steps.steps[this.resolveDepth(depth)].index;
+  }
+
+  /**
    * Returns the absolute position, where the parent node at `depth` starts.
    *
    * @param depth The depth where to search, leave empty for the current depth, or a negative number to count back from the current depth.
@@ -138,6 +147,7 @@ export class Position {
         `Failed to get the absolute position of node at depth ${depth}`,
         'Position.start'
       );
+
     return res;
   }
 
@@ -152,7 +162,7 @@ export class Position {
 
   /**
    * Returns the relative offset to `node`.
-   * @param node The index of a parent node of this position, or a node in this boundary.
+   * @param node The depth of a parent node of this position, or a node in this boundary.
    * @returns The relative position to node, will be undefined if this position is before `node`. Or undefined if node cannot be resolved in the same document as this position.
    */
   relative(node: Node | number) {
@@ -164,6 +174,7 @@ export class Position {
         'Failed to get the absolute position of node in the current boundary',
         'Position.relative'
       );
+
     return this.toAbsolute() - pos;
   }
 

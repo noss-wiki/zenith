@@ -16,7 +16,10 @@ export class Slice {
     readonly openStart: number,
     readonly openEnd: number,
     readonly boundary?: Node
-  ) {}
+  ) {
+    if (this.content.size === 0 && (this.openStart > 0 || this.openEnd > 0))
+      this.openStart = this.openEnd = 0;
+  }
 
   get size() {
     return this.content.size - this.openStart - this.openEnd;

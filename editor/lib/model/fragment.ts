@@ -1,6 +1,7 @@
-import { MethodError, NotImplementedError } from '../error';
 import type { Node, NodeJSON } from './node';
+import type { Position } from './position';
 import type { Slice } from './slice';
+import { MethodError, NotImplementedError } from '../error';
 
 export class Fragment {
   readonly nodes: Node[];
@@ -33,11 +34,28 @@ export class Fragment {
   }
 
   /**
+   * Appends the `nodes` to the end of this fragment.
+   *
+   * @param nodes Single nodes, node arrays, or fragments to append.
+   * @returns The modified fragment.
+   */
+  append(...nodes: (Node | Node[] | Fragment)[]) {
+    const _nodes = nodes.flatMap((e) => (e instanceof Fragment ? e.nodes : e));
+    const content = this.nodes.slice();
+    content.push(..._nodes);
+    return new Fragment(
+      content,
+      _nodes.reduce((a, b) => a + b.nodeSize, this.size)
+    );
+  }
+
+  /**
    * Inserts `node` at `index` in this fragment.
    *
    * @param node The node or nodes to insert
    * @param index The index where to insert. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end. If this value is out of bounds the value will be clamped.
    * @returns The modified fragment.
+   * @throws {MethodError} If the index is out of bounds.
    */
   insert(node: Node | Node[] | Fragment, index?: number): Fragment {
     // TODO: Verify if content is allowed before inserting
@@ -66,6 +84,7 @@ export class Fragment {
    *
    * @param node The node to remove
    * @returns The modified fragment.
+   * @throws {MethodError} If given the node is not part of this fragment.
    */
   remove(node: Node): Fragment;
   /**
@@ -105,6 +124,7 @@ export class Fragment {
    *
    * @param from The starting position where to cut.
    * @param to The end position, leave empty to cut until the end.
+   * @throws {MethodError} If the starting position is greater than the end position, or if one or more of the positions are outside of the allowed range.
    */
   cut(from: number, to: number = this.size): Fragment {
     if (from === 0 && to === this.size) return this;
@@ -171,36 +191,7 @@ export class Fragment {
         'Fragment.replace'
       );
 
-    // The node where to insert the slice, accounting for the depths
-    const fromDepthParent = $from.node(-slice.openStart);
-    const toDepthParent = $to.node(-slice.openEnd);
-
-    // cases:
-    // - [x] slice is empty
-    // - [x] slice is flat (no openStart and openEnd) and parent is the same
-    // - [ ] slice
-
-    if (slice.size === 0) {
-      // slice is empty, so only remove the content between from and to
-      // sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
-      // TODO: check for success
-      return parent.content.remove(from, to);
-    } else if (
-      slice.openStart === 0 &&
-      slice.openEnd === 0 &&
-      fromDepthParent === toDepthParent
-    ) {
-      // slice is flat and the parent is the same
-      const posParent = $from.parent;
-      const last = posParent.cut($to.offset);
-      // TODO: check for success
-      return posParent.content
-        .cut(0, $from.offset)
-        .insert(slice.content)
-        .insert(last);
-    }
-
-    throw new NotImplementedError('Fragment.replace', true);
+    return replaceOuter($from, $to, slice);
   }
 
   /**
@@ -211,6 +202,7 @@ export class Fragment {
    *
    * @param node The node to replace the child with.
    * @param index The index where to replace the child. Leave empty or undefined to insert at the end, or use a negative number to insert with offset from the end.
+   * @throws {MethodError} If the index is out of bounds.
    */
   replaceChild(node: Node, index?: number) {
     const i = this.resolveIndex(index);
@@ -316,3 +308,66 @@ export class Fragment {
 export type FragmentJSON = {
   nodes: NodeJSON[];
 };
+
+// TODO: Test the replace method thoroughly
+function replaceOuter(
+  from: Position,
+  to: Position,
+  slice: Slice,
+  depth: number = 0
+): Fragment {
+  const node = from.node(depth);
+  const index = from.index(depth);
+
+  // TODO: Find more efficient way of checking if they still share the same parent
+  if (node === to.node(depth) && depth < from.depth - slice.openStart) {
+    const inner = replaceOuter(from, to, slice, depth + 1);
+    const child = node.content.child(index).copy(inner);
+    return node.content.replaceChild(child, index);
+  } else if (slice.size === 0) {
+    return node.content.remove(from.relative(depth), to.relative(depth));
+  } else if (
+    slice.openStart === 0 &&
+    slice.openEnd === 0 &&
+    from.depth === depth &&
+    to.depth === depth
+  ) {
+    // TODO: check for success
+    return node.content
+      .cut(0, from.relative(depth))
+      .insert(slice.content)
+      .insert(node.content.cut(to.relative(depth)));
+  } else {
+    // complex case
+  }
+
+  throw new NotImplementedError('Fragment.replace', true);
+}
+
+/* // The node where to insert the slice, accounting for the depths
+    const fromDepthParent = $from.node(-slice.openStart);
+    const toDepthParent = $to.node(-slice.openEnd);
+
+    // cases:
+    // - [x] slice is empty
+    // - [x] slice is flat (no openStart and openEnd) and parent is the same
+    // - [ ] slice
+
+    if (slice.size === 0) {
+      // slice is empty, so only remove the content between from and to
+      // sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
+      // TODO: check for success
+      return parent.content.remove(from, to);
+    } else if (
+      slice.openStart === 0 &&
+      slice.openEnd === 0 &&
+      fromDepthParent === toDepthParent
+    ) {
+      // slice is flat and the parent is the same
+      // improve this by only changing the actual parent of the position
+      const last = parent.cut(to);
+      // TODO: check for success
+      return parent.content.cut(0, from).insert(slice.content).insert(last);
+    }
+
+    throw new NotImplementedError('Fragment.replace', true); */
