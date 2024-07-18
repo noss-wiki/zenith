@@ -24,6 +24,7 @@ export class Node {
   readonly content: Fragment;
   /**
    * The text content if this node is a text node, or `null` otherwise.
+   * This is used to determine if a node is a text node or not.
    */
   readonly text: string | null = null;
   /**
@@ -36,6 +37,10 @@ export class Node {
     else if (this.type.schema.inline === true)
       return 1; // non-text leaf nodes always have a length of 1
     else return this.content.size + 2; // the size of the content + 2 (the start and end tokens)
+  }
+
+  get childCount() {
+    return this.content.childCount;
   }
 
   // also add marks later

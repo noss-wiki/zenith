@@ -33,6 +33,12 @@ export default class Text extends Node {
   }
 
   cut(from: number, to?: number) {
+    if (from < 0 || (to && to > this.text.length))
+      throw new MethodError(
+        `One or more of the positions ${from} and ${to} are outside of the allowed range`,
+        'Text.cut'
+      );
+
     return this.copy(this.text.slice(from, to));
   }
 
@@ -61,6 +67,7 @@ export default class Text extends Node {
   }
 
   copy(content?: string): Node {
+    if (content === this.text) return this;
     return this.new(content, true);
   }
 }

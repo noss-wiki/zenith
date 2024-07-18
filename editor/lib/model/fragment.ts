@@ -7,6 +7,10 @@ export class Fragment {
   readonly nodes: Node[];
   readonly size: number;
 
+  get childCount() {
+    return this.nodes.length;
+  }
+
   /**
    * @param content The content of this fragment
    * @param size Optionally the size of this fragment, this prevents having to calculate it again.
@@ -191,6 +195,7 @@ export class Fragment {
         'Fragment.replace'
       );
 
+    // TODO: Test if the result of this method is allowed by the parent node's schema
     return replaceOuter($from, $to, slice);
   }
 
@@ -316,11 +321,10 @@ function replaceOuter(
   slice: Slice,
   depth: number = 0
 ): Fragment {
-  const node = from.node(depth);
-  const index = from.index(depth);
+  const node = from.node(depth),
+    index = from.index(depth);
 
-  // TODO: Find more efficient way of checking if they still share the same parent
-  if (node === to.node(depth) && depth < from.depth - slice.openStart) {
+  if (index === to.index(depth) && depth < from.depth - slice.openStart) {
     const inner = replaceOuter(from, to, slice, depth + 1);
     const child = node.content.child(index).copy(inner);
     return node.content.replaceChild(child, index);
@@ -335,8 +339,7 @@ function replaceOuter(
     // TODO: check for success
     return node.content
       .cut(0, from.relative(depth))
-      .insert(slice.content)
-      .insert(node.content.cut(to.relative(depth)));
+      .append(slice.content, node.content.cut(to.relative(depth)));
   } else {
     // complex case
   }
@@ -344,30 +347,60 @@ function replaceOuter(
   throw new NotImplementedError('Fragment.replace', true);
 }
 
-/* // The node where to insert the slice, accounting for the depths
-    const fromDepthParent = $from.node(-slice.openStart);
-    const toDepthParent = $to.node(-slice.openEnd);
+function addNode(node: Node, target: Node[]) {
+  let l = target.length - 1;
+  if (node.text === null) target.push(node);
+  // TODO: check for same marks
+  else if (target.length > 0 && target[l].text !== null)
+    target[l] = target[l].copy(target[l].text! + node.text);
+}
 
-    // cases:
-    // - [x] slice is empty
-    // - [x] slice is flat (no openStart and openEnd) and parent is the same
-    // - [ ] slice
+function addBetween(
+  from: Position | null,
+  to: Position | null,
+  depth: number,
+  target: Node[]
+) {
+  let node = (to || from)!.node(depth);
+  let start = 0,
+    end = to ? to.index(depth) : node.childCount;
 
-    if (slice.size === 0) {
-      // slice is empty, so only remove the content between from and to
-      // sliceDepthNode.remove($from.relative(-slice.openStart) + 1, $to.relative(-slice.openEnd) - 1); prob more efficient
-      // TODO: check for success
-      return parent.content.remove(from, to);
-    } else if (
-      slice.openStart === 0 &&
-      slice.openEnd === 0 &&
-      fromDepthParent === toDepthParent
-    ) {
-      // slice is flat and the parent is the same
-      // improve this by only changing the actual parent of the position
-      const last = parent.cut(to);
-      // TODO: check for success
-      return parent.content.cut(0, from).insert(slice.content).insert(last);
+  if (from) {
+    start = from.index(depth);
+
+    // add the text after the position if this is a text node
+    if (from.offset && from.parent.text !== null) {
+      if (from.offset < from.parent.text.length)
+        addNode(from.parent.cut(from.offset), target);
+      start++;
     }
+    // this means that the position is inside of the node, so don't add it
+    else if (from.depth > depth) start++;
+  }
 
-    throw new NotImplementedError('Fragment.replace', true); */
+  for (let i = start; i < end; i++) addNode(node.child(i), target);
+  if (to && to.offset && to.parent.text !== null)
+    addNode(to.parent.cut(0, to.offset), target);
+}
+
+function getSliceOuter(slice: Slice, from: Position) {
+  let depthOffset = from.depth - slice.openStart,
+    node = from.node(depthOffset).copy(slice.content);
+}
+
+function replaceComplex(
+  from: Position,
+  sliceStart: Position,
+  sliceEnd: Position,
+  to: Position,
+  depth: number = 0
+) {
+  let content: Node[] = [];
+
+  addBetween(null, from, depth, content);
+}
+
+/*
+Deepest common parent of the slice.
+Go layer by layer, adding the content from the existing structure, the content of the slice and the content after.
+*/
