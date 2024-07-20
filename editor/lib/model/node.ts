@@ -110,14 +110,44 @@ export class Node {
     else return this.copy(this.content.replace(from, to, slice, this));
   }
 
+  private resolveCache: { [pos: number]: Position } = {};
+
+  /**
+   * Resolves a position inside this nodes, using `Position.resolve`.
+   * The result is cached, so calling this method multiple times with the same position will return the cached position.
+   *
+   * @param pos The absolute position inside this node to resolve
+   * @returns The resolved position if successful, or `undefined` if resolving failed.
+   */
   resolve(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
       throw new MethodError(
         `The position ${pos}, is outside of the allowed range`,
-        'Fragment.cut'
+        'Node.resolve'
       );
 
-    // TODO: Cache results
+    if (this.resolveCache[pos] !== undefined) return this.resolveCache[pos];
+
+    const res = Position.resolve(this, pos);
+    if (res) this.resolveCache[pos] = res;
+    return res;
+  }
+
+  /**
+   * Resolves a position inside this nodes, using `Position.resolve`.
+   * Unlike `Node.resolve`, this method does not cache the result,
+   * so calling this multiple times with the same position is more expensive.
+   *
+   * @param pos The absolute position inside this node to resolve
+   * @returns The resolved position if successful, or `undefined` if resolving failed.
+   */
+  resolveNoCache(pos: number) {
+    if (pos < 0 || pos > this.nodeSize)
+      throw new MethodError(
+        `The position ${pos}, is outside of the allowed range`,
+        'Node.resolveNoCache'
+      );
+
     return Position.resolve(this, pos);
   }
 

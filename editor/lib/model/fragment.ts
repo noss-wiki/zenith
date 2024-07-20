@@ -303,11 +303,15 @@ export class Fragment {
     };
   }
 
+  // TODO: Check if content can be joined (like same mark text nodes)
   static from(content: Node | Node[] | Fragment) {
-    if (content instanceof Fragment) return content;
+    if (!content) return Fragment.empty;
+    else if (content instanceof Fragment) return content;
     else if (Array.isArray(content)) return new Fragment(content);
     else return new Fragment([content]);
   }
+
+  static empty = new Fragment([], 0);
 }
 
 export type FragmentJSON = {
@@ -386,8 +390,13 @@ function addBetween(
 function getSliceOuter(slice: Slice, from: Position) {
   let depthOffset = from.depth - slice.openStart,
     node = from.node(depthOffset).copy(slice.content);
+  return {
+    start: node.resolve(slice.openStart),
+    end: node.resolve(node.content.size - slice.openEnd),
+  };
 }
 
+// find different algorithm
 function replaceComplex(
   from: Position,
   sliceStart: Position,
