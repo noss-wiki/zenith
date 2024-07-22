@@ -62,6 +62,12 @@ export class Node {
     return this.content.child(index);
   }
 
+  /**
+   * Inserts the content at the given offset.
+   *
+   * @returns The modified node
+   * @throws {MethodError} If the node type doesn't support text content and the content argument is of type string.
+   */
   insert(offset: number, content: string | Node | Node[] | Fragment) {
     if (typeof content === 'string')
       throw new MethodError(
@@ -83,6 +89,12 @@ export class Node {
     return this.copy(this.content.cut(from, to));
   }
 
+  /**
+   * Removes the content between the given positions.
+   *
+   * @returns The modified node
+   * @throws {MethodError} If one or more of the positions are outside of the allowed range.
+   */
   remove(from: number, to: number = this.content.size) {
     if (from < 0 || to > this.content.size)
       throw new MethodError(
@@ -98,6 +110,7 @@ export class Node {
    * Replaces the selection with the provided slice, if it fits.
    *
    * @param slice The slice to replace the selection with, or a string if this node is a text node.
+   * @throws {MethodError} If the node type doesn't support text content and the slice argument is of type string.
    */
   replace(from: number, to: number, slice: Slice | string) {
     if (typeof slice === 'string')
@@ -118,6 +131,7 @@ export class Node {
    *
    * @param pos The absolute position inside this node to resolve
    * @returns The resolved position if successful, or `undefined` if resolving failed.
+   * @throws {MethodError} If the position is outside of the allowed range or it could not be resolved by `Position.resolve`.
    */
   resolve(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
@@ -129,8 +143,12 @@ export class Node {
     if (this.resolveCache[pos] !== undefined) return this.resolveCache[pos];
 
     const res = Position.resolve(this, pos);
-    if (res) this.resolveCache[pos] = res;
-    return res;
+    if (!res)
+      throw new MethodError(
+        `The position ${pos}, could not be resolved`,
+        'Node.resolve'
+      );
+    return (this.resolveCache[pos] = res);
   }
 
   /**
@@ -140,6 +158,7 @@ export class Node {
    *
    * @param pos The absolute position inside this node to resolve
    * @returns The resolved position if successful, or `undefined` if resolving failed.
+   * @throws {MethodError} If the position is outside of the allowed range
    */
   resolveNoCache(pos: number) {
     if (pos < 0 || pos > this.nodeSize)
@@ -174,6 +193,7 @@ export class Node {
   /**
    * Creates a new instance of this node type.
    * E.g when calling this on a Paragraph, it creates a new Paragraph node.
+   * @throws {MethodError} If the node type doesn't support text content and the content argument is of type string.
    */
   new(content?: Fragment | string, keepId?: boolean) {
     if (typeof content === 'string' && this.text === null)

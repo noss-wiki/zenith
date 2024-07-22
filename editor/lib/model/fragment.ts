@@ -372,14 +372,14 @@ function addBetween(
   if (from) {
     start = from.index(depth);
 
-    // add the text after the position if this is a text node
-    if (from.offset && from.parent.text !== null) {
+    if (from.depth > depth) start++;
+    // cut the text if this is a text node
+    else if (from.offset && from.parent.text !== null) {
+      // don't add if the text is empty
       if (from.offset < from.parent.text.length)
         addNode(from.parent.cut(from.offset), target);
       start++;
     }
-    // this means that the position is inside of the node, so don't add it
-    else if (from.depth > depth) start++;
   }
 
   for (let i = start; i < end; i++) addNode(node.child(i), target);
@@ -390,6 +390,11 @@ function addBetween(
 function getSliceOuter(slice: Slice, from: Position) {
   let depthOffset = from.depth - slice.openStart,
     node = from.node(depthOffset).copy(slice.content);
+
+  // replicate node structure until parent node
+  for (let i = depthOffset - 1; i >= 0; i--)
+    node = from.node(i).copy(Fragment.from(node));
+
   return {
     start: node.resolve(slice.openStart),
     end: node.resolve(node.content.size - slice.openEnd),

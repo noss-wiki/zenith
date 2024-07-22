@@ -1,6 +1,7 @@
 import { MethodError } from '../lib/error';
 import { Node } from '../lib/model/node';
 import { NodeType } from '../lib/model/nodeType';
+import type { Position } from '../lib/model/position';
 
 // TODO: move this to the node file
 export default class Text extends Node {
@@ -56,14 +57,17 @@ export default class Text extends Node {
     return this.copy(this.text.slice(0, from) + slice + this.text.slice(to));
   }
 
-  resolve(pos: number) {
+  resolve(pos: number): Position {
     if (pos < 0 || pos > this.nodeSize)
       throw new MethodError(
         `The position ${pos}, is outside of the allowed range`,
         'Text.resolve'
       );
 
-    return undefined;
+    throw new MethodError(
+      `The position ${pos}, cannot be resolved inside a text node`,
+      'Text.resolve'
+    );
   }
 
   copy(content?: string): Node {
