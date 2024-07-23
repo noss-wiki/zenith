@@ -1,5 +1,4 @@
-import type { ElementDefinition } from '../lib/model/node';
-import { Node, Outlet } from '../lib/model/node';
+import { Node } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/header.svg?raw';
 import { NodeType } from '../lib/model/nodeType';
 
@@ -13,7 +12,7 @@ export default class Header extends Node {
     },
   });
 
-  render(): ElementDefinition {
+  /* render(): ElementDefinition {
     return ['h1', {}, Outlet];
-  }
+  } */
 }

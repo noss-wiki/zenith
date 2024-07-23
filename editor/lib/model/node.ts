@@ -1,7 +1,5 @@
 import type { FragmentJSON } from './fragment';
 import type { Slice } from './slice';
-import { ContentExpression } from '../schema/expression';
-import { Eventfull } from '@/composables/classes/eventfull';
 import { NodeType } from './nodeType';
 import { Fragment } from './fragment';
 import { Position } from './position';
@@ -44,18 +42,30 @@ export class Node {
   }
 
   // also add marks later
-  constructor(content?: Fragment) {
+  constructor(content?: Fragment | string) {
     this.type = (<typeof Node>this.constructor).type;
+
+    if (typeof content === 'string')
+      throw new MethodError(
+        `The node type ${this.type.name}, needs to override the constructor method to support inserting text content, as the default implementation does not support it`,
+        'Node.constructor'
+      );
+
+    // Link this node class to the provided nodeType
+    if (
+      this.type.node !== undefined &&
+      this.type.node !== <typeof Node>this.constructor
+    )
+      throw new MethodError(
+        `A different node definition for the type ${this.type.name}, already exists`,
+        'Node.constructor'
+      );
+
+    this.type.node = <typeof Node>this.constructor;
+
     this.id = Math.random().toString(36).slice(2);
 
     this.content = content || new Fragment([]);
-  }
-
-  /**
-   * The result of the render hook; this is what will be displayed in the DOM.
-   */
-  render(): ElementDefinition | null {
-    return null;
   }
 
   child(index: number): Node {
@@ -225,69 +235,3 @@ export type NodeJSON = {
   type: string;
   content: FragmentJSON;
 };
-
-/**
- * Meta data is data that is displayed (or used to display) info about this node in the ui.
- * Like the commands menu, or in the selection toolbar.
- */
-export interface NodeMetaData {
-  /**
-   * The name that will be displayed to the user, e.g. in the commands menu
-   */
-  name: string;
-  /**
-   * The description that will be displayed to the user, e.g. in the commands menu
-   */
-  description: string;
-  /**
-   * Raw html code for icon, import using `*.svg?raw`
-   */
-  icon: string;
-  /**
-   * If this Node is visible for selection in the UI
-   * @default true
-   */
-  visible?: boolean;
-}
-
-export interface NodeSchema {
-  /**
-   * The content expression for this node, when left empty it allows no content.
-   */
-  content?: string | ContentExpression;
-  /**
-   * The group or space seperated groups to which this Node belongs.
-   */
-  group?: string;
-}
-
-export type ElementDefinition = [
-  keyof HTMLElementTagNameMap,
-  {
-    [x: string]: any;
-  },
-  ...ChildDefinition[]
-];
-
-type ChildDefinition = ElementDefinition | string | number | boolean;
-
-export const Outlet = '<!-- Outlet -->';
-
-// https://github.com/CodeFoxDev/honeyjs-core/blob/main/src/jsx-runtime.js#L83
-function style(element: HTMLElement, style: { [x: string]: string }) {
-  let res = {};
-  for (const property in style) {
-    let cssProp = property
-      .replace(/[A-Z][a-z]*/g, (str) => '-' + str.toLowerCase() + '-')
-      .replace('--', '-') // remove double hyphens
-      .replace(/(^-)|(-$)/g, ''); // remove hyphens at the beginning and the end
-    if (
-      typeof style[property] === 'string' ||
-      typeof style[property] === 'number'
-    ) {
-      //@ts-ignore
-      element.style[cssProp] = style[property];
-    } else console.warn('Unknown style value:', style[property]);
-  }
-  return res;
-}

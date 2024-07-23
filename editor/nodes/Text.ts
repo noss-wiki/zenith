@@ -3,8 +3,7 @@ import { Node } from '../lib/model/node';
 import { NodeType } from '../lib/model/nodeType';
 import type { Position } from '../lib/model/position';
 
-// TODO: move this to the node file
-export default class Text extends Node {
+export class Text extends Node {
   static type = NodeType.from({
     name: 'text',
     schema: {
@@ -18,7 +17,10 @@ export default class Text extends Node {
   constructor(content?: string) {
     super(undefined);
     if (!content)
-      throw new MethodError('Empty text nodes are not allowed', 'new Text()');
+      throw new MethodError(
+        'Empty text nodes are not allowed',
+        'Text.constructor'
+      );
     this.text = content;
   }
 

@@ -1,9 +1,4 @@
-import type {
-  NodeMetaData,
-  NodeSchema,
-  ElementDefinition,
-} from '../lib/model/node';
-import { Node, Outlet } from '../lib/model/node';
+import { Node } from '../lib/model/node';
 import { NodeType } from '../lib/model/nodeType';
 
 export default class Document extends Node {
@@ -19,7 +14,7 @@ export default class Document extends Node {
     return this.content.size; // document start and end brackets don't count, as you can't focus outside of document
   }
 
-  render(): ElementDefinition {
+  /* render(): ElementDefinition {
     return ['div', { contenteditable: 'true' }, Outlet];
-  }
+  } */
 }

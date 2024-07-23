@@ -1,5 +1,4 @@
-import type { ElementDefinition } from '../lib/model/node';
-import { Node, Outlet } from '../lib/model/node';
+import { Node } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/sub_sub_header.svg?raw';
 import { NodeType } from '../lib/model/nodeType';
 
@@ -13,7 +12,7 @@ export default class SubSubHeader extends Node {
     },
   });
 
-  render(): ElementDefinition {
+  /* render(): ElementDefinition {
     return ['h3', {}, Outlet];
-  }
+  } */
 }

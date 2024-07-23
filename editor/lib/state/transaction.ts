@@ -2,10 +2,8 @@ import type { EditorState } from '.';
 import type { Node } from '../model/node';
 import type { Step } from './step';
 import type { PositionLike } from '../model/position';
-import { createNode, createTextNode } from '@/editor/nodes';
+import { NodeType } from '../model/nodeType';
 import { Position } from '../model/position';
-import { Selection } from '../model/selection';
-import { Slice } from '../model/slice';
 // Steps
 import { InsertStep } from './steps/insert';
 import { RemoveStep } from './steps/remove';
@@ -23,13 +21,14 @@ export class Transaction {
    */
   insert<T extends string>(node: T | Node, pos: PositionLike) {
     if (typeof node === 'string') {
-      const created = createNode(node);
-      if (created === undefined)
+      const type = NodeType.get(node);
+      if (type === undefined)
         throw new MethodError(
-          `Failed to create node of type ${node}`,
+          `Cannot get the node type ${node}`,
           'Transaction.insert'
         );
-      node = created;
+
+      node = new type.node();
     }
 
     this.steps.push(new InsertStep(pos, node));
@@ -103,4 +102,15 @@ export class Transaction {
   undo() {
     return this.state.undo(this);
   }
+}
+
+function createTextNode(content: string) {
+  const type = NodeType.get('text');
+  if (type === undefined)
+    throw new MethodError(
+      `Cannot get the node type text, is it defined?`,
+      'Transaction.insertText'
+    );
+
+  return new type.node(content);
 }

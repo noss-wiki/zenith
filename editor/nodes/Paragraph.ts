@@ -1,5 +1,4 @@
-import type { ElementDefinition } from '../lib/model/node';
-import { Node, Outlet } from '../lib/model/node';
+import { Node } from '../lib/model/node';
 import icon from '@/assets/icons/blocks/paragraph.svg?raw';
 import { NodeType } from '../lib/model/nodeType';
 
@@ -17,7 +16,7 @@ export default class Paragraph extends Node {
     },
   });
 
-  render(): ElementDefinition {
+  /* render(): ElementDefinition {
     return ['p', {}, Outlet];
-  }
+  } */
 }

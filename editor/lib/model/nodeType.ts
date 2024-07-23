@@ -1,5 +1,6 @@
 import { MethodError } from '../error';
 import type { ContentExpression } from '../schema/expression';
+import type { Node } from './node';
 
 // TODO: Add dom representation, probably same as ProseMirror (via schema.toDom)
 export interface NodeTypeDefinition {
@@ -94,6 +95,11 @@ export class NodeType {
    * Will be false if meta is not provided or `meta.visible` is not set to true.
    */
   visible: boolean;
+
+  /**
+   * The node class that represents this node type.
+   */
+  node!: typeof Node;
 
   constructor(
     readonly name: string,
